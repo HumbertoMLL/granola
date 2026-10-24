@@ -14,10 +14,11 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 config({ path: path.resolve(here, "../apps/web/.env.local"), quiet: true });
 
 // Import dinámico para que dotenv cargue antes de que @granola/db lea DATABASE_URL.
-const { and, db, eq, users, nutritionists, services, availabilityRules, patients, appointments, payments, reviews } =
+const { and, db, eq, users, accounts, nutritionists, services, availabilityRules, patients, appointments, payments, reviews } =
   await import("@granola/db");
 
 const DEMO_EMAIL = "karla@granola.demo";
+const DEMO_PASSWORD = "granola-demo-2026";
 const DEMO_SLUG = "karla";
 const DEMO_TZ = "America/Mexico_City";
 
@@ -40,13 +41,28 @@ function cdmx(days: number, hour: number, minute = 0): Date {
 async function main() {
   console.log("→ Seed: Karla Demo");
 
-  // 1. Usuario (sin password: entra por magic link).
+  // 1. Usuario demo con password (también puede entrar por magic link).
   const [user] = await db
     .insert(users)
     .values({ name: "Karla Demo", email: DEMO_EMAIL, emailVerified: true })
     .onConflictDoUpdate({ target: users.email, set: { name: "Karla Demo", updatedAt: new Date() } })
     .returning();
   if (!user) throw new Error("No se pudo crear el usuario demo");
+
+  // 1b. Credencial email+password para Better Auth (providerId "credential").
+  const { hashPassword } = await import("better-auth/crypto");
+  const passwordHash = await hashPassword(DEMO_PASSWORD);
+  const [cred] = await db
+    .select({ id: accounts.id })
+    .from(accounts)
+    .where(and(eq(accounts.userId, user.id), eq(accounts.providerId, "credential")))
+    .limit(1);
+  if (cred) {
+    await db.update(accounts).set({ password: passwordHash, updatedAt: new Date() }).where(eq(accounts.id, cred.id));
+  } else {
+    await db.insert(accounts).values({ userId: user.id, accountId: user.id, providerId: "credential", password: passwordHash });
+  }
+  console.log(`  login: ${DEMO_EMAIL} / ${DEMO_PASSWORD}`);
 
   // 2. Perfil de nutrióloga.
   const [nutri] = await db

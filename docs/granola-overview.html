@@ -61,6 +61,47 @@
   <div class="card"><div class="big-num">0</div><p class="sub">datos reales — falta Neon + Meta</p></div>
 </div>
 
+
+<!-- ============ ACCESO ============ -->
+<h2><span class="n">0</span> Acceso · cómo ver lo que hay</h2>
+
+<div class="grid">
+  <div class="card big" style="border:2px solid var(--green)">
+    <h3>🌐 En línea (Vercel)</h3>
+    <p style="font-size:20px;font-weight:700"><a href="https://granola-humbertomlls-projects.vercel.app" style="color:var(--green)">granola-humbertomlls-projects.vercel.app</a></p>
+    <p class="sub" style="margin-top:6px">Hoy se ve: landing, <code>/login</code>, <code>/registro</code>, <code>/privacidad</code>. <b>Todo lo que lee datos (panel, página pública, booking) falla hasta que exista Neon</b>: cuando tengas el <code>DATABASE_URL</code>, va en Vercel → Settings → Environment Variables y se redeploya.</p>
+  </div>
+
+  <div class="card">
+    <h3>👤 Usuario demo</h3>
+    <div class="kv"><b>correo</b><code>karla@granola.demo</code><b>password</b><code>granola-demo-2026</code><b>slug</b><code>karla</code></div>
+    <p class="sub" style="margin-top:8px">Existe después de correr <code>pnpm db:seed</code>. También entra con magic link (en dev el link sale en la consola del server).</p>
+  </div>
+
+  <div class="card">
+    <h3>🔗 Qué abrir una vez logueado</h3>
+    <ul class="sub">
+      <li><code>/app</code> dashboard</li>
+      <li><code>/app/agenda</code> citas · servicios · disponibilidad</li>
+      <li><code>/app/mi-pagina</code> editor del link-tree</li>
+      <li><code>/app/cobros</code> Stripe / pagos</li>
+      <li><code>/karla</code> página pública · <code>/karla/agendar</code> booking</li>
+    </ul>
+  </div>
+
+  <div class="card big">
+    <h3>💻 Arrancar en local (3 minutos)</h3>
+    <div class="tree">cd ~/Desktop/granola
+cp .env.example apps/web/.env.local
+<span class="c"># edita apps/web/.env.local: DATABASE_URL=&lt;Neon&gt;  BETTER_AUTH_SECRET=$(openssl rand -base64 32)</span>
+pnpm install
+pnpm db:migrate && pnpm db:seed
+pnpm --filter @granola/web exec next dev -p 3100
+<span class="c"># → http://localhost:3100  · login con karla@granola.demo / granola-demo-2026</span></div>
+    <p class="sub" style="margin-top:10px">Sin <code>DATABASE_URL</code> todo compila pero las páginas con datos dan error en runtime. Los WhatsApp salen en modo <i>dry run</i> (se loguean y se guardan en <code>wa_messages</code>) mientras no haya token de Meta.</p>
+  </div>
+</div>
+
 <!-- ============ PRD ============ -->
 <h2><span class="n">1</span> PRD · qué construimos y por qué</h2>
 
@@ -265,7 +306,7 @@
   <div class="card">
     <span class="tag beto">solo Beto</span>
     <ul class="sub">
-      <li><b>Neon</b>: crear proyecto → <code>DATABASE_URL</code></li>
+      <li><b>Neon</b>: crear proyecto → <code>DATABASE_URL</code> (local + Vercel)</li>
       <li><b>Meta</b>: Business + número WA + 8 plantillas</li>
       <li><b>Stripe</b>: activar Connect Express MX + webhook</li>
       <li><b>Mercado Pago</b>: app + token + webhook</li>

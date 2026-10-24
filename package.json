@@ -14,10 +14,11 @@
     "db:seed": "tsx scripts/seed.ts"
   },
   "devDependencies": {
-    "turbo": "^2.5.0",
-    "typescript": "^5.9.0",
-    "tsx": "^4.20.0",
+    "@granola/db": "workspace:*",
+    "better-auth": "1.7.12",
     "dotenv": "^17.0.0",
-    "@granola/db": "workspace:*"
+    "tsx": "^4.20.0",
+    "turbo": "^2.5.0",
+    "typescript": "^5.9.0"
   }
 }
