@@ -1,0 +1,33 @@
+# Postgres local + proxy HTTP compatible con el driver de Neon (neon-http).
+# Uso: docker-compose -f docker-compose.local.yml up -d
+# .env.local:
+#   DATABASE_URL=postgres://granola:granola@localhost:5433/granola
+#   NEON_LOCAL_PROXY=http://localhost:4444/sql
+#   NEON_LOCAL_PG_HOST=postgres:5432
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: granola
+      POSTGRES_PASSWORD: granola
+      POSTGRES_DB: granola
+    ports:
+      - "5433:5432"
+    volumes:
+      - granola_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U granola"]
+      interval: 3s
+      retries: 20
+  # Proxy HTTP compatible con el endpoint /sql del driver neon-http.
+  neon-proxy:
+    image: ghcr.io/timowilhelm/local-neon-http-proxy:main
+    environment:
+      PG_CONNECTION_STRING: "postgres://granola:granola@postgres:5432/granola"
+    ports:
+      - "4444:4444"
+    depends_on:
+      postgres:
+        condition: service_healthy
+volumes:
+  granola_pg:

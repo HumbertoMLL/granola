@@ -32,8 +32,11 @@ pnpm typecheck && pnpm lint && pnpm test && pnpm --filter @granola/web exec next
 ## Dev
 
 ```bash
+docker-compose -f docker-compose.local.yml up -d   # Postgres local + proxy HTTP Neon (puertos 5433 / 4444)
 pnpm --filter @granola/web exec next dev -p 3100
 ```
+
+`apps/web/.env.local` apunta a ese Postgres con `NEON_LOCAL_PROXY` (ver `packages/db/src/index.ts`). `drizzle-kit migrate` no funciona contra el proxy local: aplica las migraciones con `psql` (ver overview) y luego `pnpm db:seed`.
 
 Sin `DATABASE_URL` en `apps/web/.env.local` las páginas con datos fallan en runtime (esperado); todo lo demás compila.
 

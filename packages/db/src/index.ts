@@ -1,4 +1,4 @@
-import { neon } from "@neondatabase/serverless";
+import { neon, neonConfig } from "@neondatabase/serverless";
 import { drizzle, type NeonHttpDatabase } from "drizzle-orm/neon-http";
 import * as schema from "./schema";
 
@@ -42,8 +42,27 @@ export function getDb(): Database {
         "cadena de conexión de Neon (ver packages/db/README.md).",
     );
   }
-  _db = drizzle({ client: neon(url), schema });
+  _db = drizzle({ client: neon(localProxyUrl(url)), schema });
   return _db;
+}
+
+/**
+ * Desarrollo sin Neon: con `NEON_LOCAL_PROXY` (p. ej. http://localhost:4444/sql) el
+ * driver HTTP de Neon habla con el wsproxy de docker-compose.local.yml, que a su vez
+ * se conecta al Postgres del compose en `NEON_LOCAL_PG_HOST` (postgres:5432).
+ * En producción ambas variables no existen y la URL se usa tal cual.
+ */
+function localProxyUrl(url: string): string {
+  const proxy = process.env.NEON_LOCAL_PROXY;
+  if (!proxy) return url;
+  neonConfig.fetchEndpoint = proxy;
+  neonConfig.useSecureWebSocket = false;
+  const pgHost = process.env.NEON_LOCAL_PG_HOST ?? "postgres:5432";
+  const u = new URL(url);
+  const [h, p] = pgHost.split(":");
+  u.hostname = h ?? "postgres";
+  u.port = p ?? "5432";
+  return u.toString();
 }
 
 /** Acceso perezoso: `db.select()…` funciona igual que un cliente normal. */

@@ -90,15 +90,13 @@
   </div>
 
   <div class="card big">
-    <h3>💻 Arrancar en local (3 minutos)</h3>
+    <h3>💻 Arrancar en local (ya está configurado en esta Mac)</h3>
     <div class="tree">cd ~/Desktop/granola
-cp .env.example apps/web/.env.local
-<span class="c"># edita apps/web/.env.local: DATABASE_URL=&lt;Neon&gt;  BETTER_AUTH_SECRET=$(openssl rand -base64 32)</span>
-pnpm install
-pnpm db:migrate && pnpm db:seed
+docker-compose -f docker-compose.local.yml up -d     <span class="c"># Postgres local + proxy Neon (ya tiene datos)</span>
 pnpm --filter @granola/web exec next dev -p 3100
-<span class="c"># → http://localhost:3100  · login con karla@granola.demo / granola-demo-2026</span></div>
-    <p class="sub" style="margin-top:10px">Sin <code>DATABASE_URL</code> todo compila pero las páginas con datos dan error en runtime. Los WhatsApp salen en modo <i>dry run</i> (se loguean y se guardan en <code>wa_messages</code>) mientras no haya token de Meta.</p>
+<span class="c"># → http://localhost:3100/login · karla@granola.demo / granola-demo-2026</span></div>
+    <p class="sub" style="margin-top:10px"><code>apps/web/.env.local</code> ya existe apuntando al Postgres de Docker. <b>Primera vez en otra máquina:</b> copia <code>.env.example</code>, levanta el compose, y corre <code>psql $DATABASE_URL -f packages/db/migrations/0000_init.sql -f packages/db/migrations/0001_f1_gaps.sql && pnpm db:seed</code>. Con Neon real: <code>pnpm db:migrate && pnpm db:seed</code>.</p>
+    <p class="sub" style="margin-top:6px">Los WhatsApp salen en modo <i>dry run</i> (se loguean y se guardan en <code>wa_messages</code>) mientras no haya token de Meta.</p>
   </div>
 </div>
 
