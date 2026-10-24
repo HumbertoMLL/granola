@@ -43,4 +43,5 @@ Sin `DATABASE_URL` en `apps/web/.env.local` las páginas con datos fallan en run
 ## Qué sigue (al 24 oct 2026)
 
 - Probar F1 contra Neon real (migrar + seed + flujo completo). Google Calendar sync aún no existe.
+- F1.5: todo el proyecto en Docker (`docker-compose up` = web + Postgres + proxy Neon + Inngest dev; `Dockerfile` standalone en apps/web). Ver `PLAN.md` sección 6.
 - F2: pacientes, expediente, antropometría, notas IA. Ver `PLAN.md` sección 6.

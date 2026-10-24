@@ -172,6 +172,9 @@ Plantillas WhatsApp a registrar en Meta (categoría *utility*): `cita_confirmada
 | **F3 Planes** | 9–14 | Motor SMAE, plantillas, recetas, PDF con marca | K smae core, L editor de plan, M recetas+seed, N PDF |
 | **F4 Paciente** | 15–20 | PWA paciente offline-first, plan por WhatsApp, lista del súper | O PWA, P sync, Q WA delivery |
 | **F5 Monetiza** | 21+ | CFDI, paquetes, retos, Expo | — |
+| **F1.5 Docker** | paralelo a F2 | Todo el proyecto corre con `docker-compose up`: web (Next standalone), Postgres, proxy Neon, Inngest dev server; Dockerfile multi-stage para desplegar fuera de Vercel (VPS/Railway/Fly) | R docker |
+
+**F1.5 Docker (pedido por Beto, 24 oct 2026):** hoy solo la DB corre en Docker (`docker-compose.local.yml`). Objetivo: `docker-compose up` levanta todo (web + db + proxy + Inngest) sin instalar Node, y un `Dockerfile` en `apps/web` con `output: "standalone"` que sirva para hospedar fuera de Vercel. Portabilidad = la misma razón por la que no usamos Supabase.
 
 **Regla:** cada agente trabaja en su `package/` o su ruta; `packages/core` no importa nada con IO (testeable puro). Contratos (tipos de Drizzle + zod) se definen en F0 antes de paralelizar.
 
