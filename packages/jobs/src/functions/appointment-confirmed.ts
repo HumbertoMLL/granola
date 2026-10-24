@@ -1,4 +1,4 @@
-import { appointments, db, eq } from "@granola/db";
+import { and, appointments, db, eq } from "@granola/db";
 import { buildCitaConfirmada, buildNuevaCitaNutri, buildRecordatorio24h, buildRecordatorio2h } from "@granola/whatsapp";
 import { inngest } from "../client";
 import { firstName, loadAppointment, paymentLabel, type AppointmentContext } from "../lib/appointment";
@@ -45,11 +45,14 @@ export const onAppointmentConfirmed = inngest.createFunction(
     if (!ctx) return { skipped: "cita no existe" };
     if (ctx.appointment.status !== "confirmed") return { skipped: `status ${ctx.appointment.status}` };
 
+    // Hora al paciente en SU zona si la guardamos al agendar; al nutri siempre en la suya.
+    const patientTimeZone = ctx.appointment.patientTimezone ?? ctx.nutritionist.timezone;
+
     const common = {
       patientName: firstName(ctx.patient.name),
       nutritionistName: ctx.nutritionist.displayName,
       startsAt: new Date(ctx.appointment.startsAt),
-      timeZone: ctx.nutritionist.timezone,
+      timeZone: patientTimeZone,
       modality: ctx.appointment.modality,
       meetUrl: ctx.appointment.meetUrl,
       location: ctx.service.location,
@@ -108,8 +111,8 @@ export const onAppointmentConfirmed = inngest.createFunction(
       const rows = await db
         .update(appointments)
         .set({ status: "completed", updatedAt: new Date() })
-        .where(eq(appointments.id, appointmentId))
-        .returning({ id: appointments.id, status: appointments.status });
+        .where(and(eq(appointments.id, appointmentId), eq(appointments.status, "confirmed")))
+        .returning({ id: appointments.id });
       // Solo si seguía confirmed; si la nutri la marcó no_show/cancelled, no se toca.
       return rows.length > 0;
     });

@@ -9,6 +9,7 @@ import {
   createConnectAccount,
   createDashboardLink,
   createOnboardingLink,
+  getAccountStatus,
   markCashPaid,
   PaymentsError,
   PaymentsNotConfiguredError,
@@ -59,6 +60,23 @@ export async function openStripeDashboardAction(): Promise<ActionState> {
     return { error: describeError(err) };
   }
   redirect(url);
+}
+
+/**
+ * "Actualizar estado": única vía (además del webhook `account.updated`) por la
+ * que el panel consulta a Stripe. `getAccountStatus` persiste los flags en
+ * `nutritionists`; el render de /app/cobros solo lee de DB.
+ */
+export async function refreshStripeStatusAction(): Promise<ActionState> {
+  const { nutritionist } = await requireNutritionist();
+  if (!nutritionist.stripeAccountId) return { error: "Primero conecta Stripe." };
+  try {
+    await getAccountStatus(nutritionist.stripeAccountId);
+  } catch (err) {
+    return { error: describeError(err) };
+  }
+  revalidatePath("/app/cobros");
+  return { ok: true };
 }
 
 const markCashPaidSchema = z.object({

@@ -12,12 +12,11 @@ import {
   Skeleton,
 } from "@granola/ui";
 import {
-  getAccountStatus,
+  accountStatusFromColumns,
   isMercadoPagoConfigured,
   isStripeConfigured,
   listPaymentsForMonth,
   listUnpaidVisitAppointments,
-  PaymentsNotConfiguredError,
   summarizeMonth,
 } from "@granola/payments";
 
@@ -151,32 +150,30 @@ async function StripeSection({ searchParams }: { searchParams: SearchParams }) {
   const [{ nutritionist }, sp] = await Promise.all([requireNutritionist(), searchParams]);
   const justReturned = sp.stripe === "return";
 
+  // Flags persistidos (webhook `account.updated` / botón "Actualizar estado"):
+  // el render no llama a Stripe.
   let state: StripeCardState;
   if (!isStripeConfigured()) {
     state = { kind: "not_configured" };
   } else if (!nutritionist.stripeAccountId) {
     state = { kind: "disconnected" };
   } else {
-    try {
-      const s = await getAccountStatus(nutritionist.stripeAccountId);
-      state = {
-        kind: "connected",
-        chargesEnabled: s.chargesEnabled,
-        payoutsEnabled: s.payoutsEnabled,
-        detailsSubmitted: s.detailsSubmitted,
-        currentlyDue: s.currentlyDue,
-        pastDue: s.pastDue,
-        disabledReason: s.disabledReason,
-      };
-    } catch (err) {
-      state = {
-        kind: "error",
-        message:
-          err instanceof PaymentsNotConfiguredError
-            ? err.message
-            : "No pudimos consultar tu cuenta de Stripe. Intenta más tarde.",
-      };
-    }
+    const s = accountStatusFromColumns({
+      stripeAccountId: nutritionist.stripeAccountId,
+      stripeChargesEnabled: nutritionist.stripeChargesEnabled,
+      stripePayoutsEnabled: nutritionist.stripePayoutsEnabled,
+      stripeRequirements: nutritionist.stripeRequirements,
+    });
+    state = {
+      kind: "connected",
+      chargesEnabled: s.chargesEnabled,
+      payoutsEnabled: s.payoutsEnabled,
+      detailsSubmitted: s.detailsSubmitted,
+      currentlyDue: s.currentlyDue,
+      pastDue: s.pastDue,
+      disabledReason: s.disabledReason,
+      syncedAt: s.syncedAt,
+    };
   }
 
   return <StripeConnectCard state={state} justReturned={justReturned} />;

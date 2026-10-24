@@ -1,22 +1,16 @@
-import { EventSchemas, Inngest } from "inngest";
-import { events } from "@granola/jobs/events";
+import { inngest, type InngestClient } from "@granola/jobs";
 
 /**
- * Cliente Inngest compartido por apps/web. Los eventos y sus payloads salen del
- * contrato en `@granola/jobs/events` (zod), así `inngest.send()` queda tipado.
- *
- * `fromSchema` acepta directamente el record `{ "appointment/confirmed": zodSchema }`
- * (Standard Schema; `fromZod` está deprecado y exigiría envolver cada uno en `{ data }`).
+ * Un solo cliente Inngest en todo el monorepo: el de `@granola/jobs`, con el que
+ * se crean las funciones. `api/inngest/route.ts` lo sirve y apps/web lo usa
+ * para `send()`, así eventos y schemas (zod) quedan tipados igual en ambos lados.
  *
  * Sin INNGEST_EVENT_KEY en dev, el SDK manda los eventos al dev server local
- * (`npx inngest-cli dev`) o los descarta con un warning; nunca rompe el request.
+ * (`npx inngest-cli dev`) o falla; `sendEvent` absorbe ese fallo.
  */
-export const inngest = new Inngest({
-  id: "granola",
-  schemas: new EventSchemas().fromSchema(events),
-});
+export { inngest };
 
-export type GranolaInngest = typeof inngest;
+export type GranolaInngest = InngestClient;
 
 type SendPayload = Parameters<GranolaInngest["send"]>[0];
 

@@ -54,3 +54,16 @@ export const overrideSchema = z
   );
 
 export type OverrideInput = z.infer<typeof overrideSchema>;
+
+/** Parámetros de agenda del nutri (`nutritionists.buffer_min`, `min_notice_min`, `slot_step_min`). */
+export const schedulingSettingsSchema = z.object({
+  bufferMin: z.coerce.number().int("Debe ser entero").min(0, "No puede ser negativo").max(240, "Máximo 4 horas"),
+  minNoticeMin: z.coerce
+    .number()
+    .int("Debe ser entero")
+    .min(0, "No puede ser negativo")
+    .max(60 * 24 * 30, "Máximo 30 días"),
+  slotStepMin: z.coerce.number().int("Debe ser entero").min(5, "Mínimo 5 min").max(240, "Máximo 4 horas"),
+});
+
+export type SchedulingSettingsInput = z.input<typeof schedulingSettingsSchema>;

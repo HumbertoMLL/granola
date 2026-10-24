@@ -20,7 +20,7 @@ export const onAppointmentCancelled = inngest.createFunction(
           patientName: firstName(ctx.patient.name),
           nutritionistName: ctx.nutritionist.displayName,
           startsAt: new Date(ctx.appointment.startsAt),
-          timeZone: ctx.nutritionist.timezone,
+          timeZone: ctx.appointment.patientTimezone ?? ctx.nutritionist.timezone,
           by,
           nutritionistSlug: ctx.nutritionist.slug,
         }),

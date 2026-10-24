@@ -1,11 +1,10 @@
-import { db, eq, nutritionists } from "@granola/db";
-
 import { requireEnv } from "../env";
 import { WebhookSignatureError } from "../errors";
+import { failureReasonFor, stripeSessionToProviderData } from "../provider-data";
 import { mapStripeEvent } from "../status";
 import { applyPaymentTransition, type ConfirmedEvent } from "../transitions";
 import { getStripe, type Stripe } from "./client";
-import { accountToStatus, type ConnectAccountStatus } from "./connect";
+import { accountToStatus, persistAccountStatus, type ConnectAccountStatus } from "./connect";
 
 /**
  * Verifica la firma (`Stripe-Signature`) con STRIPE_WEBHOOK_SECRET y devuelve
@@ -47,7 +46,10 @@ export async function handleStripeEvent(
     case "checkout.session.expired": {
       const session = event.data.object;
       const next = mapStripeEvent(event.type, session.payment_status);
-      const result = await applyPaymentTransition(session.id, next);
+      const result = await applyPaymentTransition(session.id, next, {
+        failureReason: failureReasonFor(next, { provider: "stripe", eventType: event.type }),
+        providerData: stripeSessionToProviderData(session),
+      });
       if (!result.applied) {
         return { kind: "payment", type: event.type, applied: false, reason: result.reason, confirmed: null };
       }
@@ -56,18 +58,12 @@ export async function handleStripeEvent(
     }
 
     case "account.updated": {
-      // TODO(schema): no hay columnas para persistir charges_enabled / requirements
-      // (ver README "Columnas que faltan"). Por ahora el panel consulta el estado en vivo
-      // y aquí solo confirmamos que la cuenta es de un nutri conocido.
+      // Persiste los 3 flags en `nutritionists` (el panel /app/cobros lee de DB).
       const account = event.data.object;
       const status = accountToStatus(account);
-      const nutri = await db.query.nutritionists.findFirst({
-        where: eq(nutritionists.stripeAccountId, account.id),
-        columns: { id: true },
-      });
-      return { kind: "account", type: event.type, nutritionistId: nutri?.id ?? null, status };
+      const nutritionistId = await persistAccountStatus(status);
+      return { kind: "account", type: event.type, nutritionistId, status };
     }
-
     default:
       return { kind: "ignored", type: event.type };
   }

@@ -57,3 +57,20 @@ export const db: Database = new Proxy({} as Database, {
     return Reflect.has(getDb(), prop);
   },
 });
+
+/** SQLSTATE de Postgres que nos interesa distinguir. */
+export const PG_EXCLUSION_VIOLATION = "23P01";
+
+/**
+ * true si el error (o alguno de sus `cause`) es una violación de exclusion
+ * constraint (23P01), p. ej. `appointments_no_overlap` (cita encimada).
+ * Drizzle envuelve el error del driver en `DrizzleQueryError` con `cause`.
+ */
+export function isExclusionViolation(err: unknown): boolean {
+  let cur: unknown = err;
+  for (let depth = 0; depth < 5 && cur && typeof cur === "object"; depth++) {
+    if ((cur as { code?: unknown }).code === PG_EXCLUSION_VIOLATION) return true;
+    cur = (cur as { cause?: unknown }).cause;
+  }
+  return false;
+}

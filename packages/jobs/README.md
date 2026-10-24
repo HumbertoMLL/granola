@@ -14,4 +14,4 @@ Cada función relee la cita (`loadAppointment`) antes de cada envío y hace un `
 
 - Cliente: `src/client.ts` exporta `inngest` (id `granola`). `apps/web/src/lib/inngest-client.ts` debe usar el mismo.
 - Servir: `apps/web/src/app/api/inngest/route.ts` con `serve({ client, functions })`.
-- Dev local: `npx inngest-cli@latest dev -u http://localhost:3000/api/inngest`.
+- Dev local: `npx inngest-cli@latest dev -u http://localhost:3100/api/inngest`.

@@ -2,6 +2,7 @@ import { db, eq, payments } from "@granola/db";
 
 import { appUrl } from "../env";
 import { PaymentsError } from "../errors";
+import { mpInstructionsToProviderData } from "../provider-data";
 import type { CreateCheckoutInput, CreateCheckoutResult } from "../types";
 import { getMpPayments } from "./client";
 import { extractMpInstructions } from "./instructions";
@@ -100,13 +101,21 @@ export async function createMercadoPagoCheckout(input: CreateCheckoutInput): Pro
   if (mp.id === undefined) throw new PaymentsError("mp_no_id", "Mercado Pago no devolvió id de pago");
   const providerRef = String(mp.id);
 
-  // 2) providerRef ANTES de devolver (regla dura #3).
+  const instructions = extractMpInstructions(mp);
+  const finalExpiresAt = instructions?.expiresAt ?? expiresAt;
+
+  // 2) providerRef + provider_data ANTES de devolver (regla dura #3). Con
+  //    provider_data guardado, /pago/[id] ya no consulta a MP en cada carga.
   await db
     .update(payments)
-    .set({ providerRef, updatedAt: new Date() })
+    .set({
+      providerRef,
+      providerData: instructions ? mpInstructionsToProviderData(instructions) : { providerId: providerRef },
+      expiresAt: finalExpiresAt,
+      updatedAt: new Date(),
+    })
     .where(eq(payments.id, payment.id));
 
-  const instructions = extractMpInstructions(mp);
   // OXXO: la ficha de MP ya trae código de barras y monto. SPEI: página propia con la CLABE.
   const url =
     method === "oxxo" && instructions?.ticketUrl ? instructions.ticketUrl : `${base}/pago/${payment.id}`;
@@ -115,6 +124,6 @@ export async function createMercadoPagoCheckout(input: CreateCheckoutInput): Pro
     provider: "mercadopago",
     paymentId: payment.id,
     url,
-    expiresAt: instructions?.expiresAt ?? expiresAt,
+    expiresAt: finalExpiresAt,
   };
 }

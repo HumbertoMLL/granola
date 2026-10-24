@@ -28,6 +28,8 @@ export type PaymentListItem = {
   status: "pending" | "paid" | "failed" | "expired" | "refunded";
   method: "card" | "spei" | "oxxo" | "cash";
   provider: "stripe" | "mercadopago" | "cash";
+  /** Por qué quedó failed/expired (ver `failureReasonFor`). */
+  failureReason: string | null;
   amountCents: number;
   currency: string;
   appointmentId: string;
@@ -62,6 +64,7 @@ export async function listPaymentsForMonth(
       status: payments.status,
       method: payments.method,
       provider: payments.provider,
+      failureReason: payments.failureReason,
       amountCents: payments.amountCents,
       currency: payments.currency,
       appointmentId: payments.appointmentId,

@@ -1,6 +1,6 @@
 import type { PaymentListItem } from "@granola/payments";
 
-import { formatDate, formatDateTime, formatMoney } from "./format";
+import { failureReasonLabel, formatDate, formatDateTime, formatMoney } from "./format";
 import { MethodIcon, StatusBadge } from "./method-icon";
 
 /**
@@ -47,7 +47,7 @@ export function PaymentsTable({ items, timeZone }: { items: PaymentListItem[]; t
               {p.serviceName}
               <span className="md:hidden"> · cita {formatDateTime(p.appointmentStartsAt, timeZone)}</span>
             </p>
-            <div className="flex items-center justify-end gap-2 md:order-6">
+            <div className="flex items-center justify-end gap-2 md:order-6" title={failureReasonLabel(p.failureReason) ?? undefined}>
               <StatusBadge status={p.status} />
             </div>
             <div className="col-span-2 flex items-center justify-between text-sm md:col-span-1 md:order-4 md:justify-start">

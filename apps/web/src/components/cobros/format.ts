@@ -82,6 +82,17 @@ export const STATUS_LABEL = {
   refunded: "Reembolsado",
 } as const;
 
+/** `payments.failure_reason` → texto para el nutri. */
+export function failureReasonLabel(reason: string | null): string | null {
+  if (!reason) return null;
+  if (reason === "appointment_expired") return "No se pagó a tiempo; el horario se liberó";
+  if (reason === "stripe:session_expired") return "El paciente no completó el pago con tarjeta";
+  if (reason === "stripe:async_payment_failed") return "El banco rechazó el pago";
+  if (reason === "mp:expired") return "La referencia SPEI/OXXO venció sin pagarse";
+  if (reason.startsWith("mp:cc_rejected") || reason === "mp:rejected") return "Mercado Pago rechazó el pago";
+  return reason;
+}
+
 export const METHOD_LABEL = {
   card: "Tarjeta",
   spei: "SPEI",

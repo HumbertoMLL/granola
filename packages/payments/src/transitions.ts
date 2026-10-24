@@ -1,4 +1,4 @@
-import { and, appointments, db, eq, ne, payments } from "@granola/db";
+import { and, appointments, db, eq, ne, payments, type PaymentProviderData } from "@granola/db";
 
 import { shouldApplyTransition, type PaymentStatus, type StatusTransition } from "./status";
 
@@ -19,9 +19,17 @@ export type ApplyTransitionResult =
  * Nota: el driver neon-http no soporta transacciones; el orden pago → cita es
  * seguro porque la cita solo se confirma si el UPDATE del pago devolvió fila.
  */
+export type TransitionExtras = {
+  /** Se guarda en `failure_reason` solo si `next` es failed/expired. */
+  failureReason?: string | null;
+  /** Se mezcla (shallow) con el `provider_data` existente. */
+  providerData?: PaymentProviderData;
+};
+
 export async function applyPaymentTransition(
   providerRef: string,
   next: StatusTransition,
+  extras: TransitionExtras = {},
 ): Promise<ApplyTransitionResult> {
   if (next === null) return { applied: false, reason: "noop" };
 
@@ -38,6 +46,8 @@ export async function applyPaymentTransition(
     .set({
       status: next,
       paidAt: next === "paid" ? now : current.paidAt,
+      failureReason: next === "failed" || next === "expired" ? (extras.failureReason ?? null) : null,
+      providerData: extras.providerData ? { ...current.providerData, ...extras.providerData } : current.providerData,
       updatedAt: now,
     })
     .where(and(eq(payments.providerRef, providerRef), ne(payments.status, next)))

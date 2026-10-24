@@ -7,11 +7,17 @@ import { CalendarDays, Clock, Sparkles } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@granola/ui";
 
 import { AppointmentsList, type AppointmentRow } from "./appointments-list";
-import { AvailabilityEditor, type OverrideRow, type RuleRow } from "./availability-editor";
+import {
+  AvailabilityEditor,
+  type OverrideRow,
+  type RuleRow,
+  type SchedulingSettingsRow,
+} from "./availability-editor";
 import { ServicesManager, type ServiceRow } from "./services-manager";
 
 export type AgendaData = {
   timezone: string;
+  scheduling: SchedulingSettingsRow;
   nowIso: string;
   appointments: AppointmentRow[];
   services: ServiceRow[];
@@ -61,7 +67,12 @@ export function AgendaTabs({ data }: { data: AgendaData }) {
         <ServicesManager services={data.services} />
       </TabsContent>
       <TabsContent value="disponibilidad">
-        <AvailabilityEditor rules={data.rules} overrides={data.overrides} timezone={data.timezone} />
+        <AvailabilityEditor
+          rules={data.rules}
+          overrides={data.overrides}
+          timezone={data.timezone}
+          scheduling={data.scheduling}
+        />
       </TabsContent>
     </Tabs>
   );

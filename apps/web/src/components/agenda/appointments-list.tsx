@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import * as React from "react";
 import { CalendarCheck, CalendarX2, Check, Clock, MapPin, UserX, Video } from "lucide-react";
 
@@ -173,7 +174,7 @@ function AppointmentCard({ row, timezone, nowIso }: { row: AppointmentRow; timez
               {formatTimeInTz(start, timezone)}
               <span className="text-sm font-normal text-muted-foreground"> – {formatTimeInTz(end, timezone)}</span>
             </p>
-            <p className="truncate font-semibold">{row.patientName}</p>
+            <p className="truncate font-semibold"><Link href={`/app/agenda/${row.id}`} className="hover:underline">{row.patientName}</Link></p>
             <p className="truncate text-sm text-muted-foreground">
               {row.serviceName} · {row.durationMin} min
             </p>

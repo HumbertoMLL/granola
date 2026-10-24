@@ -59,14 +59,25 @@ nutri y `application_fee: 0`.
 **El webhook de MP no trae estado**: siempre se hace `GET /v1/payments/{id}` (así nadie puede inyectar un
 `approved`).
 
-## Columnas que faltan en el schema (no se tocó `packages/db`)
+## Columnas de la migración 0001 (`packages/db/migrations/0001_f1_gaps.sql`)
 
-- `payments.provider_data jsonb` — guardar CLABE/referencia/ticket_url de MP (hoy `/pago/[id]` consulta
-  a la API de MP en cada carga) y el `payment_intent` de Stripe.
-- `nutritionists.stripe_charges_enabled boolean`, `stripe_payouts_enabled boolean`,
-  `stripe_requirements jsonb` — persistir lo que llega en `account.updated` (hoy el panel llama a
-  `accounts.retrieve` en cada render y el webhook solo loggea).
-- Opcional: `payments.failure_reason text` (status_detail de MP / last_payment_error de Stripe).
+- `payments.provider_data jsonb` — se llena en `createCheckout`: MP guarda CLABE, banco, referencia,
+  `ticket_url`, código de barras y status; Stripe guarda `sessionUrl`, `providerId` y `paymentIntentId`.
+  Mapeo puro en `provider-data.ts` (tests). `/pago/[id]` lee de aquí y solo consulta a MP si está vacío
+  (pagos previos a la migración), y entonces lo rellena.
+- `payments.failure_reason text` — se escribe al pasar a `failed`/`expired`: `mp:<status_detail>`,
+  `stripe:session_expired`, `stripe:async_payment_failed` o `appointment_expired` (job de expiración).
+- `nutritionists.stripe_charges_enabled` / `stripe_payouts_enabled` / `stripe_requirements` — los
+  actualiza el webhook `account.updated` y `getAccountStatus()` (botón "Actualizar estado" en
+  `/app/cobros`). El panel lee de DB; no llama a `accounts.retrieve` en cada render.
+
+## Expiración de citas sin pagar
+
+`expirePendingPaymentsForAppointment(appointmentId)`: cuando el job `appointment/pending_payment`
+(@granola/jobs) cancela la cita con `by: "system"`, todos sus `payments` `pending` pasan a `expired`
+(`failure_reason = "appointment_expired"`) y, best-effort, se expira la Checkout Session de Stripe /
+se cancela el pago de MP para que nadie pague un slot liberado. Idempotente. `expired` solo avanza a
+`paid` (`shouldApplyTransition`), así el `cancelled` que MP manda después no lo pisa como `failed`.
 
 ## Qué configurar
 

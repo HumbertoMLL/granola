@@ -95,6 +95,10 @@ export function shouldApplyTransition(current: PaymentStatus, next: StatusTransi
   if (current === next) return false;
   if (current === "paid") return next === "refunded";
   if (current === "refunded") return false;
-  // pending | failed | expired → cualquier otro. (failed→paid pasa si MP reintenta y aprueba.)
+  // expired solo avanza a paid (pago tardío que el proveedor aún aceptó). Así, cuando
+  // expiramos un pago y cancelamos el cobro en MP, el `cancelled` que llega después
+  // por webhook no lo pisa como `failed`.
+  if (current === "expired") return next === "paid";
+  // pending | failed → cualquier otro. (failed→paid pasa si MP reintenta y aprueba.)
   return true;
 }

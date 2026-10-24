@@ -25,7 +25,7 @@ export const onAppointmentRescheduled = inngest.createFunction(
           nutritionistName: ctx.nutritionist.displayName,
           previousStartsAt: new Date(previousStartsAt),
           startsAt: new Date(ctx.appointment.startsAt),
-          timeZone: ctx.nutritionist.timezone,
+          timeZone: ctx.appointment.patientTimezone ?? ctx.nutritionist.timezone,
           modality: ctx.appointment.modality,
           meetUrl: ctx.appointment.meetUrl,
           location: ctx.service.location,

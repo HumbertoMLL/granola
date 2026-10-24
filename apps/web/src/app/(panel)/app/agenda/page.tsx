@@ -54,6 +54,11 @@ async function AgendaContent() {
 
   const data: AgendaData = {
     timezone: nutritionist.timezone,
+    scheduling: {
+      bufferMin: nutritionist.bufferMin,
+      minNoticeMin: nutritionist.minNoticeMin,
+      slotStepMin: nutritionist.slotStepMin,
+    },
     nowIso: now.toISOString(),
     appointments: apptRows.map((a) => ({
       id: a.id,

@@ -3,11 +3,12 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+import { isValidTimeZone } from "@granola/core/scheduling";
 import { createCheckout } from "@granola/payments";
 
 import { bookingSchema, type BookingInput } from "@/components/booking/booking-schema";
 import { normalizePhoneE164 } from "@/components/booking/phone";
-import { and, appointments, db, eq, patients } from "@/lib/db";
+import { and, appointments, db, eq, isExclusionViolation, isNull, patients, payments } from "@/lib/db";
 import {
   checkSlotAvailable,
   computeAvailableSlots,
@@ -15,9 +16,12 @@ import {
   getActiveService,
   getClientIp,
   getPublicNutritionistBySlug,
-  hasEarlierConflict,
 } from "@/lib/booking";
 import { sendEvent } from "@/lib/inngest-client";
+
+import { decideBookingOutcome, initialAppointmentStatus, listoPath, type CheckoutAttempt } from "./outcome";
+
+const SLOT_TAKEN_ERROR = "Ese horario se acaba de ocupar. Elige otro, por favor.";
 
 export type SlotsResult =
   | { ok: true; slots: { startsAt: string; endsAt: string }[]; nutritionistTimezone: string }
@@ -36,6 +40,7 @@ export async function fetchSlots(input: { slug: string; serviceId: string }): Pr
   const slots = await computeAvailableSlots({
     nutritionistId: nutri.id,
     timezone: nutri.timezone,
+    settings: nutri,
     service,
   });
   return {
@@ -49,7 +54,8 @@ export type BookingResult = { ok: false; error: string; fieldErrors?: Record<str
 
 /**
  * Crea paciente (upsert por WhatsApp) + cita. Si todo sale bien redirige a la
- * página de confirmación (o al checkout si el servicio es prepagado).
+ * página de confirmación, al Checkout de Stripe (tarjeta) o a /listo con las
+ * instrucciones de SPEI/OXXO. La decisión vive en `decideBookingOutcome()`.
  */
 export async function createBooking(input: BookingInput): Promise<BookingResult> {
   const parsed = bookingSchema.safeParse(input);
@@ -76,8 +82,14 @@ export async function createBooking(input: BookingInput): Promise<BookingResult>
   const endsAt = new Date(startsAt.getTime() + service.durationMin * 60_000);
   const slot = { startsAt, endsAt };
 
-  const free = await checkSlotAvailable({ nutritionistId: nutri.id, timezone: nutri.timezone, service, slot });
-  if (!free) return { ok: false, error: "Ese horario se acaba de ocupar. Elige otro, por favor." };
+  const free = await checkSlotAvailable({
+    nutritionistId: nutri.id,
+    timezone: nutri.timezone,
+    settings: nutri,
+    service,
+    slot,
+  });
+  if (!free) return { ok: false, error: SLOT_TAKEN_ERROR };
 
   // --- Paciente: upsert por (nutritionistId, phoneWa). Consentimiento LFPDPPP obligatorio.
   const ip = await getClientIp();
@@ -108,63 +120,106 @@ export async function createBooking(input: BookingInput): Promise<BookingResult>
     patientId = row!.id;
   }
 
-  // --- Cita
+  // --- Cita. Prepagado → pending_payment (ocupa el slot mientras paga).
   const cancelToken = generateCancelToken();
-  const prepaid = service.paymentMode === "prepaid";
-  const [appt] = await db
-    .insert(appointments)
-    .values({
-      nutritionistId: nutri.id,
-      patientId,
-      serviceId: service.id,
-      startsAt,
-      endsAt,
-      status: prepaid ? "pending_payment" : "confirmed",
-      modality: d.modality,
-      cancelToken,
-    })
-    .returning({ id: appointments.id, createdAt: appointments.createdAt });
-
-  // Sin transacciones en neon-http: si otra reserva ganó la carrera, deshacemos la nuestra.
-  if (await hasEarlierConflict({ id: appt!.id, nutritionistId: nutri.id, startsAt, endsAt, createdAt: appt!.createdAt })) {
-    await db.delete(appointments).where(eq(appointments.id, appt!.id));
-    return { ok: false, error: "Ese horario se acaba de ocupar. Elige otro, por favor." };
+  const patientTimezone = d.timezone && isValidTimeZone(d.timezone) ? d.timezone : null;
+  let appt: { id: string } | undefined;
+  try {
+    [appt] = await db
+      .insert(appointments)
+      .values({
+        nutritionistId: nutri.id,
+        patientId,
+        serviceId: service.id,
+        startsAt,
+        endsAt,
+        status: initialAppointmentStatus(service.paymentMode),
+        modality: d.modality,
+        cancelToken,
+        patientTimezone,
+        notes: d.notes || null,
+      })
+      .returning({ id: appointments.id });
+  } catch (err) {
+    // appointments_no_overlap (23P01): otra reserva ganó el hueco entre la revalidación y el INSERT.
+    if (isExclusionViolation(err)) return { ok: false, error: SLOT_TAKEN_ERROR };
+    throw err;
   }
+  if (!appt) return { ok: false, error: "No pudimos agendar. Intenta de nuevo." };
+  const appointmentId = appt.id;
 
-  const base = `/${nutri.slug}/agendar/listo?cita=${encodeURIComponent(cancelToken)}`;
-
-  if (prepaid) {
-    let checkoutUrl: string | null = null;
+  // --- Cobro (solo prepagado).
+  let checkout: CheckoutAttempt = null;
+  if (service.paymentMode === "prepaid") {
+    const method = d.paymentMethod ?? "card";
     try {
       const result = await createCheckout({
-        appointmentId: appt!.id,
+        appointmentId,
         nutritionistId: nutri.id,
         amountCents: service.priceCents,
         currency: "MXN",
-        method: d.paymentMethod ?? "card",
+        method,
         description: `${service.name} con ${nutri.displayName}`,
         payer: { name: d.name, email: d.email || undefined, phone: phone.e164 },
-        successUrl: absoluteUrl(base),
+        successUrl: absoluteUrl(listoPath(nutri.slug, cancelToken, "ok")),
         cancelUrl: absoluteUrl(`/cita/${encodeURIComponent(cancelToken)}`),
       });
-      checkoutUrl = result.url;
+      checkout = { ok: true, method, result };
     } catch (err) {
-      // TODO(payments): packages/payments aún no implementa createCheckout (workstream F).
-      // Mientras, dejamos la cita confirmada y avisamos que el pago en línea viene pronto;
-      // la nutri cobra en consulta. Cuando exista, quitar este fallback y dejar pending_payment.
-      console.warn("[booking] createCheckout no disponible:", err instanceof Error ? err.message : err);
-      await db
-        .update(appointments)
-        .set({ status: "confirmed", updatedAt: new Date() })
-        .where(eq(appointments.id, appt!.id));
-      await sendEvent({ name: "appointment/confirmed", data: { appointmentId: appt!.id, nutritionistId: nutri.id } });
-      redirect(`${base}&pago=pendiente`);
+      checkout = { ok: false, error: err };
     }
-    if (checkoutUrl) redirect(checkoutUrl);
   }
 
-  await sendEvent({ name: "appointment/confirmed", data: { appointmentId: appt!.id, nutritionistId: nutri.id } });
-  redirect(base);
+  const outcome = decideBookingOutcome({
+    slug: nutri.slug,
+    cancelToken,
+    paymentMode: service.paymentMode,
+    startsAt,
+    now: new Date(),
+    checkout,
+  });
+
+  switch (outcome.kind) {
+    case "failed": {
+      console.error(
+        "[booking] createCheckout falló; se borra la cita",
+        checkout && !checkout.ok ? checkout.error : undefined,
+      );
+      // ON DELETE CASCADE borra también el `payments` pending que haya quedado.
+      await db.delete(appointments).where(eq(appointments.id, appointmentId));
+      return { ok: false, error: outcome.error };
+    }
+    case "confirmed": {
+      if (outcome.degraded) {
+        // La nutri aún no conecta cobros: la cita se confirma y se paga en consulta.
+        console.warn("[booking] pagos en línea no disponibles; se confirma y se paga en consulta", {
+          nutritionistId: nutri.id,
+          reason: checkout && !checkout.ok && checkout.error instanceof Error ? checkout.error.message : undefined,
+        });
+        await db.batch([
+          db
+            .update(appointments)
+            .set({ status: outcome.finalStatus, updatedAt: new Date() })
+            .where(eq(appointments.id, appointmentId)),
+          // MP inserta el `payments` antes de hablar con el proveedor; si faltaban keys queda huérfano.
+          db
+            .delete(payments)
+            .where(
+              and(eq(payments.appointmentId, appointmentId), eq(payments.status, "pending"), isNull(payments.providerRef)),
+            ),
+        ]);
+      }
+      await sendEvent({ name: outcome.emit.name, data: { appointmentId, nutritionistId: nutri.id } });
+      redirect(outcome.redirectTo);
+    }
+    case "awaiting_payment": {
+      await sendEvent({
+        name: outcome.emit.name,
+        data: { appointmentId, nutritionistId: nutri.id, expiresAt: outcome.emit.expiresAt },
+      });
+      redirect(outcome.redirectTo);
+    }
+  }
 }
 
 function absoluteUrl(path: string): string {

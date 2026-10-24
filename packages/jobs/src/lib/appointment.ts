@@ -17,6 +17,8 @@ export type AppointmentContext = {
     cancelToken: string;
     reminder24hSentAt: string | null;
     reminder2hSentAt: string | null;
+    /** Zona IANA del paciente detectada al agendar; null → usar la del nutri. */
+    patientTimezone: string | null;
   };
   patient: { id: string; name: string; phoneWa: string | null };
   nutritionist: { id: string; displayName: string; slug: string; phoneWa: string | null; timezone: string };
@@ -43,6 +45,7 @@ export async function loadAppointment(appointmentId: string): Promise<Appointmen
       cancelToken: row.cancelToken,
       reminder24hSentAt: row.reminder24hSentAt?.toISOString() ?? null,
       reminder2hSentAt: row.reminder2hSentAt?.toISOString() ?? null,
+      patientTimezone: row.patientTimezone ?? null,
     },
     patient: { id: row.patient.id, name: row.patient.name, phoneWa: row.patient.phoneWa },
     nutritionist: {

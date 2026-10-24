@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { index, integer, jsonb, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { boolean, index, integer, jsonb, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { users } from "./auth";
 import { services } from "./services";
 import { availabilityOverrides, availabilityRules } from "./availability";
@@ -44,6 +44,17 @@ export type NutritionistTheme = {
   font?: string;
 };
 
+/** Snapshot de `account.requirements` de Stripe Connect (lo que llega en `account.updated`). */
+export type StripeRequirements = {
+  currentlyDue?: string[];
+  eventuallyDue?: string[];
+  pastDue?: string[];
+  disabledReason?: string | null;
+  detailsSubmitted?: boolean;
+  /** ISO de la última sincronización (webhook o "Actualizar estado"). */
+  syncedAt?: string;
+};
+
 export const nutritionists = pgTable(
   "nutritionists",
   {
@@ -63,9 +74,18 @@ export const nutritionists = pgTable(
     links: jsonb("links").$type<NutritionistLink[]>().notNull().default([]),
     plan: planEnum("plan").notNull().default("trial"),
     stripeAccountId: text("stripe_account_id"),
+    stripeChargesEnabled: boolean("stripe_charges_enabled").notNull().default(false),
+    stripePayoutsEnabled: boolean("stripe_payouts_enabled").notNull().default(false),
+    stripeRequirements: jsonb("stripe_requirements").$type<StripeRequirements>().notNull().default({}),
     mpUserId: text("mp_user_id"),
     // Cifrado en la capa de aplicación antes de guardar (TODO F1-G Google Calendar).
     googleRefreshTokenEnc: text("google_refresh_token_enc"),
+    /** Minutos libres entre citas. */
+    bufferMin: integer("buffer_min").notNull().default(0),
+    /** Antelación mínima para agendar, en minutos. */
+    minNoticeMin: integer("min_notice_min").notNull().default(120),
+    /** Cada cuántos minutos se ofrece un horario de inicio. */
+    slotStepMin: integer("slot_step_min").notNull().default(30),
     onboardingStep: integer("onboarding_step").notNull().default(0),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),

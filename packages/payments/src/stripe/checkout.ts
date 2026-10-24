@@ -1,6 +1,7 @@
 import { db, eq, nutritionists, payments } from "@granola/db";
 
 import { PaymentsError } from "../errors";
+import { stripeSessionToProviderData } from "../provider-data";
 import type { CreateCheckoutInput, CreateCheckoutResult } from "../types";
 import { getStripe } from "./client";
 
@@ -98,10 +99,15 @@ export async function createStripeCheckout(input: CreateCheckoutInput): Promise<
 
   if (!session.url) throw new PaymentsError("no_session_url", "Stripe no devolvió URL de Checkout");
 
-  // 2) providerRef = session.id ANTES de devolver la URL (regla dura #3).
+  // 2) providerRef = session.id (+ provider_data con la URL de la sesión) ANTES de devolver la URL (regla dura #3).
   await db
     .update(payments)
-    .set({ providerRef: session.id, updatedAt: new Date() })
+    .set({
+      providerRef: session.id,
+      providerData: stripeSessionToProviderData(session),
+      expiresAt: session.expires_at ? new Date(session.expires_at * 1000) : undefined,
+      updatedAt: new Date(),
+    })
     .where(eq(payments.id, payment.id));
 
   return {

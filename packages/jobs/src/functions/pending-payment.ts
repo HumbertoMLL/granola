@@ -1,4 +1,5 @@
-import { and, appointments, db, eq } from "@granola/db";
+import { and, appointments, db, desc, eq, payments } from "@granola/db";
+import { expirePendingPaymentsForAppointment } from "@granola/payments";
 import { buildPagoPendienteOxxo } from "@granola/whatsapp";
 import { inngest } from "../client";
 import { firstName, loadAppointment } from "../lib/appointment";
@@ -26,14 +27,26 @@ export const onPendingPayment = inngest.createFunction(
     if (!ctx) return { skipped: "cita no existe" };
     if (ctx.appointment.status !== "pending_payment") return { skipped: `status ${ctx.appointment.status}` };
 
-    await step.run("wa-pago-pendiente", () =>
+    // Con tarjeta el paciente está en el Checkout de Stripe: no tiene sentido mandarle
+    // instrucciones de pago. Solo SPEI/OXXO reciben el WhatsApp.
+    const method = await step.run("metodo-de-pago", async () => {
+      const [row] = await db
+        .select({ method: payments.method })
+        .from(payments)
+        .where(and(eq(payments.appointmentId, appointmentId), eq(payments.status, "pending")))
+        .orderBy(desc(payments.createdAt))
+        .limit(1);
+      return row?.method ?? null;
+    });
+
+    if (method !== "card") await step.run("wa-pago-pendiente", () =>
       sendToPatient(
         ctx,
         buildPagoPendienteOxxo({
           patientName: firstName(ctx.patient.name),
           nutritionistName: ctx.nutritionist.displayName,
           startsAt: new Date(ctx.appointment.startsAt),
-          timeZone: ctx.nutritionist.timezone,
+          timeZone: ctx.appointment.patientTimezone ?? ctx.nutritionist.timezone,
           amountCents: ctx.service.priceCents,
           currency: ctx.service.currency,
           expiresAt: new Date(expiresAt),
@@ -54,6 +67,8 @@ export const onPendingPayment = inngest.createFunction(
     });
 
     if (expired) {
+      // Marca expired los pagos pending de la cita (ficha OXXO / CLABE ya no valen).
+      await step.run("expirar-pagos-pendientes", () => expirePendingPaymentsForAppointment(appointmentId));
       await step.sendEvent("emitir-cancelled", {
         name: "appointment/cancelled",
         data: { appointmentId, nutritionistId, by: "system" },
@@ -62,3 +77,4 @@ export const onPendingPayment = inngest.createFunction(
     return { expired };
   },
 );
+

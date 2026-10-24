@@ -27,17 +27,18 @@ import {
   services,
 } from "@/lib/db";
 
+/** Días de disponibilidad que se ofrecen al paciente. */
+export const BOOKING_HORIZON_DAYS = 28;
+
 /**
- * Parámetros de agenda que hoy no viven en el schema (ver reporte: harían falta
- * columnas `buffer_min`, `min_notice_min`, `slot_step_min` en `nutritionists`).
+ * Parámetros de agenda por nutri (`nutritionists.buffer_min`, `min_notice_min`,
+ * `slot_step_min`; se editan en /app/agenda → Disponibilidad).
  */
-export const BOOKING_DEFAULTS = {
-  bufferMin: 0,
-  minNoticeMin: 120,
-  stepMin: 30,
-  /** Semanas de disponibilidad que se ofrecen al paciente. */
-  horizonDays: 28,
-} as const;
+export type SchedulingSettings = {
+  bufferMin: number;
+  minNoticeMin: number;
+  slotStepMin: number;
+};
 
 /** Estados que ocupan agenda. */
 export const BUSY_STATUSES = ["confirmed", "pending_payment"] as const;
@@ -49,7 +50,7 @@ export type PublicNutritionist = {
   bio: string | null;
   avatarUrl: string | null;
   timezone: string;
-};
+} & SchedulingSettings;
 
 export type PublicService = {
   id: string;
@@ -63,11 +64,23 @@ export type PublicService = {
   paymentMode: "prepaid" | "at_visit" | "optional";
 };
 
+const PUBLIC_NUTRITIONIST_COLUMNS = {
+  id: true,
+  slug: true,
+  displayName: true,
+  bio: true,
+  avatarUrl: true,
+  timezone: true,
+  bufferMin: true,
+  minNoticeMin: true,
+  slotStepMin: true,
+} as const;
+
 /** Solo campos públicos: nunca phone_wa, tokens ni plan. */
 export async function getPublicNutritionistBySlug(slug: string): Promise<PublicNutritionist | null> {
   const row = await db.query.nutritionists.findFirst({
     where: eq(nutritionists.slug, slug),
-    columns: { id: true, slug: true, displayName: true, bio: true, avatarUrl: true, timezone: true },
+    columns: PUBLIC_NUTRITIONIST_COLUMNS,
   });
   return row ?? null;
 }
@@ -75,7 +88,7 @@ export async function getPublicNutritionistBySlug(slug: string): Promise<PublicN
 export async function getPublicNutritionistById(id: string): Promise<PublicNutritionist | null> {
   const row = await db.query.nutritionists.findFirst({
     where: eq(nutritionists.id, id),
-    columns: { id: true, slug: true, displayName: true, bio: true, avatarUrl: true, timezone: true },
+    columns: PUBLIC_NUTRITIONIST_COLUMNS,
   });
   return row ?? null;
 }
@@ -175,6 +188,7 @@ export async function loadSchedulingContext(
 export type AvailableSlotsInput = {
   nutritionistId: string;
   timezone: string;
+  settings: SchedulingSettings;
   service: { durationMin: number };
   from?: Date;
   to?: Date;
@@ -185,7 +199,7 @@ export type AvailableSlotsInput = {
 export async function computeAvailableSlots(input: AvailableSlotsInput): Promise<Slot[]> {
   const now = new Date();
   const from = input.from ?? now;
-  const to = input.to ?? new Date(now.getTime() + BOOKING_DEFAULTS.horizonDays * 86_400_000);
+  const to = input.to ?? new Date(now.getTime() + BOOKING_HORIZON_DAYS * 86_400_000);
   const ctx = await loadSchedulingContext(input.nutritionistId, from, to, input.excludeAppointmentId);
   return computeSlots({
     ...ctx,
@@ -194,9 +208,9 @@ export async function computeAvailableSlots(input: AvailableSlotsInput): Promise
     to,
     timezone: input.timezone,
     now,
-    bufferMin: BOOKING_DEFAULTS.bufferMin,
-    minNoticeMin: BOOKING_DEFAULTS.minNoticeMin,
-    stepMin: BOOKING_DEFAULTS.stepMin,
+    bufferMin: input.settings.bufferMin,
+    minNoticeMin: input.settings.minNoticeMin,
+    stepMin: input.settings.slotStepMin,
   });
 }
 
@@ -204,6 +218,7 @@ export async function computeAvailableSlots(input: AvailableSlotsInput): Promise
 export async function checkSlotAvailable(input: {
   nutritionistId: string;
   timezone: string;
+  settings: SchedulingSettings;
   service: { durationMin: number };
   slot: Interval;
   excludeAppointmentId?: string;
@@ -217,37 +232,10 @@ export async function checkSlotAvailable(input: {
     slot: input.slot,
     timezone: input.timezone,
     now: new Date(),
-    bufferMin: BOOKING_DEFAULTS.bufferMin,
-    minNoticeMin: BOOKING_DEFAULTS.minNoticeMin,
-    stepMin: BOOKING_DEFAULTS.stepMin,
+    bufferMin: input.settings.bufferMin,
+    minNoticeMin: input.settings.minNoticeMin,
+    stepMin: input.settings.slotStepMin,
   });
-}
-
-/**
- * Tras insertar, comprobamos que no se haya colado otra cita en el mismo hueco
- * (el driver HTTP de Neon no soporta transacciones interactivas). Devuelve true
- * si hay una cita *distinta* ocupando el intervalo y creada antes que la nuestra.
- */
-export async function hasEarlierConflict(appt: {
-  id: string;
-  nutritionistId: string;
-  startsAt: Date;
-  endsAt: Date;
-  createdAt: Date;
-}): Promise<boolean> {
-  const rows = await db
-    .select({ id: appointments.id, createdAt: appointments.createdAt })
-    .from(appointments)
-    .where(
-      and(
-        eq(appointments.nutritionistId, appt.nutritionistId),
-        ne(appointments.id, appt.id),
-        inArray(appointments.status, [...BUSY_STATUSES]),
-        lt(appointments.startsAt, appt.endsAt),
-        gt(appointments.endsAt, appt.startsAt),
-      ),
-    );
-  return rows.some((r) => r.createdAt.getTime() <= appt.createdAt.getTime());
 }
 
 /** Token opaco URL-safe (32 chars) para el link de reagendar/cancelar. */

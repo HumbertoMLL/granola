@@ -46,7 +46,25 @@ export {
   type PaymentStatus,
   type StatusTransition,
 } from "./status";
-export { applyPaymentTransition, type ApplyTransitionResult, type ConfirmedEvent, type PaymentRow } from "./transitions";
+export {
+  applyPaymentTransition,
+  type ApplyTransitionResult,
+  type ConfirmedEvent,
+  type PaymentRow,
+  type TransitionExtras,
+} from "./transitions";
+export {
+  failureReasonFor,
+  isProviderDataEmpty,
+  mpInstructionsToProviderData,
+  providerDataToMpInstructions,
+  stripeSessionToProviderData,
+} from "./provider-data";
+export {
+  APPOINTMENT_EXPIRED_REASON,
+  expirePendingPaymentsForAppointment,
+  type ExpirePendingPaymentsResult,
+} from "./expire";
 export { markCashPaid } from "./cash";
 export {
   listPaymentsForMonth,

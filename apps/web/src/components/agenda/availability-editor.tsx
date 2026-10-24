@@ -23,6 +23,7 @@ import {
   addAvailabilityOverride,
   deleteAvailabilityOverride,
   saveAvailabilityRules,
+  updateSchedulingSettings,
   updateTimezone,
 } from "@/app/(panel)/app/agenda/actions";
 import { Field } from "@/components/agenda/services-manager";
@@ -36,6 +37,8 @@ export type OverrideRow = {
   endTime: string | null;
   isBlocked: boolean;
 };
+
+export type SchedulingSettingsRow = { bufferMin: number; minNoticeMin: number; slotStepMin: number };
 
 type Window = { key: string; startTime: string; endTime: string };
 
@@ -52,14 +55,20 @@ export function AvailabilityEditor({
   rules,
   overrides,
   timezone,
+  scheduling,
 }: {
   rules: RuleRow[];
   overrides: OverrideRow[];
   timezone: string;
+  scheduling: SchedulingSettingsRow;
 }) {
   return (
     <div className="flex flex-col gap-6">
       <TimezoneCard timezone={timezone} />
+      <SchedulingSettingsCard
+        key={`${scheduling.bufferMin}-${scheduling.minNoticeMin}-${scheduling.slotStepMin}`}
+        initial={scheduling}
+      />
       <WeeklyEditor rules={rules} />
       <OverridesEditor overrides={overrides} />
     </div>
@@ -100,6 +109,124 @@ function TimezoneCard({ timezone }: { timezone: string }) {
           ))}
         </SelectContent>
       </Select>
+    </Card>
+  );
+}
+
+type Option = { value: number; label: string };
+
+const BUFFER_OPTIONS: Option[] = [
+  { value: 0, label: "Sin margen" },
+  { value: 5, label: "5 min" },
+  { value: 10, label: "10 min" },
+  { value: 15, label: "15 min" },
+  { value: 20, label: "20 min" },
+  { value: 30, label: "30 min" },
+  { value: 45, label: "45 min" },
+  { value: 60, label: "1 hora" },
+];
+
+const NOTICE_OPTIONS: Option[] = [
+  { value: 0, label: "Sin mínimo" },
+  { value: 30, label: "30 min" },
+  { value: 60, label: "1 hora" },
+  { value: 120, label: "2 horas" },
+  { value: 240, label: "4 horas" },
+  { value: 720, label: "12 horas" },
+  { value: 1440, label: "1 día" },
+  { value: 2880, label: "2 días" },
+];
+
+const STEP_OPTIONS: Option[] = [
+  { value: 10, label: "Cada 10 min" },
+  { value: 15, label: "Cada 15 min" },
+  { value: 20, label: "Cada 20 min" },
+  { value: 30, label: "Cada 30 min" },
+  { value: 45, label: "Cada 45 min" },
+  { value: 60, label: "Cada hora" },
+];
+
+/** Si el valor guardado no está en la lista (p. ej. puesto por soporte), se agrega. */
+function withCurrent(options: Option[], value: number): Option[] {
+  return options.some((o) => o.value === value) ? options : [...options, { value, label: `${value} min` }];
+}
+
+function SchedulingSettingsCard({ initial }: { initial: SchedulingSettingsRow }) {
+  const [values, setValues] = React.useState<SchedulingSettingsRow>(initial);
+  const [pending, startTransition] = React.useTransition();
+  const dirty =
+    values.bufferMin !== initial.bufferMin ||
+    values.minNoticeMin !== initial.minNoticeMin ||
+    values.slotStepMin !== initial.slotStepMin;
+
+  function save() {
+    startTransition(async () => {
+      const res = await updateSchedulingSettings(values);
+      if (res.ok) toast.success("Reglas de agenda guardadas");
+      else toast.error(res.error);
+    });
+  }
+
+  const fields: { key: keyof SchedulingSettingsRow; label: string; hint: string; options: Option[] }[] = [
+    {
+      key: "minNoticeMin",
+      label: "Antelación mínima",
+      hint: "Nadie puede agendar con menos tiempo que esto.",
+      options: NOTICE_OPTIONS,
+    },
+    {
+      key: "bufferMin",
+      label: "Margen entre citas",
+      hint: "Tiempo libre después de cada consulta.",
+      options: BUFFER_OPTIONS,
+    },
+    {
+      key: "slotStepMin",
+      label: "Horarios de inicio",
+      hint: "Cada cuánto se ofrece un horario al paciente.",
+      options: STEP_OPTIONS,
+    },
+  ];
+
+  return (
+    <Card className="gap-4 p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="font-semibold">Reglas de agenda</p>
+          <p className="text-sm text-muted-foreground">Cómo se calculan los horarios que ven tus pacientes.</p>
+        </div>
+        {dirty ? <Badge variant="accent">Sin guardar</Badge> : null}
+      </div>
+      <div className="grid gap-4 sm:grid-cols-3">
+        {fields.map((f) => (
+          <Field key={f.key} label={f.label} hint={f.hint}>
+            <Select
+              value={String(values[f.key])}
+              disabled={pending}
+              onValueChange={(v) => setValues((cur) => ({ ...cur, [f.key]: Number(v) }))}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {withCurrent(f.options, values[f.key]).map((o) => (
+                  <SelectItem key={o.value} value={String(o.value)}>
+                    {o.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+        ))}
+      </div>
+      <div className="flex justify-end gap-2">
+        <Button type="button" variant="outline" disabled={!dirty || pending} onClick={() => setValues(initial)}>
+          Descartar
+        </Button>
+        <Button type="button" onClick={save} loading={pending} disabled={!dirty}>
+          Guardar reglas
+        </Button>
+      </div>
     </Card>
   );
 }

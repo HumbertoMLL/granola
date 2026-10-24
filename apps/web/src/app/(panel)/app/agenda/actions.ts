@@ -8,9 +8,11 @@ import { isValidTimeZone, parseTimeToMinutes } from "@granola/core/scheduling";
 import {
   overrideSchema,
   ruleSchema,
+  schedulingSettingsSchema,
   serviceSchema,
   type OverrideInput,
   type RuleInput,
+  type SchedulingSettingsInput,
   type ServiceInput,
 } from "@/components/agenda/schemas";
 
@@ -243,6 +245,19 @@ export async function updateTimezone(timezone: string): Promise<ActionResult> {
   await db
     .update(nutritionists)
     .set({ timezone: parsed.data, updatedAt: new Date() })
+    .where(eq(nutritionists.id, nutritionist.id));
+  revalidatePath(AGENDA_PATH);
+  return { ok: true };
+}
+
+/** Margen entre citas, antelación mínima y cada cuánto se ofrece un horario. */
+export async function updateSchedulingSettings(input: SchedulingSettingsInput): Promise<ActionResult> {
+  const { nutritionist } = await requireNutritionist();
+  const parsed = schedulingSettingsSchema.safeParse(input);
+  if (!parsed.success) return fail("Revisa los campos", zodFieldErrors(parsed.error));
+  await db
+    .update(nutritionists)
+    .set({ ...parsed.data, updatedAt: new Date() })
     .where(eq(nutritionists.id, nutritionist.id));
   revalidatePath(AGENDA_PATH);
   return { ok: true };

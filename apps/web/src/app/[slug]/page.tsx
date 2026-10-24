@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ProfileView } from "@/components/public-profile/profile-view";
 import { getPublicProfile, isReservedSlug } from "@/lib/public-profile";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? process.env.BETTER_AUTH_URL ?? "https://granola.app";
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? process.env.BETTER_AUTH_URL ?? "https://granola.app";
 
 export async function generateMetadata({ params }: PageProps<"/[slug]">): Promise<Metadata> {
   const { slug } = await params;

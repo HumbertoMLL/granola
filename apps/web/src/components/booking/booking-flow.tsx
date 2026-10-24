@@ -15,6 +15,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Textarea,
   cn,
   toast,
 } from "@granola/ui";
@@ -239,7 +240,10 @@ type FormState = {
   consent: boolean;
   modality: "online" | "presencial";
   paymentMethod: "card" | "spei" | "oxxo";
+  notes: string;
 };
+
+const NOTES_MAX = 500;
 
 function BookingForm({
   slug,
@@ -264,6 +268,7 @@ function BookingForm({
     consent: false,
     modality: service.modality === "presencial" ? "presencial" : "online",
     paymentMethod: "card",
+    notes: "",
   });
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [pending, startTransition] = React.useTransition();
@@ -287,6 +292,7 @@ function BookingForm({
       consent: form.consent as true,
       timezone,
       paymentMethod: service.paymentMode === "prepaid" ? form.paymentMethod : undefined,
+      notes: form.notes.trim() || undefined,
     };
     const parsed = bookingSchema.safeParse(input);
     const fe: Record<string, string> = {};
@@ -373,6 +379,21 @@ function BookingForm({
           onChange={(e) => set("email", e.target.value)}
           placeholder="maria@correo.com"
           aria-invalid={!!errors.email}
+        />
+      </Field>
+
+      <Field
+        label="¿Algo que deba saber tu nutrióloga? (opcional)"
+        error={errors.notes}
+        hint={`${form.notes.length}/${NOTES_MAX}`}
+      >
+        <Textarea
+          value={form.notes}
+          maxLength={NOTES_MAX}
+          rows={3}
+          onChange={(e) => set("notes", e.target.value)}
+          placeholder="Objetivo, alergias, si es tu primera consulta…"
+          aria-invalid={!!errors.notes}
         />
       </Field>
 

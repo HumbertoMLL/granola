@@ -11,8 +11,10 @@ export const bookingSchema = z.object({
   phone: z.string().trim().min(6, "Escribe tu WhatsApp").max(25),
   email: z.union([z.literal(""), z.email("Correo inválido")]).optional(),
   consent: z.literal(true, { error: "Necesitamos tu consentimiento para agendar" }),
-  /** Zona del paciente; solo para mensajes (no se guarda, no hay columna). */
+  /** Zona IANA detectada en el navegador del paciente → `appointments.patient_timezone`. */
   timezone: z.string().max(64).optional(),
+  /** "¿Algo que deba saber tu nutrióloga?" → `appointments.notes`. */
+  notes: z.string().trim().max(500, "Máximo 500 caracteres").optional(),
   paymentMethod: z.enum(["card", "spei", "oxxo"]).optional(),
 });
 

@@ -31,6 +31,8 @@ export const RESERVED_SLUGS = [
   "api",
   "privacidad",
   "cita",
+  "resena",
+  "pago",
   "p",
   "precios",
   // extras defensivos

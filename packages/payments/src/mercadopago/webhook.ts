@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { requireEnv } from "../env";
 import { WebhookSignatureError } from "../errors";
+import { failureReasonFor, mpInstructionsToProviderData, providerDataToMpInstructions } from "../provider-data";
 import { mapMercadoPagoStatus } from "../status";
 import { applyPaymentTransition, type ConfirmedEvent } from "../transitions";
 import { getMpPayments } from "./client";
@@ -76,7 +77,10 @@ export async function handleMercadoPagoNotification(
   const mp = await fetchPayment(mpPaymentId);
 
   const next = mapMercadoPagoStatus(mp.status, mp.status_detail);
-  const result = await applyPaymentTransition(mpPaymentId, next);
+  const result = await applyPaymentTransition(mpPaymentId, next, {
+    failureReason: failureReasonFor(next, { provider: "mercadopago", status: mp.status, statusDetail: mp.status_detail }),
+    providerData: { providerStatus: mp.status ?? null, providerStatusDetail: mp.status_detail ?? null },
+  });
   if (!result.applied) {
     return { kind: "payment", mpPaymentId, mpStatus: mp.status ?? null, applied: false, reason: result.reason, confirmed: null };
   }
@@ -86,16 +90,40 @@ export async function handleMercadoPagoNotification(
 
 /**
  * Para la página /pago/[paymentId]: busca el pago en nuestra DB (provider
- * mercadopago) y pide a MP los datos de la CLABE/referencia.
+ * mercadopago) y arma las instrucciones desde `provider_data`. Solo si está
+ * vacío (pagos creados antes de la migración 0001) consulta a MP y rellena
+ * `provider_data` para la próxima vez.
  */
 export async function getMpInstructionsForPayment(paymentId: string): Promise<
-  | { ok: true; payment: typeof payments.$inferSelect; instructions: MpInstructions | null }
+  | {
+      ok: true;
+      payment: typeof payments.$inferSelect;
+      instructions: MpInstructions | null;
+      source: "provider_data" | "mercadopago" | "none";
+    }
   | { ok: false; reason: "not_found" | "not_mercadopago" | "no_provider_ref" }
 > {
   const payment = await db.query.payments.findFirst({ where: eq(payments.id, paymentId) });
   if (!payment) return { ok: false, reason: "not_found" };
   if (payment.provider !== "mercadopago") return { ok: false, reason: "not_mercadopago" };
   if (!payment.providerRef) return { ok: false, reason: "no_provider_ref" };
+
+  const stored = providerDataToMpInstructions(payment);
+  if (stored) return { ok: true, payment, instructions: stored, source: "provider_data" };
+
+  // Un pago ya cerrado no necesita instrucciones: no gastamos una llamada a MP.
+  if (payment.status !== "pending") return { ok: true, payment, instructions: null, source: "none" };
+
   const mp = await getMpPayments().get({ id: payment.providerRef });
-  return { ok: true, payment, instructions: extractMpInstructions(mp) };
+  const instructions = extractMpInstructions(mp);
+  if (instructions) {
+    await db
+      .update(payments)
+      .set({
+        providerData: { ...payment.providerData, ...mpInstructionsToProviderData(instructions) },
+        updatedAt: new Date(),
+      })
+      .where(eq(payments.id, payment.id));
+  }
+  return { ok: true, payment, instructions, source: "mercadopago" };
 }

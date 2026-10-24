@@ -1,4 +1,4 @@
-import { db, eq, nutritionists } from "@granola/db";
+import { db, eq, nutritionists, type StripeRequirements } from "@granola/db";
 
 import { PaymentsError } from "../errors";
 import { getStripe, type Stripe } from "./client";
@@ -90,9 +90,73 @@ export function accountToStatus(account: Stripe.Account): ConnectAccountStatus {
   };
 }
 
+/** Columnas de `nutritionists` que reflejan el estado de Connect. Puro. */
+export function accountStatusToColumns(
+  status: ConnectAccountStatus,
+  now: Date = new Date(),
+): {
+  stripeChargesEnabled: boolean;
+  stripePayoutsEnabled: boolean;
+  stripeRequirements: StripeRequirements;
+} {
+  return {
+    stripeChargesEnabled: status.chargesEnabled,
+    stripePayoutsEnabled: status.payoutsEnabled,
+    stripeRequirements: {
+      currentlyDue: status.currentlyDue,
+      eventuallyDue: status.eventuallyDue,
+      pastDue: status.pastDue,
+      disabledReason: status.disabledReason,
+      detailsSubmitted: status.detailsSubmitted,
+      syncedAt: now.toISOString(),
+    },
+  };
+}
+
+/** Inverso de `accountStatusToColumns`: lo que el panel lee de DB sin llamar a Stripe. */
+export function accountStatusFromColumns(row: {
+  stripeAccountId: string;
+  stripeChargesEnabled: boolean;
+  stripePayoutsEnabled: boolean;
+  stripeRequirements: StripeRequirements | null;
+}): ConnectAccountStatus & { syncedAt: string | null } {
+  const req = row.stripeRequirements ?? {};
+  return {
+    accountId: row.stripeAccountId,
+    chargesEnabled: row.stripeChargesEnabled,
+    payoutsEnabled: row.stripePayoutsEnabled,
+    detailsSubmitted: Boolean(req.detailsSubmitted),
+    currentlyDue: req.currentlyDue ?? [],
+    eventuallyDue: req.eventuallyDue ?? [],
+    pastDue: req.pastDue ?? [],
+    disabledReason: req.disabledReason ?? null,
+    syncedAt: req.syncedAt ?? null,
+  };
+}
+
+/**
+ * Guarda los flags de Connect en el nutri dueño de `status.accountId`.
+ * Devuelve su id, o null si la cuenta no es de ningún nutri conocido.
+ */
+export async function persistAccountStatus(status: ConnectAccountStatus): Promise<string | null> {
+  const [row] = await db
+    .update(nutritionists)
+    .set({ ...accountStatusToColumns(status), updatedAt: new Date() })
+    .where(eq(nutritionists.stripeAccountId, status.accountId))
+    .returning({ id: nutritionists.id });
+  return row?.id ?? null;
+}
+
+/**
+ * Consulta el estado en vivo (`accounts.retrieve`) y lo persiste en
+ * `nutritionists`. Solo para acciones explícitas ("Actualizar estado", regreso
+ * del onboarding); el render del panel lee de DB.
+ */
 export async function getAccountStatus(accountId: string): Promise<ConnectAccountStatus> {
   const account = await getStripe().accounts.retrieve(accountId);
-  return accountToStatus(account);
+  const status = accountToStatus(account);
+  await persistAccountStatus(status);
+  return status;
 }
 
 /** Link al dashboard Express del nutri (ver pagos, cambiar cuenta bancaria). */

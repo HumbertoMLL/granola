@@ -48,6 +48,28 @@ Para producción, pon el `DATABASE_URL` del branch `main` en Vercel y corre
 
 Nunca edites un SQL ya aplicado; genera una migración nueva.
 
+## SQL manual en migraciones
+
+drizzle-kit no modela algunas cosas de Postgres; se agregan **a mano al final** del SQL
+generado (después de un `--> statement-breakpoint`) y se listan aquí para no perderlas:
+
+| Migración | Objeto | Por qué |
+|-----------|--------|---------|
+| `0001_f1_gaps.sql` | `CREATE EXTENSION btree_gist` | Necesaria para combinar `=` sobre uuid con `&&` sobre rangos en un índice GiST. |
+| `0001_f1_gaps.sql` | `appointments_no_overlap` (EXCLUDE) | `(nutritionist_id WITH =, tstzrange(starts_at, ends_at, '[)') WITH &&) WHERE status IN ('confirmed','pending_payment')`. Impide doble reserva aunque dos requests lleguen a la vez (neon-http no tiene transacciones interactivas). |
+
+Notas:
+
+- La violación llega como SQLSTATE **`23P01`** (`exclusion_violation`). `createBooking`
+  (apps/web/src/app/[slug]/agendar/actions.ts) y el reagendado del paciente la traducen a
+  "Ese horario se acaba de ocupar". Helper: `isExclusionViolation(err)` en `@granola/db`.
+- Rango semiabierto `[)`: una cita que termina 10:00 no choca con otra que empieza 10:00.
+  El `buffer_min` del nutri **no** lo cubre la constraint; lo aplica `packages/core/scheduling`.
+- Si la base ya tuviera citas encimadas activas, el `ALTER TABLE … ADD CONSTRAINT` falla:
+  cancélalas o corrígelas antes de `pnpm db:migrate`.
+- **No uses `drizzle-kit push`** contra una base con estas migraciones: push compara con el
+  schema TS y borraría la constraint. `generate` no la toca (trabaja sobre los snapshots).
+
 ## Sin DATABASE_URL
 
 `tsc`, `next build` y `drizzle-kit generate` funcionan sin la variable. El cliente

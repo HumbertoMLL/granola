@@ -40,6 +40,10 @@ export const appointments = pgTable(
     cancelToken: text("cancel_token").notNull().unique(),
     reminder24hSentAt: timestamp("reminder_24h_sent_at", { withTimezone: true }),
     reminder2hSentAt: timestamp("reminder_2h_sent_at", { withTimezone: true }),
+    /** Zona IANA detectada en el navegador del paciente al agendar (para mensajes). */
+    patientTimezone: text("patient_timezone"),
+    /** Mensaje opcional del paciente al agendar ("¿Algo que deba saber tu nutrióloga?"). */
+    notes: text("notes"),
     cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
     cancelReason: text("cancel_reason"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

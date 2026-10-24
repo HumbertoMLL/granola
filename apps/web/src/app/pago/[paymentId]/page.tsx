@@ -20,8 +20,9 @@ export const metadata: Metadata = {
  * OXXO). Sin sesión: el `paymentId` (uuid) actúa como capability token. Solo
  * muestra datos del pago, nunca del expediente.
  *
- * Hasta que exista `payments.provider_data`, los datos de la CLABE se piden a
- * la API de MP en cada carga (ver README de @granola/payments).
+ * Los datos (CLABE, banco, referencia, ficha) salen de `payments.provider_data`,
+ * guardado al crear el cobro. Solo si está vacío (pagos anteriores a la
+ * migración 0001) `getMpInstructionsForPayment` consulta a MP y lo rellena.
  */
 export default function PagoPage({ params }: { params: Promise<{ paymentId: string }> }) {
   return (

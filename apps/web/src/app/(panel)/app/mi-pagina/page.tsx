@@ -50,7 +50,7 @@ async function MiPaginaPageContent() {
   };
 
   const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ?? process.env.BETTER_AUTH_URL ?? "https://granola.app";
+    process.env.NEXT_PUBLIC_APP_URL ?? process.env.BETTER_AUTH_URL ?? "https://granola.app";
 
   return (
     <MyPageEditor

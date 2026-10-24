@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-import { appointments, db, eq } from "@/lib/db";
+import { appointments, db, eq, isExclusionViolation } from "@/lib/db";
 import { checkSlotAvailable, computeAvailableSlots, getPublicNutritionistById } from "@/lib/booking";
 import { sendEvent } from "@/lib/inngest-client";
 
@@ -68,6 +68,7 @@ export async function fetchRescheduleSlots(token: string): Promise<RescheduleSlo
   const slots = await computeAvailableSlots({
     nutritionistId: nutri.id,
     timezone: nutri.timezone,
+    settings: nutri,
     service: appt.service,
     excludeAppointmentId: appt.id,
   });
@@ -95,6 +96,7 @@ export async function rescheduleByPatient(token: string, startsAtIso: string): P
   const free = await checkSlotAvailable({
     nutritionistId: nutri.id,
     timezone: nutri.timezone,
+    settings: nutri,
     service: appt.service,
     slot: { startsAt, endsAt },
     excludeAppointmentId: appt.id,
@@ -102,10 +104,16 @@ export async function rescheduleByPatient(token: string, startsAtIso: string): P
   if (!free) return { ok: false, error: "Ese horario se acaba de ocupar. Elige otro, por favor." };
 
   const previousStartsAt = appt.startsAt.toISOString();
-  await db
-    .update(appointments)
-    .set({ startsAt, endsAt, reminder24hSentAt: null, reminder2hSentAt: null, updatedAt: new Date() })
-    .where(eq(appointments.id, appt.id));
+  try {
+    await db
+      .update(appointments)
+      .set({ startsAt, endsAt, reminder24hSentAt: null, reminder2hSentAt: null, updatedAt: new Date() })
+      .where(eq(appointments.id, appt.id));
+  } catch (err) {
+    // appointments_no_overlap (23P01): otra reserva ganó el hueco entre la revalidación y el UPDATE.
+    if (isExclusionViolation(err)) return { ok: false, error: "Ese horario se acaba de ocupar. Elige otro, por favor." };
+    throw err;
+  }
 
   await sendEvent({
     name: "appointment/rescheduled",

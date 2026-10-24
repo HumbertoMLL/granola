@@ -1,13 +1,18 @@
 "use client";
 
 import { useActionState } from "react";
-import { CreditCard, ExternalLink, ShieldCheck } from "lucide-react";
+import { CreditCard, ExternalLink, RefreshCw, ShieldCheck } from "lucide-react";
 
 import { Badge, Button, Card } from "@granola/ui";
 
-import { connectStripeAction, openStripeDashboardAction, type ActionState } from "@/app/(panel)/app/cobros/actions";
+import {
+  connectStripeAction,
+  openStripeDashboardAction,
+  refreshStripeStatusAction,
+  type ActionState,
+} from "@/app/(panel)/app/cobros/actions";
 
-/** Estado serializable que calcula el server component (sin llamar a Stripe desde el cliente). */
+/** Estado serializable que el server component lee de DB (flags de `nutritionists`). */
 export type StripeCardState =
   | { kind: "not_configured" }
   | { kind: "disconnected" }
@@ -20,6 +25,8 @@ export type StripeCardState =
       currentlyDue: string[];
       pastDue: string[];
       disabledReason: string | null;
+      /** ISO de la última sincronización con Stripe; null si nunca llegó. */
+      syncedAt: string | null;
     };
 
 const initial: ActionState = {};
@@ -45,7 +52,8 @@ function requirementLabel(key: string): string {
 export function StripeConnectCard({ state, justReturned }: { state: StripeCardState; justReturned: boolean }) {
   const [connectState, connect, connecting] = useActionState(connectStripeAction, initial);
   const [dashState, openDashboard, opening] = useActionState(openStripeDashboardAction, initial);
-  const error = connectState.error ?? dashState.error;
+  const [refreshState, refresh, refreshing] = useActionState(refreshStripeStatusAction, initial);
+  const error = connectState.error ?? dashState.error ?? refreshState.error;
 
   return (
     <Card className="gap-4">
@@ -66,7 +74,7 @@ export function StripeConnectCard({ state, justReturned }: { state: StripeCardSt
 
       {justReturned && state.kind === "connected" && !state.chargesEnabled ? (
         <p className="rounded-xl bg-accent-soft px-3 py-2 text-sm text-[#8a5a0b]">
-          Stripe está revisando tus datos. Suele tardar unos minutos; recarga esta página.
+          Stripe está revisando tus datos. Suele tardar unos minutos; da clic en «Actualizar estado».
         </p>
       ) : null}
 
@@ -79,6 +87,13 @@ export function StripeConnectCard({ state, justReturned }: { state: StripeCardSt
             ))}
           </ul>
         </div>
+      ) : null}
+
+      {state.kind === "connected" && state.syncedAt ? (
+        <p className="text-xs text-muted-foreground" suppressHydrationWarning>
+          Última actualización:{" "}
+          {new Intl.DateTimeFormat("es-MX", { dateStyle: "medium", timeStyle: "short" }).format(new Date(state.syncedAt))}
+        </p>
       ) : null}
 
       {state.kind === "not_configured" ? (
@@ -102,6 +117,14 @@ export function StripeConnectCard({ state, justReturned }: { state: StripeCardSt
           <form action={connect}>
             <Button type="submit" size="sm" loading={connecting}>
               <ShieldCheck /> Completar verificación
+            </Button>
+          </form>
+        ) : null}
+
+        {state.kind === "connected" ? (
+          <form action={refresh}>
+            <Button type="submit" size="sm" variant="ghost" loading={refreshing}>
+              <RefreshCw /> Actualizar estado
             </Button>
           </form>
         ) : null}
