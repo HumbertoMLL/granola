@@ -11,8 +11,13 @@ export const appointmentEventData = z.object({
 });
 
 export const events = {
-  /** Cita confirmada (pago hecho, o servicio sin prepago). Dispara WA de confirmación + recordatorios. */
-  "appointment/confirmed": appointmentEventData,
+  /**
+   * Cita confirmada (pago hecho, o servicio sin prepago). Dispara WA de confirmación + recordatorios.
+   * `isReschedule: true` lo emite internamente onAppointmentRescheduled para rearmar los
+   * recordatorios sin volver a mandar `cita_confirmada` / `nueva_cita_nutri` (ya se mandó `cita_reagendada`).
+   * Quien emite desde booking/pagos NO lo manda.
+   */
+  "appointment/confirmed": appointmentEventData.extend({ isReschedule: z.boolean().optional() }),
   /** Cita cancelada por paciente o nutri. Cancela recordatorios pendientes. */
   "appointment/cancelled": appointmentEventData.extend({ by: z.enum(["patient", "nutritionist", "system"]) }),
   /** Cita reagendada: cancela recordatorios viejos y programa nuevos. */

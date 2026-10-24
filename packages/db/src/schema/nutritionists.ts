@@ -9,11 +9,36 @@ import { reviews } from "./reviews";
 
 export const planEnum = pgEnum("plan", ["trial", "starter", "pro", "clinica"]);
 
-/** Link libre de la página pública (link-tree). */
-export type NutritionistLink = { label: string; url: string; icon?: string };
+// Solo tipos: las listas en runtime viven en apps/web/src/components/public-profile/theme.ts
+// para que el cliente no importe drizzle.
 
-/** Tema visual de la página pública. Se afina en F1 con packages/ui. */
+/** Ícono opcional de un link de la página pública. */
+export type LinkIcon = "instagram" | "tiktok" | "youtube" | "whatsapp" | "web" | "otro";
+
+/** Link libre de la página pública (link-tree). `id` es estable para reordenar/editar. */
+export type NutritionistLink = {
+  id?: string;
+  label: string;
+  url: string;
+  icon?: LinkIcon | (string & {});
+  /** Default true. Un link oculto se conserva pero no se muestra. */
+  visible?: boolean;
+};
+
+/** Presets de tema de la página pública (tokens en apps/web/src/components/public-profile/theme.ts). */
+export type ThemePreset = "avena" | "menta" | "lavanda" | "durazno" | "carbon";
+
+export type ButtonStyle = "pill" | "rounded" | "square";
+
+/** Tema visual de la página pública. Todo opcional: los defaults viven en apps/web. */
 export type NutritionistTheme = {
+  preset?: ThemePreset;
+  buttonStyle?: ButtonStyle;
+  /** Botón "Escríbeme por WhatsApp" (requiere phone_wa). Default false. */
+  showWhatsApp?: boolean;
+  /** Bloque de reseñas verificadas. Default true. */
+  showReviews?: boolean;
+  /** Legacy (F0): overrides sueltos. Se ignoran si hay `preset`. */
   primary?: string;
   background?: string;
   font?: string;

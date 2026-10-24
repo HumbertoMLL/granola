@@ -1,0 +1,31 @@
+{
+  "object": "whatsapp_business_account",
+  "entry": [
+    {
+      "id": "102290129340398",
+      "changes": [
+        {
+          "value": {
+            "messaging_product": "whatsapp",
+            "metadata": { "display_phone_number": "15550783881", "phone_number_id": "106540352242922" },
+            "contacts": [{ "profile": { "name": "Ana López" }, "wa_id": "523312345678" }],
+            "messages": [
+              {
+                "context": {
+                  "from": "15550783881",
+                  "id": "wamid.HBgLNTIzMzEyMzQ1Njc4FQIAERgSQzdDNTk0RkM0OTY3QTk4RjQ0AA=="
+                },
+                "from": "523312345678",
+                "id": "wamid.HBgLNTIzMzEyMzQ1Njc4FQIAEhggRTk3QjU0QjU2QjUyNjQwRDQ0QTY4OTQ2RjE4N0Q5QUQA",
+                "timestamp": "1761322000",
+                "type": "button",
+                "button": { "payload": "confirm:5f3c1b2a-0000-4000-8000-000000000001", "text": "Confirmo" }
+              }
+            ]
+          },
+          "field": "messages"
+        }
+      ]
+    }
+  ]
+}

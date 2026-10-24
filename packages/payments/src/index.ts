@@ -1,32 +1,62 @@
 /**
+ * @granola/payments — Stripe Connect (tarjeta) + Mercado Pago (SPEI/OXXO) + efectivo.
+ *
  * CONTRATO: el flujo de reserva (booking) llama createCheckout() y redirige al
  * `url` devuelto. Los webhooks (stripe/mercadopago) marcan el pago y emiten
  * `appointment/confirmed`. Implementación en ./stripe y ./mercadopago.
  */
-export type CheckoutProvider = "stripe" | "mercadopago";
-export type CheckoutMethod = "card" | "spei" | "oxxo";
+import { createMercadoPagoCheckout } from "./mercadopago/checkout";
+import { createStripeCheckout } from "./stripe/checkout";
+import type { CreateCheckoutInput, CreateCheckoutResult } from "./types";
 
-export type CreateCheckoutInput = {
-  appointmentId: string;
-  nutritionistId: string;
-  amountCents: number;
-  currency: "MXN";
-  method: CheckoutMethod;
-  description: string;
-  payer: { name: string; email?: string; phone?: string };
-  /** A dónde vuelve el paciente tras pagar / cancelar. */
-  successUrl: string;
-  cancelUrl: string;
-};
+export type { CheckoutMethod, CheckoutProvider, CreateCheckoutInput, CreateCheckoutResult } from "./types";
 
-export type CreateCheckoutResult = {
-  provider: CheckoutProvider;
-  paymentId: string;
-  url: string;
-  /** Para OXXO/SPEI: hasta cuándo se puede pagar. */
-  expiresAt?: Date;
-};
-
-export async function createCheckout(_input: CreateCheckoutInput): Promise<CreateCheckoutResult> {
-  throw new Error("createCheckout: pendiente de implementar en packages/payments (workstream F)");
+/** Qué proveedor atiende cada método. Puro, para que booking pueda decidir sin llamar a nadie. */
+export function providerForMethod(method: CreateCheckoutInput["method"]): CreateCheckoutResult["provider"] {
+  return method === "card" ? "stripe" : "mercadopago";
 }
+
+/**
+ * Crea el cobro e inserta la fila `payments` (status pending, providerRef del
+ * proveedor) ANTES de devolver la URL a la que hay que redirigir al paciente.
+ *
+ * - card  → Stripe Checkout Session (destination charge al acct del nutri).
+ * - spei  → Mercado Pago pago directo `clabe`; url = /pago/[paymentId] (CLABE propia).
+ * - oxxo  → Mercado Pago pago directo `oxxo`; url = ticket de MP.
+ *
+ * Lanza `PaymentsNotConfiguredError` si faltan keys, `PaymentsError` si el
+ * nutri no conectó Stripe, etc. Booking decide cómo mostrar el error.
+ */
+export async function createCheckout(input: CreateCheckoutInput): Promise<CreateCheckoutResult> {
+  if (!Number.isInteger(input.amountCents) || input.amountCents <= 0) {
+    throw new Error(`createCheckout: amountCents debe ser entero positivo (recibido ${input.amountCents})`);
+  }
+  return providerForMethod(input.method) === "stripe"
+    ? createStripeCheckout(input)
+    : createMercadoPagoCheckout(input);
+}
+
+export { PaymentsError, PaymentsNotConfiguredError, WebhookSignatureError } from "./errors";
+export { appUrl, isMercadoPagoConfigured, isStripeConfigured } from "./env";
+export {
+  mapMercadoPagoStatus,
+  mapStripeEvent,
+  shouldApplyTransition,
+  type MpPaymentStatus,
+  type PaymentStatus,
+  type StatusTransition,
+} from "./status";
+export { applyPaymentTransition, type ApplyTransitionResult, type ConfirmedEvent, type PaymentRow } from "./transitions";
+export { markCashPaid } from "./cash";
+export {
+  listPaymentsForMonth,
+  listUnpaidVisitAppointments,
+  monthRange,
+  summarizeMonth,
+  type MonthSummary,
+  type PaymentListItem,
+  type UnpaidVisitAppointment,
+} from "./queries";
+
+export * from "./stripe";
+export * from "./mercadopago";
