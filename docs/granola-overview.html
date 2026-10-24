@@ -57,8 +57,8 @@
 <div class="grid" style="margin-top:22px">
   <div class="card"><div class="big-num">F0 ✓</div><p class="sub">Fundamentos</p></div>
   <div class="card"><div class="big-num">F1 ✓</div><p class="sub">Negocio: página + agenda + WhatsApp + cobros</p></div>
-  <div class="card"><div class="big-num">130</div><p class="sub">tests en verde</p></div>
-  <div class="card"><div class="big-num">0</div><p class="sub">datos reales aún — falta Neon</p></div>
+  <div class="card"><div class="big-num">157</div><p class="sub">tests en verde</p></div>
+  <div class="card"><div class="big-num">0</div><p class="sub">datos reales — falta Neon + Meta</p></div>
 </div>
 
 <!-- ============ PRD ============ -->
@@ -98,7 +98,7 @@
 <table>
   <tr><th>Fase</th><th>Entregable</th><th>Estado</th></tr>
   <tr><td><b>F0</b></td><td>Monorepo, DB, auth, design system, shell del panel</td><td><span class="tag ok">hecho</span></td></tr>
-  <tr><td><b>F1</b></td><td>Link-tree público, agenda + reservas, WhatsApp, cobros</td><td><span class="tag ok">hecho</span> <span class="tag wip">cerrando huecos</span></td></tr>
+  <tr><td><b>F1</b></td><td>Link-tree público, agenda + reservas, WhatsApp, cobros</td><td><span class="tag ok">hecho</span></td></tr>
   <tr><td><b>F2</b></td><td>Pacientes, expediente, antropometría, notas IA, labs PDF</td><td><span class="tag todo">pendiente</span></td></tr>
   <tr><td><b>F3</b></td><td>Motor de planes SMAE, recetas, PDF con marca</td><td><span class="tag todo">pendiente</span></td></tr>
   <tr><td><b>F4</b></td><td>PWA paciente offline, plan por WhatsApp, lista del súper</td><td><span class="tag todo">pendiente</span></td></tr>
@@ -254,12 +254,12 @@
     </ul>
   </div>
   <div class="card">
-    <span class="tag wip">en curso (agentes)</span>
+    <span class="tag wip">siguiente</span>
     <ul class="sub">
-      <li>Migración 0001 (columnas faltantes + constraint anti doble reserva)</li>
-      <li>Pago real en booking (pending_payment)</li>
-      <li>Rutas /resena y detalle de cita</li>
-      <li>Seed con pacientes y citas demo</li>
+      <li>Correr migraciones y seed contra Neon y probar el flujo completo</li>
+      <li>Google Calendar sync (Meet) — pendiente de F1</li>
+      <li>F2: pacientes + expediente + antropometría</li>
+      <li>Deploy a Vercel</li>
     </ul>
   </div>
   <div class="card">

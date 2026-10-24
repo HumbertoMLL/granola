@@ -33,5 +33,5 @@ Sin `DATABASE_URL` en `apps/web/.env.local` las páginas con datos fallan en run
 
 ## Qué sigue (al 24 oct 2026)
 
-- Cerrar huecos de F1 (ver sección 4 del overview).
+- Probar F1 contra Neon real (migrar + seed + flujo completo). Google Calendar sync aún no existe.
 - F2: pacientes, expediente, antropometría, notas IA. Ver `PLAN.md` sección 6.
