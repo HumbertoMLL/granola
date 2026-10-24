@@ -1,0 +1,23 @@
+{
+  "name": "@granola/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts", "./schema": "./src/schema/index.ts" },
+  "scripts": {
+    "generate": "drizzle-kit generate",
+    "migrate": "drizzle-kit migrate",
+    "studio": "drizzle-kit studio",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.0",
+    "drizzle-orm": "^0.44.0"
+  },
+  "devDependencies": {
+    "@granola/config": "workspace:*",
+    "drizzle-kit": "^0.31.0",
+    "dotenv": "^17.0.0",
+    "typescript": "^5.9.0"
+  }
+}

@@ -1,0 +1,287 @@
+Supabase: el caso en contra
+
+# Supabase: el caso en contra (y qué hacer en el clon de Avena)
+
+Para Beto · 13 oct 2026 · fuentes: Hacker News (API Algolia, 3,411 comentarios), status.supabase.com (412 incidentes desde 2023), GitHub (issues y discussions), X, YouTube, blogs de migración y postmortems, páginas de precios oficiales. Citas textuales en inglés, sin editar.
+
+435comentarios negativos en HN de 3,411 que mencionan Supabasesin empleados; regex por categoría
+
+152incidentes en status page en 2026 (al 13 oct) vs 98 en 2025 y 82 en 2024status.supabase.com
+
+16,000bases con datos personales expuestos (UpGuard, sep 2026)TechCrunch 25 sep 2026
+
+12+ hclínica médica en Pro caída, 2 tickets urgentes sin respuesta humanaGitHub discussion #51135, 1 oct 2026
+
+$599 + add-onpiso para HIPAA en Supabase (plan Team); Neon Scale lo da sin costo extrasupabase.com/pricing · neon.com/pricing
+
+0regiones de Supabase en México; AWS mx-central-1 sí tiene RDS desde ene 2025docs de regiones
+
+$36 a $100rango de todas las opciones a 10,000 pacientes: el precio no decidemodelo propio, sección 5
+
+25posts en X "moving away from / migrated off Supabase" (2024 a 2026), incluye OpenRouterbúsqueda X API
+
+### Hallazgos clave
+
+- La queja #1 no es el precio de lista, es el comportamiento del precio: pasar de Free (pausa a la semana sin uso) a $25 fijos por proyecto, compute add-ons para tener conexiones, y proyectos que fallan con HTTP 402 al pasar cuotas.
+
+- La confiabilidad empeora en 2026: 152 incidentes en 9.5 meses, 26 caídas parciales y 7 totales; el postmortem del 12 feb admite "communication was insufficient and at times misleading" y que no hay failover entre regiones.
+
+- Soporte débil en Pro: solo email, sin SLA. Hay dos casos de 2026 con producción caída 12 h y 37 h sin respuesta humana; uno es una clínica médica.
+
+- RLS es el centro del problema: es lo que más cuesta mantener ("2 weeks trying to make the policies work"), lo que más falla en seguridad (61% de 71 startups YC con alguna exposición) y lo que más ata al migrar ("reliance on authenticated role").
+
+- El lock-in real es menor de lo que se dice si solo usas Postgres: Val Town y un consultor migraron "en una tarde". Lo que ata es Auth + RLS con auth.uid(), Edge Functions (Deno), Realtime, Storage y extensiones como supa_audit.
+
+- Para datos de salud en México: la LFPDPPP 2025 exige consentimiento expreso y medidas de seguridad, no residencia de datos. Supabase no tiene región MX; HIPAA solo importa si vendes a EE.UU. y ahí Supabase es la opción más cara.
+
+- Veredicto: no construir el clon sobre Supabase como BaaS. Postgres administrado (Neon ahora, RDS mx-central-1 después) + Better Auth + S3, todo detrás de la API de Next.js. Si se usa Supabase, solo como Postgres + Auth, sin RLS desde el cliente, sin Edge Functions ni Realtime.
+
+## 1. Las críticas, por categoría
+Un comentario puede caer en varias categorías. Conteo por regex en una ventana de ±300 caracteres alrededor de "supabase" con señal negativa; es aproximado. Por año: 2024: 73, 2025: 134, 2026: 85, 2022: 49, 2023: 76, 2021: 15, 2020: 3.
+
+CategoríaComentarios HNCasos curados con cita (abajo)Riesgo para el clon de Avena
+Costos a escala1415BAJO
+Migraciones y entornos1285MEDIO
+RLS: complejidad y bugs807ALTO
+Rendimiento y conexiones795BAJO
+Seguridad (claves, RLS mal)717ALTO
+Lock-in (Auth, Edge, RLS, Realtime)664MEDIO
+Outages e incidentes308ALTO
+Soporte64ALTO
+Compliance salud62MEDIO
+
+Reddit: r/Supabase, r/webdev y r/ExperiencedDevs devuelven 403 y captcha al box; no se rodeó el bloqueo. Solo se usan títulos y links (sección 1.10). X: 25 posts "moving away / migrated off supabase". YouTube: 8 videos críticos. GitHub: issues con más reacciones por repo.
+
+### 1.1 Vendor lock-in
+
+66
+comentarios HN
+Lo que ata: Auth (esquema auth.*, hooks), RLS con roles authenticated/anon, Edge Functions en Deno, Realtime, extensiones propias.
+
+“Supabase lock-in is deep (their Postgres extensions, auth hooks, edge functions all intertwined).”moh_quz · Hacker News dic 2025 · https://news.ycombinator.com/item?id=46324928“Supabase is great for toy projects that have a defined scope & no future or a very early startup that has the intention to rebuild entirely.”madamelic · Hacker News abr 2025 · https://news.ycombinator.com/item?id=43771744“Untangled the RLS complexity introduced by Supabase (ex: reliance on authenticated role)”Vitalize (staffing hospitalario), feb 2026 · https://vitalize.care/blog/from-supabase-to-planetscale“the original 130 million records were missing”Vitalize: la tabla de la extensión supa_audit no se copió en la migración · https://vitalize.care/blog/from-supabase-to-planetscale
+
+Ya existe una librería para salir: Replacebase (HN 47154750). OpenRouter migró fuera (@0xRaduan); @justinstorre: "moving away from Supabase to a simpler architecture with @better_auth, which allowed us to reduce from 12 services to just 4" (X).
+
+### 1.2 Costos a escala
+
+141
+comentarios HN
+Patrón: Free se pausa tras 1 semana sin actividad y no tiene backups; el salto a Pro es $25 por proyecto; conexiones y RAM se compran con compute add-ons; al exceder cuota sin spend cap el proyecto responde 402.
+
+“Instead of a soft warning or overage billing, the project hard-fails. Every API request returns 402. Login breaks. Signups break.”Ask HN · Hacker News abr 2026 · https://news.ycombinator.com/item?id=47846253“Their plan starts at $25/month (their free plan is shit)”eashish93 · Hacker News  · https://news.ycombinator.com/item?id=41243148“40 concurrent viewers = $$$ on Supabase”yoan9224 · Hacker News  · https://news.ycombinator.com/item?id=46368771“Please add new pricing tiers between FREE to 25$”GitHub supabase/supabase#4792 · 100 reacciones · https://github.com/supabase/supabase/issues/4792
+Ask HN: proyecto en 402 por cuota · https://news.ycombinator.com/item?id=47846253
+
+Compute add-onUSD/mesRAMConexiones directas / pooler
+Micro$10 (cubierto por el crédito de Pro)1 GB60 / 200
+Small$152 GB90 / 400
+Medium$604 GB120 / 600
+Large$1108 GB160 / 800
+XL$21016 GBn/d
+
+Otros add-ons: PITR $100/mes por 7 días, branching $0.01344 por hora-rama, MFA por teléfono $75, log drain $60. Fuente: https://supabase.com/pricing
+
+### 1.3 Outages e incidentes
+
+30
+comentarios HN
+412 incidentes en la status page desde ene 2023. 2026 ya supera a todo 2025 (152 vs 98).
+"Sin impacto marcado" incluye incidentes importados al nuevo status page (incident.io, 7 oct 2026) sin severidad por componente, por ejemplo el outage de us-east-2 del 12 feb 2026. Más incidentes también puede reflejar reportes más transparentes. · https://status.supabase.com/history
+
+Clasificación por palabras en el título del incidente.
+
+FechaIncidente
+20 oct 2025Caída regional us-east-1, 15.5 h
+12 feb 2026Outage us-east-2, 3 h 42 min (postmortem)
+4 sep 2026Errores de ciclo de vida de proyectos en todas las regiones
+16 sep 2026Auth Service Outage
+1 oct 2026Proyecto Pro de clínica caído 12+ h, no aparece en status
+
+“Our communication was insufficient and at times misleading.”Supabase, postmortem 12 feb 2026 · https://supabase.com/blog/supabase-incident-on-february-12-2026“Today, Supabase does not offer automatic cross-region failover for customer Postgres databases.”Supabase, postmortem 12 feb 2026 · https://supabase.com/blog/supabase-incident-on-february-12-2026“We can't restart it, can't restore it, can't even download our own backup.”Ask HN (base de producción caída 37 h tras error de facturación) · Hacker News ago 2026 · https://news.ycombinator.com/item?id=49472642“Supabase was taking a database backup that took the database fully offline every night, at midnight”Val Town, may 2023 · https://blog.val.town/blog/migrating-from-supabase“supabase's own offering has downtimes that won't appear on their status page.”k4rli · Hacker News  · https://news.ycombinator.com/item?id=46358779“I get downtime on Supabase every few weeks.”spaceman_2020 · Hacker News  · https://news.ycombinator.com/item?id=48293268“4 hours! For a network config change.”multisport · Hacker News feb 2026 · https://news.ycombinator.com/item?id=47009376“I guess it's time to move up the timeline on real backend with failover.”consumer451 · Hacker News feb 2026 · https://news.ycombinator.com/item?id=46997360
+
+Postmortem oficial 12 feb 2026: causa, VPC Block Public Access activado por un deploy interno de monitoreo · https://supabase.com/blog/supabase-incident-on-february-12-2026Ask HN: 37 h caído · https://news.ycombinator.com/item?id=49472642
+
+X: "We migrated off supabase after one too many outages lol" (@sawyermidddd); "Moving away from supabase. It has become completely unreliable now." (@llmcodes).
+
+### 1.4 Rendimiento y conexiones (pooler)
+
+79
+comentarios HN
+Límite de conexiones atado al tamaño de compute; Supavisor (pooler) en modo transacción no soporta prepared statements con nombre ni LISTEN/NOTIFY (issues abiertos).
+
+“we were capped at fewer than 150 usable connections across 15,000 users, with 10–30 permanently reserved by the platform for auth and storage services”Vitalize · https://vitalize.care/blog/from-supabase-to-planetscale“over 60% of our CPU time was spent on “IOWait,””Vitalize (Supabase XL 4 CPU / 16 GB, migró a PlanetScale M-160) · https://vitalize.care/blog/from-supabase-to-planetscale“it's just plain slow for a lot of use cases, because Postgres will check the security for all rows before filtering on the joins”crooked-v · Hacker News  · https://news.ycombinator.com/item?id=36007032“It was far too slow so we switched back to postgresql included with vercel.”alexnewman · Hacker News  · https://news.ycombinator.com/item?id=41240964“Named prepared statements not working”GitHub supabase/supavisor#239 (abierto) · https://github.com/supabase/supavisor/issues/239
+Vitalize: de Supabase a PlanetScale, feb 2026 · https://vitalize.care/blog/from-supabase-to-planetscale
+
+### 1.5 RLS: complejidad y bugs
+
+80
+comentarios HN
+RLS obliga a escribir la autorización en SQL, se vuelve difícil de probar (supabase#7311, 31 reacciones pidiendo cómo depurar RLS) y los LLM lo generan mal.
+
+“The supabase Row Level Security method must be in top10 worst product decisions ever. You can have working app in 2 hours than spend 2 weeks trying to make the policies work.”profstasiak · Hacker News sep 2026 · https://news.ycombinator.com/item?id=49867066“Try to implement even a halfway complicated permissions scheme with it and RLS and you are in for a world of hurt and seemingly unmaintainable code.”atonse · Hacker News abr 2025 · https://news.ycombinator.com/item?id=43763733“that decision actually cost us thousands of dollars”atonse · Hacker News  · https://news.ycombinator.com/item?id=43763733“RLS will never be reliable. It takes too much discipline to use safely and reliably on any meaningful project”jjani · Hacker News  · https://news.ycombinator.com/item?id=44158841“We ended up having three user tables”Val Town · https://blog.val.town/blog/migrating-from-supabase“We generally don't recommend relying on RLS.”Paralect, citando a PlanetScale · https://www.paralect.com/stack/dont-use-rls-in-supabase“LLMs are pretty terrible with that – constantly getting RLS wrong”JimDabell · Hacker News  · https://news.ycombinator.com/item?id=46188131
+
+### 1.6 Migraciones y entornos (local dev, branching)
+
+128
+comentarios HN
+El stack local son ~11 contenedores Docker; la CLI rompe entre versiones (cli#4466 "local fails to start", 41 reacciones, nov 2025; cli#4142 abierto). Branching cobra por hora.
+
+“We weren’t able to get a local development environment working for more than a day at a time”Val Town · https://blog.val.town/blog/migrating-from-supabase“migrations were generated incorrectly and couldn’t be applied”Val Town · https://blog.val.town/blog/migrating-from-supabase“The local development & database migration story is Supabase's biggest weakness.”omeze · Hacker News  · https://news.ycombinator.com/item?id=36005491“the CLI very heavily assumes that you are using the cloud product as the remote”SOLAR_FIELDS · Hacker News  · https://news.ycombinator.com/item?id=36008167“Supabase self-host is another nightmare in itself.”AwkwardPanda · Hacker News  · https://news.ycombinator.com/item?id=46149785
+Val Town: "Migrating from Supabase", 2023 · https://blog.val.town/blog/migrating-from-supabaseGitHub API, sin autenticar.
+
+### 1.7 Soporte
+
+6
+comentarios HN (pocos, pero los casos son graves)
+Pro = soporte por email sin SLA. SLA de respuesta desde Team ($599); SLA de uptime solo Enterprise.
+
+“two Urgent support tickets (SU-490754, SU-490831) have had no human reply in 12+ hours”jdanfossi, GitHub discussion #51135, 1 oct 2026 · https://github.com/orgs/supabase/discussions/51135“The Management API reports the project as ACTIVE_HEALTHY the whole time”jdanfossi · https://github.com/orgs/supabase/discussions/51135“This is a medical clinic's production system in the middle of our biggest campaign of the year.”jdanfossi · https://github.com/orgs/supabase/discussions/51135“was a hardware failure, migrating to new hardware fixed it.”Respuesta de staff de Supabase en el mismo hilo · https://github.com/orgs/supabase/discussions/51135“24 hours of silence, and no ETA despite asking three times.”Ask HN · Hacker News ago 2026 · https://news.ycombinator.com/item?id=49472642“There is also really poor support and at the end of the day, the whole platform felt like a hack.”ilrwbwrkhv · Hacker News  · https://news.ycombinator.com/item?id=36005966
+Clínica médica caída 12+ h en Pro · https://github.com/orgs/supabase/discussions/51135
+
+### 1.8 Seguridad: anon key pública + RLS mal configurado
+
+71
+comentarios HN
+La anon key va en el cliente por diseño; si una tabla del esquema expuesto no tiene RLS correcto, cualquiera la lee o escribe con esa llave.
+
+ModernPentest (estudio): 107 startups YC, 71 auditadas, 20.1M filas expuestas, 3 con tokens de auth. SupaExplorer: 2,217 de 20,052 dominios, 2,325 exposiciones críticas.“around 16,000 databases on which some degree of personal data was exposed”TechCrunch sobre UpGuard, 25 sep 2026 · https://techcrunch.com/2026/09/25/some-supabase-customers-are-publicly-exposing-reams-of-peoples-data-to-the-web/
+TechCrunch, 25 sep 2026. El CISO de Supabase responde que los proyectos son "secure by default" y la responsabilidad es compartida. · https://techcrunch.com/2026/09/25/some-supabase-customers-are-publicly-exposing-reams-of-peoples-data-to-the-web/
+
+“exposed full read/write access to it’s supabase db, complete with over a million API keys”xmcp123 (caso Moltbook) · Hacker News  · https://news.ycombinator.com/item?id=47132465“Supabase service_role keys committed to GitHub”Andrei_dev · Hacker News  · https://news.ycombinator.com/item?id=47418636“I'm rather surprised that this is open by default. It seems quite bad from a security perspective.”c-p-b · GitHub discussion #4547 · https://github.com/orgs/supabase/discussions/4547“auth.signUp() doesn't error for existing accounts - security vulnerability”GitHub supabase/auth#1517 (abierto) · https://github.com/supabase/auth/issues/1517
+
+Fuga vía el MCP de Supabase (prompt injection con service_role), 848 puntos en HN: https://news.ycombinator.com/item?id=44502318.
+
+### 1.9 Compliance para datos de salud
+
+6
+comentarios HN
+Casi nadie lo discute en foros; el riesgo está en la letra chica de precios y en la ley mexicana (sección 6).
+
+TemaSupabaseFuente
+HIPAA / BAASolo en Team ($599/mes) más add-on HIPAA sin precio público; exige PITR (que requiere compute Small o mayor), SSL forzado, restricciones de red y logs de conexióndocs HIPAA · precios
+Self-hostHIPAA no soportado tal cualdocs
+Región MéxicoNo existe; las más cercanas son us-east-1/2 y sa-east-1regiones
+SOC 2Desde Teamprecios
+“make sure they didn't egress the file to supabase or some other platform”sorieus · HN · https://news.ycombinator.com/item?id=48028597
+
+### 1.10 Reddit, X y YouTube
+
+Hilo de Reddit (solo título)Sub
+Migrating away from Supabaser/Supabase
+Why are so many people moving away from Supabase for production?r/SaasDevelopers
+Love Supabase, but the $25/mo pricing tier killed my side projectsr/Supabase
+Anyone build with supabase and regret it?r/Supabase
+Supabase is suprisingly unreliable, it is definitely not production readyr/Supabase (2023)
+No update to Supabase outage since 9 hours agor/webdev (28 ago 2026)
+Supabase downtime is becoming a problem. Any cost-effective alternatives?r/webdev
+Anyone else getting really frustrated with RLS?r/Supabase
+Supabase is making it hard to be productiver/Supabase
+Should I move from Supabase to a self-hosted backend?r/webdev
+
+VideoCanalVistas
+STOP Building Apps With Supabase (Use THIS Instead)Tech With Tim41,438
+Why I use Convex over Supabase as my BaaSWeb Dev Cody58,777
+This Supabase Feature is Dangerous...Ben Davis34,832
+Why I Stopped Using Supabase for My SaaSEliana Jordan34,053
+I LEFT Supabase for This Simpler, Faster BackendJames NoCode5,697
+I don't like Supabase Edge FunctionsCode The Web2,009
+My Database Bill Was $247 in 6 Hours (Supabase RLS Mistake)n/d239
+
+Usuario en XCitaFecha
+@joonahn_ai“No transactions / Even scale up, I'm getting disconnections (without understanding)”feb 2025
+@SahiljitSandhu“As my database grew it became really slow.”sep 2025
+@SThapa123456“too much bloat for something that should just be a DSN.”oct 2025
+@saurabhksinghr“permission denied for schema public”oct 2025
+@danielsinewe“Moving away from @supabase... Hello 👋 @neondatabase”abr 2026
+@jjbuskermolen“moving everything from these third parties to an $8 a month VPS”oct 2026
+
+## 2. Contraargumentos (lo que dicen a favor)
+
+“There shouldn’t be a reason to switch from Supabase to any other Postgres provider if you want “plain Postgres”.”kiwicopple (CEO de Supabase) · https://news.ycombinator.com/item?id=36006018“Migrating from it is not that hard so far. I did it on an afternoon for a customer.”whstl · https://news.ycombinator.com/item?id=43764154“migrating away from Supabase was easy for Val Town, because it's just Postgres”pcthrowaway · https://news.ycombinator.com/item?id=36007922“The default is secure.”mediaman · https://news.ycombinator.com/item?id=46358423“Supabase is an excellent out-of-the-box solution and a strong choice for an MVP.”Vitalize, en el mismo post donde explica por qué se fue · https://vitalize.care/blog/from-supabase-to-planetscale“Supabase was very helpful in their support”Val Town · https://blog.val.town/blog/migrating-from-supabase
+
+CríticaRespuesta / mitigación verificadaFuente
+Lock-inEs Postgres estándar, Apache-2.0, 111,491 estrellas; pg_dump funciona; self-host posiblegithub.com/supabase/supabase
+Llaves expuestasLas nuevas secret keys se revocan solas si se suben a GitHub; event triggers que activan RLS; Security Advisor y lints; emails semanales; plataformas de vibe-coding obligadas por contrato a mostrar advisorsCEO, HN 46676584
+Facturas sorpresaSpend cap activado por defecto en Pro; Pro incluye 100K MAUhttps://supabase.com/pricing
+CostoA 10,000 pacientes queda en el rango de todas las alternativas (sección 5)modelo propio
+VelocidadAuth + DB + Storage + SDK de Expo en un día; ninguna alternativa portable lo iguala sin ensamblar piezas
+
+## 3. Aterrizado al clon de Avena
+
+Requisito del clonRiesgo con SupabaseDecisión
+Datos de salud de pacientes (sensibles, LFPDPPP)RLS mal hecho = fuga directa desde la app; sin región MX; soporte Pro solo emailNunca tablas clínicas accesibles con la anon key. Acceso solo vía API de Next.js
+App Expo + web Next.jssupabase-js#1400: error de websockets con Expo SDK 53 (66 reacciones); Realtime frágilNo usar Realtime; la app habla con la API propia (REST/tRPC)
+Stripe Connect (cobro a pacientes)Webhooks en Edge Functions (Deno) atan a SupabaseWebhooks en rutas de Next.js; idempotencia en Postgres
+WhatsApp (recordatorios, links)Cron y colas en Edge Functions/pg_cron = lock-inJobs en el backend propio o en un worker portable
+Sin IANada que ganar de pgvector o el MCP de Supabase; el MCP fue vector de fugaDesactivar el MCP en producción
+Costo bajo por usuarioFree se pausa a la semana sin uso; piso real $25 + compute; PITR $100A 10K pacientes, < $0.01 por paciente al mes en cualquier opción
+Posible migración a AWS/GCPSalir de Auth (auth.users, hashes, sesiones de la app) y de RLS es lo caro; Vitalize perdió una tabla de 130M filasAuth portable desde el día 1 (Better Auth en tu Postgres) o exportar usuarios con hash bcrypt
+Clínicas / mercado EE.UU. (futuro)HIPAA desde $599 + add-onNeon Scale o RDS con BAA de AWS
+
+## 4. Alternativas
+
+OpciónAuthPortabilidad a AWS/GCPHIPAA / BAARegión MXContras verificadas
+Supabase ProIncluida (100K MAU)Media (Postgres sí; Auth/RLS/Edge no)Team $599 + add-onNoIncidentes al alza, soporte email, RLS
+Neon + Better AuthNeon Auth (Better Auth administrado, hasta 1M MAU) o Better Auth propioAlta (Postgres puro, Better Auth MIT)Scale, sin costo extraNo (São Paulo sí)Ahora "from Databricks"; scale-to-zero agrega latencia de arranque
+AWS RDS + Better AuthBetter Auth (con plugin Expo), $0Ya estás en AWSBAA de AWS, RDS elegibleSí, mx-central-1 (precio MX no verificado)Tú operas parches menores, alarmas y backups
+RDS + ClerkClerk Pro $25, 50K MRUAuth atada a ClerkBAA solo Enterprisen/aOtro proveedor con datos de pacientes
+FirebaseGratis < 50K MAUBaja (Firestore NoSQL propietario)Firestore sí; Firebase Auth NO (usar Identity Platform)Sí, northamerica-south1Modelo de datos NoSQL para expedientes, reglas de seguridad tipo RLS
+ConvexConvex Auth / ClerkBaja (TypeScript propio)Professional, BAANo (us-east-1; otras +30%)Por desarrollador; salir implica reescribir backend
+PocketBaseIncluidaBaja (SQLite, un binario)NoDonde lo hospedesv0.40.5: "full backward compatibility is not guaranteed before reaching v1.0.0"
+Supabase autohospedadoIncluidaMediaNo soportado tal cualDonde lo hospedesMínimo 4 GB RAM, ~11 contenedores, "nightmare" (HN 46149785)
+
+## 5. Costos a 100, 1,000 y 10,000 pacientes
+
+Supuestos (no son datos de mercado): 1 nutriólogo por 50 pacientes; 2 MB de base por paciente; 20 MB de archivos (fotos, PDFs); 30 MB de egress por paciente al mes; Firestore 3,000 lecturas y 300 escrituras por paciente al mes; Convex 1,500 llamadas y 10 MB de I/O. Compute encendido 24/7. Excluye hosting de Next.js, WhatsApp y Stripe. Precios de lista us-east al 13 oct 2026.
+Script: build/costs.py · datos: data/costs.json
+
+Opción1001,00010,000Por paciente a 10KCómo se calcula (10K)
+Supabase Pro$25.00$30.00$83.13$0.0083Pro $25 + compute Medium $60 - $10 crédito
+Neon Launch + Neon Auth$19.50$40.25$92.98$0.0093Launch 1 CU 24/7 a $0.106/CU-h + storage $0.35/GB + restore $0.20/GB + objetos $0.023/GB; Neon Auth incluido
+RDS + Better Auth$14.03$26.12$74.65$0.0075db.t4g.medium Single-AZ $0.065/h + 40 GB gp3 $0.115 + S3 $0.023/GB + egress $0.09/GB tras 100 GB; Better Auth $0
+RDS + Clerk Pro$39.03$51.12$99.65$0.0100RDS anterior + Clerk Pro $25 (50K MRU incluidos)
+Firebase Blaze$0.00$3.39$53.43$0.0053Blaze: Firestore $0.03/100K lecturas, $0.09/100K escrituras, cuota diaria gratis; Storage $0.026/GB; egress $0.12/GB; Auth gratis <50K MAU
+Convex Professional$25.00$25.00$68.00$0.0068Professional $25/dev (1 dev) + excedentes: archivos $0.03/GB, egress $0.12/GB, DB I/O $0.20/GB
+PocketBase en VPS$7.85$16.06$35.80$0.0036Droplet DigitalOcean $24 + backups diarios 30% + archivos en S3
+Supabase autohospedado$31.25$31.66$67.00$0.0067Supabase self-host: Droplet $48 (mínimo oficial 4 GB RAM) + backups 30% + S3
+
+Producción seria (respaldo y HA) a 10KUSD/mesCálculo
+Supabase Pro + PITR 7 días$183$83 + $100
+RDS Multi-AZ + Better Auth$127instancia y disco ×2 + S3 + egress
+Neon Launch$93restore instantáneo ya incluido en el modelo
+
+Add-on HIPAA de Supabase: $350/mes reportado por un empleado en GitHub discussion 35594; no oficial.
+Planes Supabase · https://supabase.com/pricing
+
+## 6. Compliance: LFPDPPP, NOM-024 y HIPAA
+
+NormaQué exigeImpacto en la elección de backendFuente
+LFPDPPP (vigente desde 21 mar 2025)Datos de salud son sensibles: consentimiento expreso y por escrito (firma autógrafa, electrónica o mecanismo de autenticación), aviso de privacidad, medidas de seguridad. El INAI se extinguió; autoridad: Secretaría Anticorrupción y Buen GobiernoNo exige que los datos estén en México. Transferencia internacional sin consentimiento permitida si es necesaria para diagnóstico o servicios de salud (art. 36 fr. II). La brecha más probable es RLS mal configurado, no el paísLFPDPPP
+NOM-024-SSA3-2012Obligatoria para Sistemas de Información de Registro Electrónico para la Salud (SIRES) de prestadores del Sistema Nacional de Salud y sus proveedores. Certificación ante DGIS solo si aplica una guía GIIS de intercambio; SGSI (GIIS-A004) con 6 meses de madurezPide bitácoras, control de acceso y cifrado: más fácil de demostrar con autorización en tu backend que con políticas RLS. Si el clon es "expediente clínico", validar con abogadoDOF 30/11/2012
+HIPAA (solo si atiendes EE.UU.)BAA con cada proveedor que toque PHISupabase $599 + add-on; Neon Scale sin costo extra; RDS con BAA de AWS; Clerk solo Enterprise; Firebase Auth fuera del BAAAWS HIPAA
+
+Avena ya ataca EE.UU. con otra marca (Alva Health, HIPAA), ver ronda 2: si el clon quiere ese mercado, el backend debe poder firmar BAA barato.
+
+## 7. Veredicto
+
+### No construir el clon sobre Supabase como BaaS. Sí sobre Postgres administrado + Better Auth, detrás de la API de Next.js.
+
+- Recomendado: Neon (Launch hoy, Scale cuando haya clínicas o EE.UU.) + Better Auth (con plugin Expo) + Drizzle/Prisma + S3. Costo modelado $20 / $40 / $93 al mes a 100 / 1K / 10K pacientes. Migrar a RDS mx-central-1 es pg_dump/pg_restore, sin reescribir Auth.
+
+- Por qué no Supabase como BaaS: la seguridad de datos de salud quedaría en políticas RLS expuestas al cliente (la causa de las 16,000 bases expuestas), la confiabilidad empeora en 2026 (152 incidentes), el soporte en Pro no responde en emergencias (clínica caída 12+ h) y el piso para HIPAA es 15 a 40 veces el de Neon Scale o RDS.
+
+- Si igual eligen Supabase por velocidad: solo Postgres + Auth; desactivar el Data API o dejar las tablas clínicas en un esquema no expuesto; todo acceso con la service key solo en servidor; sin Edge Functions, Realtime ni MCP en producción; PITR desde el día 1; plan de salida probado (export de auth.users con hashes).
+
+- Descartar: Firebase y Convex (lock-in de modelo de datos, contrario a migrar a AWS/GCP), PocketBase (pre-1.0, un solo nodo) y Supabase self-host (operación pesada, sin HIPAA).
+
+- El precio no decide: todas las opciones cuestan menos de $0.01 por paciente al mes a 10K; la diferencia está en riesgo, portabilidad y compliance.
+
+## Anexo: fuentes y limitaciones
+
+- Hacker News: API Algolia, 3,411 comentarios con "supabase", ene 2019 a oct 2026; clasificación por regex (aproximada, multietiqueta, excluye cuentas de staff). Datos: data/hn_comments.json, data/hn_cats2.json.
+- Status page: API pública de incident.io de status.supabase.com, 461 entradas (412 incidentes, 49 mantenimientos). Las duraciones importadas no son confiables (ej. 270 h para un incidente de GCP), por eso se usan conteos. Datos: data/status_rows.json.
+- Reddit bloqueó el box (403 y captcha); no se rodeó. Solo títulos y links.
+- Add-on HIPAA de Supabase: sin precio oficial público; los $350 son reporte de un empleado. Precios de AWS mx-central-1 no verificados (se usó us-east-1).
+- Costos: modelo con supuestos explícitos, precios de lista oct 2026; sin impuestos ni descuentos; script build/costs.py.
+- Blogs: https://blog.val.town/blog/migrating-from-supabase · https://vitalize.care/blog/from-supabase-to-planetscale · https://supabase.com/blog/supabase-incident-on-february-12-2026 · https://techcrunch.com/2026/09/25/some-supabase-customers-are-publicly-exposing-reams-of-peoples-data-to-the-web/ · https://modernpentest.com/blog/yc-supabase-vulnerability-research · https://www.paralect.com/stack/dont-use-rls-in-supabase
+- Ley: https://www.diputados.gob.mx/LeyesBiblio/pdf/LFPDPPP.pdf · https://dof.gob.mx/nota_detalle.php?codigo=5280847
+ModernPentest, ene 2026 · https://modernpentest.com/blog/yc-supabase-vulnerability-research

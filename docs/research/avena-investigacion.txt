@@ -1,0 +1,2191 @@
+Avena: investigación para competidor
+
+# Avena (avena.io): radiografía para construir un competidor
+
+Investigación para Beto · 13 oct 2026 · fuentes públicas, scraping propio de reseñas, análisis del bundle JS y 2 entrevistas transcritas. Cifras de la empresa marcadas como autodeclaradas.
+
+$299 a $999MXN/mes, 3 planes por pacientes activos (20, 40, 80)avena.io/precios
+
+$27 a $83USD/mes, mismos planes vistos desde EE.UU.avena.io/precios
+
++15,000especialistas (autodeclarado 2026)App Store, landings
+
++4Mconsultas acumuladas (autodeclarado)TechFundingNews jun 2026
+
+660,993instalaciones app paciente AndroidGoogle Play, oct 2026
+
+4.92 ★38,053 calificaciones Play · 4.9 con 50 k en App Store MXPlay / App Store
+
+~33anuncios activos en Meta (MX) hoyMeta Ad Library 13 oct 2026
+
+2017Delaware · Guadalajara · rentable según la empresaLinkedIn CEO, TFN
+
+## Resumen ejecutivo: 10 hallazgos
+- Es un SaaS B2B con una app B2C gratis como gancho. El nutriólogo paga; el paciente usa la app sin costo. Nació B2C (2017, chat con nutriólogos propios, 2,000 clientes) y pivotó a B2B tras feedback de Y Combinator sobre retención.
+- Precio por paciente activo, no por usuario: $299 (20), $549 (40, con IA), $999 (80) MXN. Sale entre $12.5 y $15 MXN por paciente. La IA es el gatillo de upsell del plan medio "Más popular".
+- Moat real = contenido + hábito del paciente: +30,000 recetas basadas en SMAE, +500 plantillas, intercambio de equivalentes y lista del súper. Es lo más elogiado en reseñas (recetas, facilidad, acompañamiento).
+- El dolor #1 está en la app del paciente: en 136 reseñas negativas domina la rigidez de recetas/intercambios (35) y bugs de sincronización que borran planes (27). En 2025 a 2026 crecen "difícil de usar" y "no carga".
+- Legado de desconfianza en cobros: 26 quejas de cobros/trials, casi todas de la era B2C 2018 a 2021, más un aumento de precio en 2022 que molestó a nutriólogos veteranos.
+- Stack modesto y viejo en partes: marketing en Astro sobre Apache/Ubuntu en AWS; panel React + Redux + Firebase (Auth, Realtime DB) + Google App Engine; Stripe, PayPal y OXXO. Un equipo pequeño en Next.js/Supabase puede igualarlo en meses.
+- Van fuerte por IA y agentes: grabación de consulta con nota, lectura de laboratorios/InBody, recordatorio 24 h, copiloto, y un servidor MCP para ChatGPT/Claude/Grok Bot. Venden "Notas IA" suelta a $499/mes en anuncios.
+- Marketing: Meta + SEO programático + product-led. ~33 anuncios activos (IA, Excel, recetas, lead magnets por WhatsApp, UGC de nutriólogas, B2C GLP-1). Páginas de recetas, ingredientes, padecimientos y directorio de especialistas; bloquean Ahrefs/Semrush.
+- Urgencia artificial: contador "1 día 12 h" que se reinicia y popup "primer mes gratis hasta 1 de febrero" en octubre. Un competidor honesto (precio claro, prueba real) tiene espacio.
+- Huecos claros para un clon: app paciente flexible (registro libre, comer fuera, ver kcal), entrega por WhatsApp, cobros a pacientes con OXXO/SPEI y CFDI, clínico profundo (ISAK, NOM-004), programas GLP-1, y LATAM fuera de México con alimentos locales.
+## 1. Qué es el producto
+Home avena.io (13 oct 2026) · https://avena.io/Landing IA · https://avena.io/software-nutricion-inteligencia-artificial/
+MóduloQué hacePlan
+ExpedientePersonalizable, antropometría, labs; registrar expedientes no cuenta como paciente activoTodos
+Planes de alimentaciónSMAE, equivalentes, +30,000 recetas, +500 plantillas, menús Compacto/Regular/Completo/Editable, semanal/quincenal/mensualTodos
+EntregaApp paciente, PDF, Word, PowerPointTodos
+App pacienteMenú del día, recetas, intercambio, lista de súper, recordatorios, fotos de progreso, HealthKitTodos (gratis al paciente)
+NegocioAgenda, página web/perfil SEO, pagos en línea y suscripciones, respaldo en Google DriveTodos
+IAPlanes y recetas con IA, recordatorio 24 h, copiloto, notas por grabación, InBody y labs desde PDF, rutinasEstándar y Premium
+WhatsAppConfirmación de citasPremium
+MCPUsar Avena desde ChatGPT, Claude, Grok Bot, MuseIncluido
+Avena Boost (nuevo, B2C)Análisis IA, registro de comida con foto, puntaje semanal · $199 MXN/mes en App StorePaciente paga
+App paciente en App Store MX: 4.9, 50 k calificaciones, #27 Salud y fitness · https://apps.apple.com/mx/app/avena-health/id1161252999MCP para nutriólogos · https://avena.io/mcp
+PúblicoNutriólogos independientes (núcleo), médicos (bariatras), entrenadores, clínicas, empresas y farmacéuticas (programas de soporte a pacientes), estudiantes y docentes. PaísesMéxico fuerte; landings es-CO, en-US y pt-BR; app en español, inglés y portugués; 5% de usuarios en EE.UU. en 2023 (El Economista). Expansión EE.UU. con marca nueva Alva Health.
+## 2. Planes, precios y psicología
+PlanMXN/mesUSD/mesPacientes activosClave
+Básico$299 promo (regular $329)$271 a 20Sin IA
+Estándar · Más popular$549 (promo $499 1er mes)$461 a 40IA completa
+Premium$999 (promo $899)$831 a 80IA + WhatsApp + soporte prioritario
+EmpresarialCotizaciónPersonalizadoClínicas, empresas
+EstudiantesGratis 6 mesesMáx 8"no está diseñada para usarla en tu negocio"
+Fuentes: avena.io/precios, heynutre.com, nutrify.ioCálculo propio sobre precio de lista
+Popup y contador en /precios (13 oct 2026) · https://avena.io/precios/
+
+### Tácticas visibles
+- Banner "Special price · From $0 usd in your first month" con contador 1 día 12 h que se reinicia en cada visita.
+- Popup "Your first month FREE Until February 1st!" mostrado en octubre.
+- Etiqueta "Prueba GRATIS" sobre cada plan, precio regular tachado y ancla "Más popular" en el plan medio.
+- Regalo "Material para tu consulta" (recetarios, guías de suplementos).
+- "Garantía de satisfacción" + "4.9/5 en Trustpilot" en todas las landings.
+- Chat WhatsApp con persona ("Natalia de Avena Health") y número con etiqueta de atribución en el mensaje prellenado.
+- Límite por pacientes activos: crece con el negocio del nutriólogo (expansión natural de ingresos).
+## 3. Voz del usuario
+Google Play com.avena.avenafit, 13 oct 2026Trustpilot: 4.9 con 153 opiniones; en 2024 eran 4 opiniones y TrustScore 2.9 · https://es.trustpilot.com/review/avena.ioMuestra propia: 971 reseñas Google Play MX + 221 App Store (US, PE, CL, CO, AR, ES) vía RSS. Clasificación por palabras clave.
+
+### Lo que aman (1,056 reseñas de 4 y 5★)
+TemaMenciones
+Fácil de usar320
+Nutriólogo / acompañamiento282
+Recetas y variedad227
+Intercambiar alimentos107
+Resultados93“Anteriormente podía tardar hasta un día completo en diseñar la dieta para un paciente, actualmente gracias a Avena, es un proceso que yo hago en consulta”Testimonio nutrióloga, reviews.avena.io
+
+### Cuándo y para qué la usan
+- Nutriólogo: durante la consulta para armar el plan en minutos y asignarlo antes de que el paciente salga.
+- Paciente: a diario para ver qué toca comer, cambiar ingredientes y hacer la lista del súper.
+- Por qué se van: app paciente rígida, pérdida de datos tras actualizaciones, precio por paciente, y pacientes que no cocinan.
+- Features pedidas: registrar comida libre o de fonda, ver kcal/macros/gramos, varias porciones del mismo grupo, imprimir semana completa, perfiles familiares, alergias en el plan, notificaciones puntuales.
+“no permite guardar recetas si no tiene todos los grupos de alimentos, no deja elegir varios del mismo grupo”Google Play, 26 may 2026“Salgo de la sesión y se borra todo mi plan hecho con esfuerzo”Google Play, 26 may 2026“yo trabajo en la calle por lo que como en fonditas ... yo no cocino”Google Play, 22 feb 2025“preferiría tener una tabla de equivalencias para yo misma decidir qué se me antoja comer”Google Play, 12 abr 2026“it doesn't show the calories and/or macros ... I wouldn't be using it if it wasn't mandatory for my specialist”Google Play (inglés)“Exagerado el cambio de costos ... con 4 años de antigüedad ... (cobrar x paciente individual)”Nutriólogo, Google Play, 31 mar 2022“la app para móvil está terrible ... En sí, Avena es buenísima para el trabajo del nutriologo”Google Play, 21 mar 2025“Quise probar la aplicacion en su prueba trial ... me van a cobrar los 1100 pesos por 6 meses”Google Play, jun 2019, 219 votos útiles“Soy celiaca y casi todas las recetas son con gluten”App Store ES, jun 2026
+Reddit, foros y X: no se encontraron conversaciones relevantes (búsqueda web y API de X sin resultados). YouTube con reseñas de terceros: Review de AVENA, Mi amigo el nutriólogo (10.4k vistas) · Tutorial app pacientes, Shape Eat · Nutrify vs Avena, Victoria Gote.
+## 4. Cómo está construida
+
+#### Marketing / SEO
+Astro (rutas /_astro)
+Apache 2.4.18 · Ubuntu
+AWS (IP 18.221.x) · Route 53
+Blog WordPress (restos)
+Sitemaps: recetas, especialistas, blog
+
+#### Panel nutriólogo
+React SPA · Vite
+Redux Toolkit · React Router
+react-intl (es/en/pt) · Base UI
+localForage (offline)
+panel.avena.io en Google Frontend
+
+#### Backend / datos
+api.avena.io (Google App Engine)
+avena-api-ai.appspot.com (IA)
+Firebase Auth + Realtime DB (avena-bot)
+Cloud Storage (cdn, assets)
+MCP: specialist.avena.io/mcp
+
+#### Terceros
+Pagos: Stripe · PayPal · OXXO
+Analítica: GTM · PostHog · Amplitude · Clarity · Sentry
+ProfitWell (MRR/churn)
+Soporte: Intercom · Crisp · Typeform
+Ads: TikTok Pixel, Meta
+Google Drive · Calendly · Meet · HealthKit
+
+Evidencia: headers HTTP, DNS (dns.google), HTML de avena.io y panel.avena.io, bundle /assets/index-Cd6aFKDJ.js (3.6 MB) y payments.avena.io/js/avena-payments.js, descargados el 13 oct 2026.
+Login del panel: credenciales llegan por correo tras pagar · https://panel.avena.io
+
+TemaHallazgo
+Base de alimentosSMAE (tutorial dentro del panel), recetas propias +30,000, referencias USDA; CEO menciona tablas de Walmart precargadas
+Apps móvilesiOS 94.7 MB, Android desde 2016, Huawei AppGallery; lanzamientos casi semanales (v8.2.x)
+IntegracionesGoogle Drive, Calendly, WhatsApp Business (link), Meet, HealthKit, PDFs InBody/labs con IA, MCP
+EmpleoFront-end React, ingenieros, Growth AI-first, Performance Marketing, UX; todo en Guadalajara
+IA"Implementar IA no es una ventaja competitiva, es un commodity ... pay to play" (CTO 2023)
+GitHubSin repos públicos encontrados
+## 5. Empresa
+
+2017Avena Technologies, Inc en Delaware. App B2C con chat/videoconsulta y nutriólogo interno
+2018 a 2020B2C con trial de 7 días y planes de 6 meses; ronda chica de ángeles/friends and family en Silicon Valley
+2019 a 2021Pivote a B2B. +400% de crecimiento; ~1M consultas en 2021
+2022Google for Startups Accelerator Latino Founders; alianza Jüsto; 5,000 nutriólogos activos
+2023~20,000 usuarios, 2M consultas; "números verdes"; YC final varias veces sin entrar
+2025+50% en 6 meses; plan "World Domination"; CEO a EE.UU. con visa O-1
+2026+15,000 especialistas, +4M consultas; lanza Alva Health en EE.UU.; Avena Boost B2C
+Fuentes: MBN 2022, El Economista 2023, podcast Emprende Healthy 2024, TFN 2026Las cifras de especialistas no son comparables entre sí (activos vs registrados)
+DatoValorFuente
+FundadoresJavier Álvarez Barragán (CEO, ingeniero de software) · Rubén Sandoval Dávila (CTO, 16 años en tecnología)avena.io/nosotros
+FundingCrowdfunding temprano, ángel/F&F SV, "seed"; Google for Startups 2022; CEO dice "Google es nuestro inversionista" (monto no publicado); Descubre.vc: Pre-SeedPodcasts, TFN, Descubre.vc
+Rentabilidad"ya estamos en números verdes" (2023); "profitable" (2026)Podcast CTO, TFN
+Retención40% de usuarios >11 meses; automatizar la atención bajó retención a 9% y luego 2%MBN 2022
+M&A"Dos veces tuvimos intenciones de compra" que se cayeron por ser empresa mexicanaLinkedIn CEO
+EnterpriseNovo Nordisk, PepsiCo HNS, aceleradora Bayer (nota con tono de PR pagado)TFN 2026
+EquipoNo verificado (LinkedIn requiere sesión). Contratan en GuadalajaraLinkedIn postsAlva Health by Avena: versión EE.UU., early access · https://alvahealth.io/
+## 6. Adquisición y marketing
+Meta Ad Library MX, búsqueda "avena.io", activos (13 oct 2026) · https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=MX&q=avena.io&search_type=keyword_unordered
+
+Ángulo del anuncioEjemplo textual
+Dolor Excel"¿Todavía haces tus planes de alimentación en Excel?"
+IA"No, no es magia. Pero se siente bastante parecido."
+Notas por voz"Terminas la consulta y la nota ya está escrita ... 499 al mes, sin contrato."
+Recetas"¿Ya le diste el huevo a tu paciente de todas las formas posibles?"
+Lead magnet"Tabla de Alimentos FODMAPs" / "Manual de Medidas GRATIS" vía Typeform y WhatsApp
+UGC nutrióloga"comenta AVENA y te mando un código"
+B2C GLP-1"La inyección hace su parte. El resto pasa en tu cocina a las 11 de la noche."
+Escala"¿Ya tienes +10 pacientes y cada semana se te van horas haciendo planes?"
+
+### Funnel observado
+
+Meta Ads · SEO programático · YouTube · universidades · referidos
+
+Landing con promo primer mes y contador
+
+WhatsApp con asesor o checkout Stripe / PayPal / OXXO
+
+Credenciales por correo · Typeform de bienvenida · videos
+
+Activación: primer plan asignado e invitación al paciente
+
+Expansión: más pacientes activos, upgrade a IA
+
+### Canales
+
+- Paid: Meta (FB, IG, Messenger, Threads, Audience Network) y TikTok Pixel instalado. En 2022 el CEO dijo que habían dejado de pautar; en 2025 contrataron Performance Marketing.
+
+- SEO/GEO: /receta/, /ingrediente/, /padecimiento/, directorio /especialista/, comparativas vs Nutrimind, FAQ para respuestas de IA; robots bloquea Ahrefs y Semrush.
+
+- Product-led: reseñas del paciente publicadas en la web del nutriólogo ("en algunos casos salimos arriba que Doctoralia"); referidos.
+
+- Académico: plan estudiante gratis, docentes, universidades, embajadoras.
+
+- Contenido: webinars, capacitaciones en YouTube (10.7k vistas la básica), retos, materiales.
+
+- Alianzas: Jüsto 2022 (MX$300 al nutriólogo por cupón usado).
+## 7. Entrevistas con los fundadores
+Transcritas en el box con Whisper (modelo small) desde el audio público de los podcasts. YouTube bloqueó la descarga de subtítulos desde el box. Emprende Healthy: Entrevista al CEO (dic 2024, 55 min) · AQUÍ CON CARLOS #36: CTO de avena.io (jun 2023, 49 min).
+
+### Javier Álvarez, CEO“teníamos dentro de avena una equipo de nutriólogos que daba las consultas ... llegamos a tener 2,000 clientes”CEO, min 07:37“la aplicación de avena es como una parte básica, una parte como core ... porque es la forma en la que nosotros llegamos al paciente”CEO, min 07:16“se han hecho como 3 millones de consultas ... podemos predecir que pacientes se pueden quedar más tiempo”CEO, min 12:24“para mí el reto principal no está en la tecnología está en apoyar a esos profesionales a que puedan hacer ... un negocio alrededor de su profesión”CEO, min 19:37“los pacientes que utilizan la aplicación en automático pueden generar una reseña ... y en algunos casos salimos arriba que doctor alia”CEO, min 20:24“le hemos invertido millones a esa plataforma”CEO, min 40:11“uno de los agentes que estamos probando hoy es el agente de citas”CEO, min 47:49
+
+### Rubén Sandoval, CTO“empezó como dando servicio a personas que querían un plan nutricional y les daban coaching a través del chat”CTO, min 12:37“Nuestra idea era ser rentables, antes de morirnos, porque no tenemos credenciales ... no somos de ninguna Ivy League”CTO, min 13:43“una gente que hace dieta tiende a tener un comportamiento de yo-yo ... tu negocio necesita meter y meter y meter gente”CTO, min 15:39“ese cambio de B2C a B2B fue por una entrevista de oye no te están durando nada aquí no hay retención”CTO, min 27:12 (sobre Y Combinator)“cambiamos un poquito el enfoque a product magnet ... el producto tiene que ser el magnet de los leads”CTO, min 20:20“la automatización generalmente no le gusta al paciente final ... les gusta que los papachen”CTO, min 31:06“implementar inteligencia artificial ... no es una ventaja competitiva, es un commodity”CTO, min 45:07
+Insight clave para el clon: los dos fundadores coinciden en que el valor no es la IA sino retener al paciente y hacer crecer el negocio del nutriólogo. Automatizar al paciente destruyó su retención (9% y luego 2%). La IA debe darle tiempo al nutriólogo, no reemplazar el contacto humano.
+## 8. Competidores y huecos
+ProductoOrigenPrecioApp paciente (Play)Fuerte enDébil en
+AvenaMX$299 a $999 MXN/mes661k inst. · 4.92★ (38k)Recetas SMAE, app, IA, marketingApp rígida, bugs, urgencia falsa
+NutrimindMX 200989 USD pago único1.26M inst. · 4.88★ (18k)Precio, ISAK, base instaladaSin IA en consulta, sin cobros, sin WhatsApp
+NutriumPT15 a 39 EUR/mes614k inst. · 4.63★ (4.9k)UX, 20+ bases, InBodySin WhatsApp, cobros no en MX, precio EUR
+NutrifyMX$499 a $1,999 MXN/mes160k inst. · 4.90★ (5.8k)App con marca propia del nutriólogoMenor contenido e IA
+HeyNutreMX (nuevo)$349 a $799 MXN/mesPortal webGrabación IA, NOM-004, WhatsApp con botones, Stripe sin comisiónSin OXXO/SPEI, sin CFDI, marca nueva
+Healthie / Practice BetterEE.UU.19.99 a 155 USD/mesEHR completo, seguros, telehealthSin SMAE ni español real
+Google Play, realInstalls vía google-play-scraper, 13 oct 2026avena.io/precios (vista EE.UU.), gethealthie.com, practicebetter.io
+Nutrimind · https://nutrimind.net/Nutrium · https://nutrium.com/esHeyNutre · https://www.heynutre.com/
+HuecoEvidenciaOportunidad
+App paciente flexible35 quejas de rigidez, "como en fonditas", "tabla de equivalencias"Modo equivalentes libre + registro por foto/texto con IA, comer fuera
+Confiabilidad27 quejas de borrado/sincronizaciónOffline-first, historial de versiones del plan
+Ver kcal/macrosReseñas en inglés y españolToggle de visibilidad que decide el nutriólogo
+Cobros a pacientes MXHeyNutre sin OXXO/SPEI; nadie con CFDIStripe/Conekta/Mercado Pago + facturación CFDI + paquetes
+WhatsApp como canalPacientes que no instalan app; Premium cobra WhatsAppPlan y recordatorios por WhatsApp API en todos los planes
+Clínico seriosoftwaredenutricion.org: Avena sin ISAK ni somatocartaISAK, NOM-004, LFPDPPP declarados
+GLP-1 / obesidad médicaAvena ya lo pauta en B2CProtocolos con médicos bariatras y farmacias
+LATAM fuera de MX"si no eres de mexico no tienes variedad de alimentos"Bases locales CO, PE, CL, AR
+Confianza en precioContador falso, quejas de cobrosPrecio claro, prueba real de 14 días, cancelación en 1 clic
+## 9. Recomendaciones para el clon
+### MVP (8 a 12 semanas)
+#FeaturePor qué
+1Expediente + antropometría + cálculo de requerimientosBase de toda consulta
+2Motor de planes por equivalentes SMAE con distribución por tiemposEs el flujo central; Avena gana aquí
+3Biblioteca inicial de 1,000 a 2,000 recetas mexicanas (generadas con IA y validadas por nutriólogas)El contenido es el moat; arrancar con menos pero mejor etiquetado
+4App/PWA paciente: menú del día, intercambio libre por equivalente, lista del súper, registro rápido por fotoAtacar el dolor #1 de Avena
+5Entrega por WhatsApp (link mágico al plan, recordatorios con botones)Pacientes sin app; diferenciador vs Premium de Avena
+6Agenda + página pública con reservas + cobro (tarjeta, OXXO, SPEI)Lo que el nutriólogo paga con gusto: más ingresos
+7Notas IA por grabación y lectura de labs PDFParidad con Avena y HeyNutre; venderla también suelta
+8Export PDF con marca del nutriólogoRequisito básico
+### Stack sugerido
+
+WebNext.js (App Router) en Vercel, Tailwind, shadcn/ui; páginas SEO programáticas con ISR
+DatosSupabase Postgres con RLS por nutriólogo, Auth, Storage para PDFs, pg_vector para recetas
+PacientePWA primero; Expo/React Native después; offline con sync
+IATranscripción (Whisper o equivalente), LLM con salida estructurada, validación con reglas SMAE
+PagosStripe (tarjeta + OXXO) o Mercado Pago/Conekta para SPEI; facturación CFDI vía PAC
+MensajeríaWhatsApp Cloud API con plantillas; Resend para correo
+AnalíticaPostHog (como Avena), ProfitWell/Baremetrics para MRR
+### Diferenciadores y go-to-market
+- Posicionamiento: "la app que tus pacientes sí usan" (flexible y por WhatsApp) + "cobra y factura desde tu consulta".
+- Pricing: tiers por pacientes activos como Avena (funciona), pero con precio claro, prueba de 14 días y IA incluida desde el plan de entrada.
+- Canales: SEO programático de recetas SMAE (copiar el modelo de /receta/), lead magnets por WhatsApp, programa de embajadoras universitarias, comparativas honestas, migración asistida desde Avena y Nutrimind (import CSV).
+- Nicho de entrada: nutriólogas jóvenes de consulta en línea con Instagram/TikTok (el CEO de Avena las identifica como las más orientadas a negocio) o bariatría/GLP-1.
+### Riesgos
+RiesgoMitigación
+Contenido: 30,000 recetas no se replican rápidoIA para generar + validación por nutriólogas; foco en calidad y filtros
+Datos de salud (LFPDPPP, NOM-004, HIPAA si EE.UU.)Aviso de privacidad, cifrado, RLS, auditoría, consentimiento del paciente
+Costo de adquisición alto en MetaProduct-led (reseñas, referidos), SEO, alianzas universitarias
+Avena responde rápido (releases semanales) y es rentableVelocidad en nichos que Avena no cuida (clínico, cobros, LATAM)
+Precio por paciente genera fricción al crecerTiers generosos, plan anual
+Pacientes que no instalan appsWhatsApp + web sin login
+## 10. Lo que no se pudo verificar
+TemaEstadoQué haría falta
+Ingresos, ARR, número de clientes de pago, churnNo publicadoDatos internos; ProfitWell está instalado pero es privado
+Monto de funding e inversión de GoogleNo publicadoCrunchbase/CB Insights pagados, o preguntar al fundador
+Tamaño del equipoNo accesibleLinkedIn con sesión / Sales Navigator
+Panel por dentro: UX real, flujo de plan, calidad de la IA, base de alimentos exactaSolo vía bundle y landingsSuscripción pagada (primer mes en promo) o plan estudiante
+App paciente con plan realNo probadaSer paciente de un nutriólogo que use Avena
+Gasto en Meta y creativos en videoSolo textos e IDsAd Library muestra gasto solo para anuncios políticos
+Tráfico web y keywordsSin accesoSimilarweb / Semrush pagados (Avena bloquea sus bots)
+Comunidad (grupos de Facebook, WhatsApp)No encontrada públicamenteUnirse a grupos de nutriólogos
+Entrevistas Prodcast #28 y SVCHNo transcritasDescargar desde otra IP (YouTube bloqueó el box)
+Clientes enterprise (Novo Nordisk, PepsiCo)Solo en nota con tono de PRConfirmación de terceros
+## Anexo A. Fuentes
+### Producto y precios
+- https://avena.io/
+- https://avena.io/precios/
+- https://avena.io/software-para-nutriologos-mexico/
+- https://avena.io/software-nutricion-inteligencia-artificial/
+- https://avena.io/app-para-pacientes-de-nutricion/
+- https://avena.io/mcp
+- https://avena.io/es-co/planes-alimentacion/
+- https://avena.io/nosotros/
+- https://avena.io/robots.txt
+- https://panel.avena.io
+### Reseñas
+- https://play.google.com/store/apps/details?id=com.avena.avenafit
+- https://apps.apple.com/mx/app/avena-health/id1161252999
+- https://es.trustpilot.com/review/avena.io
+- https://reviews.avena.io/
+- https://apptail.io/app/avena-health-YQG/united-kingdom
+### Empresa y prensa
+- https://mexicobusiness.news/health/news/human-powered-tech-personalized-nutritionist-approach
+- https://www.eleconomista.com.mx/arteseideas/Avena-app-un-software-de-inteligencia-artificial-aplicado-a-la-nutricion-20230620-0020.html
+- https://techfundingnews.com/avena-targets-u-s-market-with-scaled-digital-health-infrastructure/
+- https://www.elfinanciero.com.mx/tv/entre-mercados/conoce-avena-la-app-que-te-ayuda-a-mejorar-habitos-alimenticios/
+- https://blog.google/intl/es-419/noticias-de-la-empresa/google-for-startups-accelerator-se-renueva-para-acelerar-a-mas-startups-de-origen-latinoamericano/
+- https://www.descubre.vc/avena
+- https://es.linkedin.com/posts/javierab_la-ruta-que-tom%C3%A9-como-fundador-para-mover-activity-7306033028269490177-o5fI
+- https://www.linkedin.com/posts/bennsandoval_hiring-growthjobs-ai-activity-7299161964553854976-_LDj
+- https://es.linkedin.com/posts/javierab_world-domination-es-el-nombre-de-nuestro-activity-7342983191613382656-Cdk6
+- https://alvahealth.io/
+### Marketing
+- https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=MX&q=avena.io&search_type=keyword_unordered
+- https://avena.io/blog/software-nutricion-avena-vs-nutrimind/
+- https://avena.io/estudiantes/
+- https://avena.io/embajadoras/
+- https://avena.io/universidades/
+### Competidores
+- https://www.heynutre.com/blog/mejor-software-para-nutriologos/
+- https://softwaredenutricion.org/
+- https://www.nutrimind.net/obtener/
+- https://www.nutrimind.net/page/noticias/preguntas_frecuentes
+- https://nutrify.io/
+- https://www.gethealthie.com/healthie-pricing
+- https://practicebetter.io/pricing
+- https://play.google.com/store/apps/details?id=nutrimind.net.paginapaciente
+- https://play.google.com/store/apps/details?id=co.healthium.nutrium
+### Podcasts y video
+- https://anchor.fm/s/be5a910/podcast/rss
+- https://anchor.fm/s/b7d76998/podcast/rss
+- https://www.youtube.com/watch?v=ZknMbPWyHQk
+- https://www.youtube.com/watch?v=rg9nb_BMMWU
+- https://www.youtube.com/watch?v=SeIytZz0EM4
+- https://www.youtube.com/watch?v=MyLgidtIUt4
+- https://www.youtube.com/watch?v=C5gXTtLlvYw
+- https://www.youtube.com/watch?v=MWb6c6Niltg
+Archivos de datos en /workspace/avena: gplay_reviews.json, appstore_reviews.json, quejas_final.json, play_competitors.json, metaads.txt, panel.js, pay.js, home.html, contexto-avena.md, transcripcion_emprende_healthy_CEO_2024.txt, transcripcion_aqui_con_carlos_CTO_2023.txt.
+## Anexo B. Transcripciones
+Transcripción automática (Whisper small, español). Contiene errores de reconocimiento, por ejemplo "Abena" por Avena. Texto completo en los archivos .txt; en la versión HTML se puede expandir abajo.Emprende Healthy · Entrevista al CEO de Avena Health (14 dic 2024)[00:00] Bienvenidos ¿Cómo están? Soy Antonio Díaz, fundador de
+[00:04] Emprende Helti y autor de los
+[00:08] y el día de hoy estoy con un gran, gran emprendedor, un gran
+[00:11] empresario, fundador CEO de Abena Salud, Abena Helt, un
+[00:17] software para nutriólogos y bueno el día de hoy
+[00:21] no es un poco de su trayectoria, tiene una amplia
+[00:25] experiencia en temas de tecnología, desarrollo,
+[00:29] él tiene una propuesta muy innovadora con con este
+[00:33] software de nutrición que realmente está impactando
+[00:36] muchísimo a nivel latinoamérica y seguramente
+[00:39] también en Estados Unidos y otras partes del mundo.
+[00:42] Entonces pues quiero darle la bienvenida Javier, Javier ¿Cómo
+[00:46] estás? Muy bien Antonio pues gracias por la invitación a
+[00:50] la orden. Ya teníamos pues un ratito que que no
+[00:54] platicábamos, que no nos manteníamos en contacto,
+[00:57] recuerdo hace algunos años también cuando pues Abena
+[01:00] empezó a salir que empezaba a tocar las las puertas
+[01:06] por lo menos aquí en Guadalajara y y ya se veía
+[01:10] pues una propuesta bastante bastante prometedora,
+[01:13] bastante agresiva, pero pues me gustaría que que las
+[01:17] personas que nos están viendo, que nos están
+[01:19] escuchando en las diferentes plataformas pues pudieran
+[01:22] conocerte. Cuéntanos un poquito de ti, ¿Quién es
+[01:25] cubio Javier? ¿Qué hace?
+[01:27] ¿Cuál es tu background? ¿Qué es lo que te especializas?
+[01:30] Y bueno cuéntanos un poco más de ti.
+[01:33] Ok, Antonio pues mira, yo soy ingeniero de software este
+[01:39] iniciamos Abena ya creo que hace como dos mil diecisiete
+[01:45] y a mí me gustaba mucho la área de la salud, entonces por ahí
+[01:50] estuvimos haciendo alguna solución primeros para diabetes
+[01:54] hicimos una aplicación para para ejercicio personalmente
+[01:59] me gustaba mucho el ejercicio y pues ahí haciendo haciendo
+[02:04] pronto pues una cosa lleva la otra y al final
+[02:08] estamos como en esta en esta línea de de software de salud
+[02:13] y ahorita tenemos esta solución que es Abena que es
+[02:17] para para trióos y la visión un poquito más
+[02:23] y
+[02:26] que va a ser la de las últimas generaciones donde las personas
+[02:36] van a vivir digamos poco y yo creo que la expectativa de vida
+[02:42] va a subir ahora que tenemos tecnología como inteligencia
+[02:46] artificial que ayuda a avanzar el tema del del acélulas
+[02:52] y que la nutrición es súper importante en esta
+[02:56] en esta ecuación entonces por eso me gusta
+[02:59] la
+[03:03] , la la en la salud y
+[03:05] y no es importante es el software y también
+[03:09] y también una parte importante es los profe
+[03:11] yo creo que creo que los, los profe la salud
+[03:15] salud, creo que es una, importante y diría muy
+[03:21] , importante. A ver, te
+[03:24] vertijo por qué, pero yo
+[03:25] creo que sin ellos no, hay cambio, sin ellos no, hay cambio en las personas y no hay
+[03:28] hay influencia.
+[03:28] Claro. ¿Como, cómo fue que decidiste hacer un software, o decidieron comenzar a, al
+[03:39] desarrollarlo, o sea fue sugerencia de algún profesional de la salud o tu
+[03:44] tenías como esta como esta afic
+[04:52] que esa aplicación no servía pero pero eso me llevó a pensar en lo siguiente que
+[04:59] fue una aplicación que sea solita que trate de ayudar a las personas a que hagan
+[05:06] más eexis y yo pues es una buena intención pero creo que hay un componente
+[05:13] adicional y es donde entra un profesional y yo recordé que en algún momento pues
+[05:18] , pues yo entre me entren, entrenaba solo, entrenaba iba al gimnasio y demás
+[05:22] pero no empecé a notar un cambio importante hasta que contraté un coach
+[05:28] entonces pensé en esa parte y dije un coach y entrenarse solo ok hizo la diferencia
+[05:35] entonces ahí surgió digamos la primera parte o la primer hipótesis sobre avena y
+[05:43] después lo que hicimos fue la primer versión de avena que la primer versión de
+[05:49] avena no era serla una aplicación autom
+[05:55] tuviera un acompañamiento de un nutriólogo entonces ahí recuerdo un 15 19 de
+[06:02] diciembre estábamos ya terminando las pruebas de avena trajimos a alguien un
+[06:08] que nos apoyara porque nosotros no éramos nutriólogos somos programadores
+[06:12] entonces se unió alguien al equipo un nutriólogo y ahí recuerdo bien que
+[06:19] todavía no llegaba enero 28 de dijsembre y ya teníamos las primeras personas
+[06:25] interesadas en comprar el servicio que ofrece una que era una vídeo consulta por
+[06:33] allá del 2017 18 era el tema de con y contratarlas a través de una
+[06:41] aplicación no era tan común en ese momento entonces sacamos esta versión y
+[06:46] empezamos
+[06:54] algunos algunos pacientes duró un poco de tiempo
+[06:59] o más bien duramos algo de tiempo tratando de conseguir más pacientes
+[07:04] a medida que la aplicación fue madurando politovario y demas, pero el objetivo que
+[07:09] traíamos era cuando hade un producto que la gente sí quisiera usar
+[07:14] Entonces comenzamos con la aplicación.
+[07:16] Por eso la aplicación de avena es como una parte básica,
+[07:23] una parte como core de lo que es el ecosistema de avena,
+[07:28] porque es la forma en la que nosotros llegamos al paciente
+[07:32] y le damos las herramientas para que el paciente pueda tener
+[07:34] un mejor apego en su plan de nutrición.
+[07:37] Entonces, ahí todavía nosotros teníamos dentro de avena
+[07:42] una equipo de nutriólogos que daba las consultas.
+[07:45] Nosotros no vendíamos y no dábamos acceso a ningún otro
+[07:51] profesional que utilizara nuestras herramientas,
+[07:53] sino nosotros mismos dábamos el servicio.
+[07:57] Entonces la aplicación por eso en avena es tan robusta,
+[08:00] porque fue diseñada para que el paciente se apegará a los
+[08:03] tratamientos y así el paciente tuviera mejores resultados.
+[08:08] En ese momento llegamos a tener 2,000 clientes utilizando la
+[08:13] plataforma, utilizando nuestros servicios y en algún punto fue
+[08:18] cuando evolucionó la plataforma y demás y fuimos
+[08:22] creando otras herramientas que nos llevó a lo que hoy utilizan
+[08:25] los profesionales de la salud, que es esta plataforma web que se
+[08:29] llama avena, donde pueden hacer planes de nutrición,
+[08:32] pueden llevar expedientes.
+[08:34] Tenemos una nueva plataforma que está en inglés,
+[08:37] que se llama Full Taste, que es para un mercado de adesuados
+[08:41] y dos.
+[08:42] Entonces hemos venido como creciendo este ecosistema que
+[08:46] estamos construyendo, pero aparte de lo que se ha construido
+[08:52] de herramientas, creo que el objetivo y la visión de avena
+[08:56] siempre ha sido como hacer que las personas logren vivir
+[09:01] más.
+[09:02] O sea, ¿cómo hacemos que la longevidad sea algo a lo que
+[09:06] cualquier persona pueda tener acceso?
+[09:09] Y creo que nutrición es una parte como muy básica en este
+[09:14] tema de longevidad.
+[09:15] Igual hablamos del sueño, hablamos del ejercicio,
+[09:18] pero nutrición es como un área básica.
+[09:21] Entonces nosotros seguimos invirtiendo en nutrición en
+[09:26] diferentes aspectos de la nutrición.
+[09:30] Pero sí, ha venido evolucionando avena,
+[09:34] por eso creamos avena.
+[09:36] Y hoy, pues, tenemos un poquito más de presencia en México,
+[09:41] en algunos países de Latinoamérica,
+[09:43] comenzamos a tener presencia.
+[09:45] Yo creo que estamos lejos de donde queremos llegar.
+[09:49] Pero bueno, pues estamos en ese camino, ¿no?
+[09:52] Excelente.
+[09:53] Muy, muy interesante todo los inicios del software.
+[09:59] Y tengo entendido que estuviste trabajando un tiempo en
+[10:02] Google, en Estados Unidos.
+[10:04] ¿Qué aprendizajes tuviste ahí que tú consideras que hoy son
+[10:13] como este, esta columna vertebral de avena o que te han
+[10:20] podido ayudar a colocarlo en un lugar muy importante en el
+[10:25] nicho, en donde estás?
+[10:28] Mira, como tal, yo no trabajé en Google,
+[10:33] pero sí tenemos relación con Google,
+[10:35] porque Google es nuestro inversionista.
+[10:37] Entonces, tenemos una rena con Google por eso y que hemos
+[10:43] aprendido, creo que hemos aprendido un montón de cosas,
+[10:47] sí de Google.
+[10:49] En ese sentido, al final Google lo que le interesa es cómo
+[10:54] podemos llevar tecnología a todas las partes del mundo.
+[10:58] Nosotros, como estábamos basados en Latinoamérica,
+[11:02] creo que fue atractivo por la industria en la que estamos,
+[11:05] la tecnología que estamos impulsando.
+[11:07] Dentro de avena tenemos muchos componentes de inteligencia
+[11:10] artificial.
+[11:11] Recientemente ya son componentes que son más visibles o son más
+[11:16] tangibles.
+[11:17] El hecho de que una persona pueda tener una lista de
+[11:24] ingredientes y que la misma aplicación pueda crear una
+[11:28] receta basándose en esa lista de ingredientes.
+[11:31] Ya ves que algunos nutrilogos te dan una lista de intercambios,
+[11:33] entonces tú puedes elegir.
+[11:35] Es muy parecido acá donde el paciente elige sus ingredientes,
+[11:39] por los cuales va a intercambiar equis cosas y creamos de ahí,
+[11:43] a partir de eso, creamos una receta con su fotografía y demás
+[11:46] dentro de la plataforma, el recordatorio de 24 horas.
+[11:50] También te calculamos la lengua está calórica,
+[11:53] si tú pones ahí el recordatorio, te lo calculamos.
+[11:58] Entonces, tenemos muchos componentes de inteligencia
+[12:00] artificial.
+[12:00] Entonces, por eso Google
+[12:01] Google decidió invertirnos a nosotros por esa parte de la
+[12:06] tecnología que estamos aplicando a salud.
+[12:09] Dentro de lo que hemos construido hoy,
+[12:13] se han que han dado dentro de avena más de 3 millones
+[12:16] millones de consultas en lo que va desde el 2017 finales 18.
+[12:24] Entonces se han hecho como 3 millones de consultas,
+[12:26] y entonces estamos
+[12:30] haciendo una base muy, una base muy rica de información a tal punto de que
+[12:34] podemos predecir que pacientes se pueden quedar más tiempo y no
+[12:39] basándonos en el comportamiento que tienen en la app,
+[12:43] si hacen lista de compras, recetas seleccionan,
+[12:46] nosotros vamos hacia allá.
+[12:49] Cuando avena nació, no nació como la idea de ser una herramienta
+[12:54] de crear planes de nutrición, sino como una plataforma para el
+[12:57] paciente y en el camino, pues estamos ayudando a terminar los
+[13:01] profesionales a que puedan hacer ese cambio en la vida de los
+[13:05] pacientes.
+[13:06] Entonces, ¿qué hemos aprendido?
+[13:07] Respondí a tu pregunta.
+[13:10] Muchísimas cosas realmente, cosas en específico tendría que entrar
+[13:14] como detalles muy técnicos, pero si Google principalmente su
+[13:19] interés es dejarnos desarrollar que utilizamos su
+[13:22] tecnología y la adaptemos acá con lo que tenemos nosotros.
+[13:26] OK, OK.
+[13:30] No sé si Aben ha sido tu primer proyecto, me imagino que no, no
+[13:35] sé, pero ¿qué otros proyectos has desarrollado que te han dejado
+[13:41] así como enseñanzas muy valiosas en pasado que hoy
+[13:47] en día aplicas?
+[13:53] Es una buena pregunta.
+[13:54] No es mi primer emprendimiento o mi primer proyecto.
+[14:00] He tenido otros, pero creo que este es el primero que he ido
+[14:06] como en serio, porque la diferencia con nosotros
+[14:11] proyectos es de que no les invertía tanto tiempo y no me
+[14:18] encantaban y este sí me encanta.
+[14:21] Y
+[14:28] cuando me levanto es lo primero que estoy pensando y cuando me
+[14:33] duermo sigue siendo lo que estoy pensando.
+[14:35] Entonces, todo el tiempo estoy pensando en Abena, todo el
+[14:38] tiempo estoy pensando en construir cosas para Abena,
+[14:42] para los pacientes, tan sencillo como de pronto.
+[14:49] Algunos sí se dan cuenta, pero dentro de Abena estamos
+[14:54] sacando actualizaciones.
+[14:56] Yo creo que cada semana estamos sacando actualizaciones nuevas
+[14:59] herramientas, algunas no funcionan, algunas otras sí.
+[15:02] Entonces, creo que la diferencia ha sido como el compromiso que le
+[15:06] hemos metido y hoy Abena es digamos que estamos en
+[15:11] otra etapa de crecimiento.
+[15:13] Creo que lo que es México, donde tenemos la pres
+[15:16] presencia yo creo que más fuerte.
+[15:18] Este este, se ha consolidado bien y yo creo que la
+[15:22] trayectoria hacia Abena se ve brillante.
+[15:27] Yo creo que Abena se ve como una plataforma importante hacia el
+[15:34] futuro y más con lo inteligencia artificial que está llegando.
+[15:39] Sí.
+[15:41] Y sí, yo creo que aprendizajes, yo creo que este es el
+[15:44] que más se ha aprendido, pero yo diría que uno de los
+[15:47] prensajes como más fuert
+[16:04] de probando cosas, cuál ha sido como el reto más importante
+[16:09] al que te has enfrentado y cómo lo solucionaste.
+[16:17] La verdad Antonio, I think the challenges,
+[16:27] vas teniendo challenges as you advance and the challenges are
+[16:32] el tamaño del digamos del momento en cómo.
+[17:19] No entonces yo creo que a medida que avanzas vas
+[17:23] encontrando nuevos retos.
+[17:26] Hoy en día yo creo que uno de los retos más importantes que hay
+[17:31] y yo creo que en general no vienen de la parte de la
+[17:36] tecnología.
+[17:37] Yo creo que la tecnología.
+[17:52] A más gente de una manera más e.
+[17:54] Y no hablo de Abena.
+[17:56] Que lo lo, lo usen más nutriólogos, sino que Abena
+[18:00] llega a las manos de las personas allá afuera que
+[18:03] necesitan una buena atención nutricional porque una cosa
+[18:08] que tiene nutrición es que todo mundo tiene una opinión
+[18:13] sobre la nutrición.
+[18:14] Y ese es un tema porque muchas personas piensan que
+[18:21] lo que piensan es lo correcto sobre nutrición hasta que
+[18:27] van con un nutriólogo y se enteran de que no,
+[18:30] que realmente el comer de noche o el agua con lim
+[18:33] en la mañana o ciertas cosas no son, no son la realidad y no
+[18:39] las van a ayudar a conseguir el objetivo que quieren.
+[18:41] Entonces el tema acá que tenemos yo creo como industria
+[18:46] en nutrición.
+[18:48] No creo que se pueda cambiar la mentalidad de las personas
+[18:51] en nutrición, sino que
+[19:00] En nutrición.
+[19:01] Y yo creo que aunque.
+[19:04] Digamos que se dice que hay muchos nutriólogos en México.
+[19:09] Realmente yo creo que ahí podría haber muchos,
+[19:12] pero hay muy pocos operando.
+[19:14] Muy pocos operando muy pocos teniendo
+[19:18] teniendo éxitos en sus consultas y aunque les guste el área de nutrición pues al final nutrición
+[19:25] pues el profesional tiene que vivir de algo entonces ahí es donde necesitamos que los
+[19:32] profissionales también tengan éxito en sus carreras en sus profesiones en sus consultorios
+[19:37] entonces para mí el reto principal no está en la tecnología está en apoyar a esos a esos
+[19:42] profesionales a que puedan hacer vamos a llamar un negocio alrededor de su profesión que es algo
+[19:49] muy digno y es algo que se tiene que tiene que suceder yo creo que ahí está el reto por eso si
+[19:55] invertimos en la aplic, invertimos en que el paciente tenga herramientas para que pueda tener un mejor
+[20:03] apego pero también invertimos en que el nutriólogo tenga una mayor penetración en el mercado,
+[20:10] crearle herramientas para que ahora será más fácil poder dar una consulta en línea que alguien que
+[20:16] tenga este mecanismo para generar contenidos y tal cual dentro de avena los pacientes que
+[20:24] utilizan la aplicación en automático pueden generar una reseña y esa reseña el nutriólogo
+[20:29] puede compartir esa reseña nosotros la ponemos en la web y hoy en día muchos de los nutriólogos
+[20:35] que utilizan avena si buscan sus nombres o buscan este nutriólogo en guadalajara salen las reseñas
+[20:44] y en algunos casos salimos arriba que doctor alia entonces ahí está el reto real antonio en cómo
+[20:52] hacemos que el ecosistema así ayuda al paciente pero también ayude al profesional que tenga un
+[21:01] éxito en su carrera en su consulta yo te que tocaste varios puntos que son que bueno me apasionan
+[21:09] mucho me gustan mucho que justamente pues yo tengo una startup que se dedica justamente al digitalizar
+[21:17] a potenciar los los proyectos los negocios los consultorios de los profesionales de la salud y
+[21:26] hay mucha resistencia a la tecnología de hecho hice un instrumento para un protocolo de investigación
+[21:34] y la gran mayoría no utiliza software de nutrición eso fue hace dos años aproximadamente debe
+[21:42] haber un avance en estos días me imagino pero lo que sí no dejé pasar fue esa resistencia que hay
+[21:51] tú porque crees que existe como como ese desapego a la tecnología y que prefieren utilizar un excel
+[21:59] o que mencionan muchas veces que el software no se adapta a ellos cuando que desde mi opinión ellos
+[22:06] deberán de adaptar a un software eficiente innovador tecnológico disruptivo tu opinión tienes con
+[22:15] respecto a eso yo creo y de hecho por ahí hice creo que el año pasado mandé una carta por lo
+[22:27] menos a las universidades que yo conozco y donde yo les expresaba que el problema que yo veo con la
+[22:34] carrera de nutrición es está excelente en el tema de la ciencia entiendo que nutrición es
+[22:39] una ciencia y está perfecto pero hay una desconexión entre lo que les están enseñando en
+[22:48] las universidades a cuando los profesionales salen de las universidades al mundo real y lo que se
+[22:54] van a encontrar los estudiantes en el mundo real es de que la carrera de nutrición es una carrera
+[23:01] que principalmente por lo menos en méxico requiere que tengas algún grado de emprendimiento porque
+[23:10] te vas a llevar a hacer un consultorio eso normalmente es una de las rutas que tienes para
+[23:29] no hay tantos hospitales en méxico ese es una la otra pues las personas que tienen un empleo en
+[23:34] los hospitales tienden a quedarse 30 años ahí en esas posiciones entonces pues no hay
+[23:41] no hay suficiente exposiciones para el agente que está saliendo de las carreras tienes esta
+[23:46] otra industria donde puedes tú encontrar un empleo en alguna empresa sí padrísimo,
+[24:05] normalmente primero invierten en el doctor y después invierten en el nut
+[24:09] entonces lo que encuentras es esta desconexión donde preparas a los profesionales para para
+[24:19] una industria más clínica y cuando salen al mundo esa industria no existe o sea es relativamente
+[24:28] o es muy poco probable que logras conseguir una posición en un hospital hablando de méxico
+[24:34] no es esta, en la carrera de nutrición deberían de ponerle algún componente adicional,
+[25:04] no es esta utilizando un excel, digo habrá quienes les funciona muy bien pero al final es un
+[25:15] negocio tu consultorio es un negocio y podrás tener todas las herramients podrás conocer todos
+[25:22] los libros podrás ser un experto en tu industria pero quien te va a pagar te va a
+[25:29] juzgar por lo que recibe por ese pago entonces si, si tú vas con alguien y te da una hoja
+[25:38] con intercambios porque para el nutriol luego es lo más fácil darte una hoja con intercambios pues
+[25:45] , quien te go pagar tal vez no te va a decir en la mayoría de los casos como de siento que
+[25:50] que te pague más de lo que obtuve entonces no te lo va a decir tal cual la forma en la
+[25:57] que te lo va a decir es no agendando la próxima vez entonces yo creo que hay que ponerse un poco
+[26:03] en los zapatos de vamos a llamarle cliente al paciente en estados unidos a casi le llaman le
+[26:11] llaman cliente poniéndonos en los zapatos de ellos pues entonces tenemos que hacer que
+[26:18] nuestra consulta, nuestro negocio pues gira alrededor de darles máximo valor a los pacientes
+[26:26] entonces ahí es donde avena no solamente te te ayuda a ti a hacer tus planes de nutrición más
+[26:33] rápidos te ayuda que tu paciente cuando se vaya se quede con esa sensación de órale me
+[26:39] dio una aplicación tengo un montón de recetas ay mira puedo hacer la lista de compras aquí
+[26:44] o mira te puedo incluir a mis hijos acá y a mi esposa y ya todos podemos comer lo mismo entonces eso es valor que le
+[26:51] estás dando a tu paciente y creo que ese chip no está en todos el chip un poco de negocio donde si estás
+[27:03] ayudando a la gente y demás pero es importante entender que pues hay una transacción una transacción
+[27:11] económica y esa transacción económica, pues debe de dar suficiente valor para que pues siga fluyendo y
+[27:19] sigas creciendo claro totalmente es justo también una parte que les menciono mucho de que
+[27:27] hay dos tipos de adherencia la adherencia del tratamiento nutricional y la adherencia
+[27:32] a tu negocio puede que tengan muy buena adherencia al tratamiento pero a lo mejor van una vez cada
+[27:40] tres meses o ya no sé si a lo mejor les gustó el planpero es volvemos a lo.mimo el
+[27:48] tiempo de adherencia al negocio no es tan efectivo entonces creo que a ven a resolver
+[27:54] también muy bien esa esa ese tema de generar como hasta cierto punto de escasez y y bueno con con
+[28:04] las funciones que las conozco bien porque pues las usamos todos los días pero esa sensación
+[28:11] de escasez y de generar también adherencia a tu negocio en lo personal nosotros hemos visto que
+[28:19] si incrementa mucho la facturación al final del mes con esa estrategia de recurrencia porque
+[28:26] pues al final estamos un negocio de recurrencia si y también he visto
+[28:56] son mucho más altos en proporción si tú los comparas con cuánto cuesta una mesolidad de
+[29:03] gimo cuánto cuesta esto aquello son mucho más altos la mayoría tiene páginas de internet
+[29:11] que ellos mismos han hecho que han mandado a ser a su presencia en internet es es raro que
+[29:17] no tiene una página de internet es raro que no tiene una forma en la que tú les puedas
+[29:22] pagar en línea es
+[29:31] es a la mayoría incluso no tiene consultorios la mayoría da consultas en línea obviamente el sistema
+[29:43] de salud acá es distinto y permite también hacer algunas cosas para apoyar el crecimiento de
+[29:51] la industria de los nutriólogos pero si te das cuenta que ellos se refieren a su paciente como
+[29:58] cliente y traen más este chip de buen presario donde pues estoy corriendo un negocio y con
+[30:08] un negocio necesito esto y a que ello entonces invierten en ese negocio porque al final tus
+[30:16] inversiones deberían retornarte en crecimiento entonces si he visto esa mentalidad que existe acá
+[30:22] no lo he visto tanto en en méxico pero también he visto que ha cambiado antonio he visto que sobre
+[30:30] todos los nutriólogos más jóvenes los que andan más involucados que en tiktok que andan más
+[30:35] a involucrados en instagram traen más esta esta mentalidad de pues cómo consigo más flujo
+[30:42] de pacientes a través de las redes sociales están buscando están buscando mecanismos entonces yo
+[30:47] creo que es un tema posiblemente de mentalidad derivado un poquito de la de la educación que
+[30:54] que reciben en las carreras pero si la tendencia yo creo que si va va hacia hacia el bien yo
+[31:05] creo que que sí se se va un poquito más en en cómo creo un negocio a partir de la nutrición
+[31:11] porque algo que sí me gusta de nutrición me encanta y siempre veo como que es una oportunidad y
+[31:18] también se los digo a los nutriólogos es que hay muchísima gente que se puede ver beneficiada
+[31:26] del servicio de nutrición cómo llegar a ellos es otro boleto no pero la carrera de nutrición
+[31:33] te da esa ventaja de que tú puedes digamos tú mismo te haces un negocio y tampoco no necesitas
+[31:42] tantísimos clientes para rápidamente sobrepasar un salario de la industria entonces eso es lo
+[31:51] que me encanta de nutrición de que es es es una carrera como muy noble que te permite a ti digamos
+[31:59] emprender hacer un negocio y con muy poquitos clientes puedes tener mejor resultados que que
+[32:08] trabajar a mi mejor en un comedor en otro lado entonces yo creo que la industria se está moviendo
+[32:16] hacia allá los profesionales están moviendo hacia ya si acaso algunos que ya tienen muchos
+[32:20] años en la industria que están como casados con ciertos métodos pues a lo mejor que ellos
+[32:25] ya no se van a mover pero yo creo que los nuevos impulsados más por todo el contenido que
+[32:32] nos hace sociales yo creo que si va a en un buen rumbo de acuerdo ahora que la inteligencia
+[32:41] artificial está más disponible como ha sido para ven a integrarla porque también nos
+[32:49] llegaron notificaciones de nuevas actualizaciones y de repente comenzamos a utilizar las notas y
+[32:56] de repente no le entendíamos muy bien pero ya después actualizó y ahora o sea puedes hacer un
+[33:01] montón de cosas con con a ven y la inteligencia artificial como fue ese impacto y qué resultados hanvist ustedes
+[33:10] mira Antonio yo creo que vas a ver un cambio super drástico en los próximos 2 3 años
+[33:23] impulsado por inteligencia artificial en la área de salud y no me dejarás mentir pero es súper
+[33:31] común que veas desde pacientes yendo a chat y piti ahí quiero una dieta tal cual bla bla y
+[33:41] van a obtener una dieta tú como piscinar cuando vas y ves la dieta y ves al paciente te das cuenta
+[33:48] que la dieta no está también el paciente no lo sabe no pero ya eso pues se convierte en el paciente
+[33:56] no lo sabe pero creo que obtuvo la solución bueno ahí hay un tema que seguramente va a pegar en
+[34:02] la industria porque son las van a reemplazar al nutriólogo este pero también otra que yo veo
+[34:10] porque si se van a empezar a automatizar mucha mucha la de la que es la que
+[34:22] pues si tú lo haces con puro papel y tu calculadora a la mejor te vas a llevar dos horas no una
+[34:31] herramienta como avena lo puedes hacer mucho más rápido y eventualmente con inteligencia artificial
+[34:37] nosotros a qué queremos llegar pues ahorita en avena tienes tú que seleccionar platillos tienes
+[34:43] que especificar ciertas cosas a dónde queremos llegar que tú registres el expediente y con
+[34:50] ese expediente nosotros ya sabemos cuánto pesa mide padecimientos recordatorio ya tenemos toda
+[34:58] la información entonces nosotros queremos en automático hacerte ya un plan de nutrición
+[35:04] adecuado si tu paciente es tiene diabetes hacerte un plan adecuado para que tú como
+[35:10] profesional no haces tanto tiempo tú seleccionando recetas y demás y no tratar de darte eso
+[35:18] ya pre hecho y yo creo que la inteligencia artificial nos va a ayudar a llegar a ese punto
+[35:23] entonces eso es, positivo y la cosa que yo creo que que va a ser la diferencia
+[35:33] con el paciente con en los consultorios yo creo que va a ser la empatía las herramientas siempre
+[35:40] son puedes tener mejores herramientas cada vez pero yo creo que lo que vuelve exitoso un consultor
+[35:48] y un nutriólogo es la empatía la empatía que tienes hacia el paciente porque al final una
+[35:55] persona si decide o gran parte de su decisión de volver o no a la consulta o de que te recomiende
+[36:03] con alguien más es que también se siente contigo entonces por eso vemos que hay algunos
+[36:09] nutrioros que toman su tiempo de platicar con el paciente entenderlo entonces yo creo que la empatía
+[36:15] la empatía es algo que de aquí a desaños no veo que que vaya a cambiar y yo creo que va a
+[36:24] tomar más relevancia por todos estos componentes de inteligencia artificial que van a automatizar
+[36:29] los procesos entonces lo que tú hoy haces a mano lo que tú hoy haces semi manual en algunas
+[36:36] herramientas mañana no van a no vas a necesitar hacerlas este mañana va a ser más en automático
+[36:43] entonces yo creo que si las herramientas van a cambiar van a beneficiar al paciente para hacer las cosas
+[36:51] más rápidas al nutriólogo también pero la empatía esa yo creo que no va a cambiar y
+[36:57] esa es la que yo creo que va a seguir siendo asesor hacia el futuro y claro y esa y donde entrar el tema
+[37:05] del desarrollo personal desarrollar habilidades volvemos a lo mismo no el tema de negociación
+[37:13] ventas el tema de que como decías no puedes tener el mejor software las mejores herramientas pero si
+[37:21] no ven
+[37:51] un punto un punto que es la confianza sabes o sea imagínate un estudiante que va iniciando y que pues se
+[37:59] va a ventar el mundo laboral con su software el software ya trae la estructura como como pensaron en
+[38:05] esa parte para poder guiar de manera pues muy intuitiva al al profesional de la salud y que
+[38:13] pues la consulta sea como más amenada ahí es donde yo creo que si entra un poquito el aprendizaje
+[38:23] que mencionabas al inicio de google por ejemplo donde tienes que ver como el comportamiento de la
+[38:30] gente o del usuario y con ese comportamiento tú decides donde poner un botón donde poner una
+[38:39] cajita de texto y creo que el ejemplo como más aterrizado es al cual los los apagadores en
+[38:51] las casas los apagadores en las casas normalmente tienen no se la gente no se da cuenta pero tienen
+[38:57] una distancia del piso para que tú cuando entres a un baño o sea todas tengan la misma distf
+[39:04] distancia entonces siempre aunque entres a un lugar que no conoces siempre estiras la mano y casi
+[39:11] casi siempre atinas donde está el apagador entonces el eso es comportamiento y nosotros
+[39:18] lo que hacemos es vemos el comportamiento de uso entonces con eso construimos entonces por eso
+[39:26] avena tiene cierta estructura es más para para el comportamiento que ya pre existe es por eso diseñamos
+[39:34] basándonos en comportamiento es antonio es posiblemente y quiero hacer como este este
+[39:44] comentario que es chistoso la gente de la de salud que entra a trabajar en avenna siempre
+[39:53] tiene este, comentario the en su celular ese cuadr.
+[40:04] cuadrito y dices bueno a la mejor con cinco mil pesos puedo hacer que alguien me haga esa aplicación
+[40:11] le hemos invertido millones a esa a esa plataforma y es muchísimo para tratar de dar la mejor
+[40:29] ыт experiencia posible que el botón de x cosa esté en x lugar se pensó específicamente
+[40:37] para eso otro ejemplo tal vez muy creo que tal cual la mayoría de las personas pues utiliza la
+[40:44] mano derecha entonces los teléfonos están diseñados para que las acciones principales estén al alcance
+[40:54] de tu mano derecha de tu dedo las acciones que son secundarias las tienes en la parte superior
+[41:01] de la pantalla cosas que vas a utilizar tal vez una vez al día o dos veces al día pero las que
+[41:07] utilizas más siempre los aplicaciones se aseguran de que las las cosas principales las puedas
+[41:16] alcanzar con tu dedo entonces ese tipo de usabilidad es lo que nosotros siempre estamos considerando
+[41:21] cuando desarrollamos la aplicación cuando estamos desarrollando la plataforma web y si hay
+[41:27] muchísimo muchísimo trabajo de diseño muchísimo trabajo de investigación detrás para poder llegar
+[41:34] a la mejor solución posible de la plataforma que se sienta muy natural lo más natural posible
+[41:43] siempre estamos trabajando para mejorarla y si no lo notas o sea si no te das cuenta de que
+[41:51] de que ese flujo o esa esa pantalla si no te das cuenta que que te causó algún malestar o si no
+[42:02] te das cuenta que existe tal cual entonces porque hicimos un buen trabajo cuando te das cuenta de
+[42:07] que no le entiendo no esto no aquello es cuando hay muchas cosas que mejorar entonces ahí es donde
+[42:12] nosotros siempre estamos viendo y mejorando y cambiando cosas para que se sienta lo más
+[42:18] transparente posible y lo más fácil de usar claro totalmente
+[42:22] que como es para trabajar con con personas y que es compartirles esa visión compartirles ese
+[42:31] entusiasmo esa esa gran visión que tienes ese perfeccionismo esa calidad esa entrega como
+[42:41] de los para para contagiar eso creo que nuestra industria es relativamente sencillo antonio,
+[42:53] porque dentro de la plataforma hay hoy hay cientos de miles de personas todos los días utilizando
+[43:03] la plataforma entonces todo el tiempo nos están llegando comentarios de gente de me encanta esto
+[43:09] aquello entonces realmente es muy fácil como transmitir eso al equipo porque dentro de
+[43:16] la venas a todo el tiempo estamos recibiendo comentarios positivos pero también comentarios de
+[43:21] mejora esos los
+[43:23] arreglamos de alguna manera pero los comentarios positivos pues más o menos nos indican por
+[43:28] donde y también pues siempre trato de de conscientizar porque hay un punto donde las
+[43:37] personas también sacan por ejemplo tú tienes miles de seguidores en tu cuenta de instagram
+[43:44] y son miles de personas cuando los ves en en físico a lo mejor con los con los followers que
+[43:56] tú tienes en instagram puedes llenar un estadio entonces tu impacto es súper grande pero cuando se
+[44:03] ve nada más como un número 38 mil 40 mil pues se le pierde un poquito la sensibilidad de qué
+[44:09] representa ese número entonces en avena siempre pues yo lo que trato de
+[44:25] diabetes o están tristes porque están en daño renal 4 o 5 entonces esas historias
+[44:34] nosotros debemos de ser empáticos con ellos entonces nuestra plataforma tiene una responsabilidad
+[44:39] súper grande si alguien tiene un problema renal entonces no nos podemos equivocar no no
+[44:47] podemos hacer no podemos tener errores donde la plataforma le sugiera un paciente con
+[44:54] hipertensión algún alimento o algo con sodio alto no entonces siempre trato de aterrizarlo a la
+[45:04] cosa más básica posible que es estamos trabajando con personas no son un número si puedes ver que
+[45:12] hay hoy activos en este momento hay 20 30 mil personas pero no son un número cada uno es una
+[45:21] historia cada uno tiene una motivación una frustración y yo creo que pues básicamente
+[45:29] todas las semanas estamos trabajando con esto tenemos dentro de los canales de comunicación
+[45:34] dentro de avena tenemos un canal específicamente y cuando me refiero a canal digamos un grupo
+[45:41] interno como sería lo lo equivalente a decir un grupo de whatsapp pero este grupo interno
+[45:49] nada más está recibiendo los mensajes como positivos o mensajes que tratan de
+[45:56] generar sensibilidad dentro del equipo de avena de lo que estamos construyendo y
+[46:01] la visión hacia el futuro o sea también creo que todos estamos claros de que el componente
+[46:07] de nutrición es la base de lo que estamos construyendo para el futuro pero lo que
+[46:13] buscamos es que una persona pueda tener una mejor mejor estilo de vida y pueda tenerlo
+[46:21] javidad hacia el futuro yo quiero eso para mí y por eso también impulso eso a seguramente yo creo
+[46:28] que nadie se va a quejar si puede vivir otros 10 15 años más saludables claro totalmente
+[46:36] que es lo que en los próximos tres años cinco años que es lo que las personas
+[46:45] pueden esperar porque me queda claro que cada vez van a salir nuevas propuestas más opciones más
+[46:52] herramientas más herramientas para para hacer las herramientas más interesantes también que es lo
+[46:59] que viene para ven en el futuro yo creo que inteligencia artificial es donde estamos hoy por hoy
+[47:09] 100 por ciento metidos tenemos como la plataforma tenemos como parte del equipo operando lo que
+[47:19] existe hoy pero también tenemos parte del equipo operando en lo que va a existir mañana y lo
+[47:26] que va a existir mañana entre la inteligencia artificial entonces cómo lo va a haber alguien que
+[47:33] está dentro de avena tan sencill B.com hoy estamos trabajando en un concepto que se le llama agentes
+[47:41] agentes de inteligencia artificial que que son unos agentes llamémoslo como una especie de robots
+[47:49] que hacen ciertas tareas uno de los agentes que estamos probando hoy es el agente de citas
+[48:00] a la mejor quienes han probado los chatbots de citas los chatbots agarran y te dicen
+[48:08] tengo estas opciones y tú haces clic en las opciones y si no hay una opción ahí ya el
+[48:15] chatbot ya no te sirvió entonces existe este con esta idea de que el chatbot no es tan
+[48:19] bueno entonces tan no es tan bueno que muchos consultorios siguen teniendo secretarias que se
+[48:29] dedican específicamente a agendar las citas a mandar los recordatorios de citas a darle
+[48:35] seguimiento incluso a los pacientes entonces nosotros estamos probando con agentes de
+[48:39] inteligencia artificial que prácticamente hacen eso donde contactan a la persona hoy quiero
+[48:48] contactar al consultorio hoy y quiero agendar una cita responde la gente ok para cuando este
+[48:55] qué tienes disponible tengo estos disponibles para la mañana no me funciona ninguna ah tengo estas
+[48:59] disponibles para la próxima semana ah dame esta ok va y lo agenda hace todo todo el manejo de la de
+[49:06] la agenda entonces estamos probando con con este agente este mismo agente también tiene la
+[49:13] función de cuando van a confirmar la cita oye man tengo agendado mañana para ti confirmas no no
+[49:20] confirmo ok la misión de la gente no es simplemente no confirmar las citas sino puedo ofrecerte otro
+[49:29] espacio sabes que si agéndame para el sábado entonces la gente revisa que haya espacio el
+[49:36] sábado entonces se lo ofrece y se lo agenda entonces estos agentes que estamos construyendo
+[49:41] son algunas de las cosas de inteliancia artificial que van a empezar a ver dentro de la
+[49:48] plataforma de avena durante el 20 25 y estamos en piloto con este con este agente de seguimiento y
+[49:57] de consulta de la de la agenda pero así como tenemos este también estamos trabajando en otro que
+[50:05] sea tal cual para revisar cuál es la experiencia del paciente post consulta vemos hoy que algunos
+[50:13] nutriólogo lo que hacen es ah yo contacto a mi paciente siete días después o 15 días antes de
+[50:20] su consulta para ver cómo va si tiene preguntas o no entonces queremos hacer eso mejor entonces
+[50:27] que el mismo agente sirva como un soporte para el paciente muchos pacientes les da vergüenza
+[50:33] preguntarle al nutriólogo como hoy estoy en el súper estoy en el súper y no sé si elegir un pan
+[50:40] bimbo blanco o un pan x no y son preguntas que a la mejor el nutriólogo no le incomodaría
+[50:47] o a la mejor si pero a la gente a veces le da vergüenza pedir eso y el problema de
+[50:53] nutrición también es de que cuántos no hemos escuchado de que y ya rompí la dieta es
+[50:59] miércoles no la empiezo el lunes grave porque una vez que las personas rompen el ritmo difícilmente se
+[51:08] recuperan entonces lo que estamos haciendo es que por medio de whatsapp también tengas como este
+[51:14] agente de soporte donde le puedes preguntar le puedes preguntar a la gente como si le preguntaras
+[51:20] al nutriólogo o a la secretaría del nutriólogo de oye este ¿cuál de estos dos panes? y le
+[51:26] tomas una fotografía y la gente vas a ver el contexto de tu de tu expediente vas a ver a es
+[51:34] una persona con ciertos padecimientos nosotros ya tenemos precargado por ejemplo hoy tenemos
+[51:39] precargadas ciertas listas de de los de lo de lo que hay en walmart por ejemplo entonces tenemos
+[51:46] las tablas nutricionales y eso entonces poder darle una mejor información al paciente al
+[51:51] instante cuando lo necesite entonces todo esto es lo que viene para vena hacia hacia el futuro
+[51:57] inteligencia artificial mejores herramientas yo creo que hoy en día si no hay manera de que no
+[52:05] se esté trabajando en eso y si a vena no trabaja en eso alguien más lo va a hacer entonces para
+[52:09] nosotros es obvio que va hacia inteligencia artificial va hacia herramientas para el paciente
+[52:17] y también para el nutriólogo para hacerle más fácil el trabajo pero al final
+[52:21] parte también de nuestro objetivo es hacer las consultas con herramientas con toda la tecnología
+[52:28] que podamos desarrollar les hacer crecer las consultas y lograr mayor penetración del del
+[52:34] mercado en méxico latinoamérica y principalmente 2025 estamos trabajando en
+[52:41] estados unidos estamos trabajando en latinoamérica excepto brasil ok no está súper interesante
+[52:48] todo lo que comentas todo lo que va a venir no me queda duda de por qué están están donde están
+[52:57] y por qué están teniendo tanto impacto creo que hay una gran visión detrás y bueno pues también
+[53:04] me ha gustado mucho que nosotros somos usuarios porque de verdad ha sido hasta el momento
+[53:08] pues el software que más eficiencia nos ha dado y estamos muy muy contentos también con eso
+[53:15] también me gustaría que cerráramos pero quisiera preguntarte si tuvieras
+[53:27] a tu yo de hace 10 años que le dirías yo que simplemente le diría que que no tuviera miedo a
+[53:51] explorar lo que piensa que es interesante yo creo que es uno de los de las cosas que me ha
+[53:57] llevado a donde estoy ahora y eso su le iría perfecto pues me dio mucho gusto poder compartir
+[54:07] pues está estas enseñanzas y realmente ha sido muy muy enriquecedor todo lo que nos estás
+[54:14] compartiendo todo lo que nos has mencionado sobre el futuro de avena tu desarrollo y pues esperemos
+[54:21] ver nuevas cosas en avena y todo lo que nos has contado muchísimas gracias por por tu tiempo y
+[54:27] a ver gracias a ti antonio y pues un saludo y a tu audiencia muchas gracias hasta luego
+AQUÍ CON CARLOS #36 · Construir una Startup, CTO de avena.io (1 jun 2023)[00:00] Rubén Sandoval, bienvenido aquí con Carlos. Gracias Carlos, por fin se hizo. Por fin se nos hizo.
+[00:04] Sí. Está bien. Chingón, pues Rubén, desde que te conozco, siempre te ha gustado
+[00:10] emprender obviamente en la edadera de tecnología de tu carrera y pues entre
+[00:17] ellos te conozco algunos proyectos de los que has trabajado pero quiero que me
+[00:21] platique desde los que trabajaste antes de que te conociera. Han sido un
+[00:27] montón generalmente cargados a mobile. La mayoría de las veces me llego como la
+[00:34] curiosidad de desarrollar mobile desde Android, yo creo, desde que se la la iPhone.
+[00:40] Pero estaba en México y como conseguí un iPhone en México, estaba muy difícil, bien
+[00:45] caro y luego lo conseguí así de ver que desbloquearlo.
+[00:48] Hace el jailbreak, entonces dije bueno, un Android. Entonces de ahí empezó como
+[00:52] como mi gusto de desarrollar apps. Empecé con Android con una aplicación para
+[00:56] ' rutas de camiones' cuando no había nada. Para' rutas como de tipo logística.
+[01:02] Ah, tú querías decirle que estoy en el punto A y quiero llegar al punto B, entonces dame
+[01:06] las rutas de camiones que tengo que tomar, ¿no? Y me acuerdo que estaba en mi casa
+[01:10] con la guía rojilla escaneándolos. Los calles, pues. Estaba haciendo un Google Maps,
+[01:14] no tenía ni idea de lo difícil que era hacer eso. Pero ahí estaba yo en mi casa
+[01:18] los fines de semana escaneando ahí las calles, pasándola en spreadsheet. Eso fue al principio,
+[01:25] no tenía ni idea de producto. En mi cabeza era como desarrollar sacas y trases millonario,
+[01:31] porque veías mucho eso en internet, ¿no? Hasta la fecha.
+[01:34] ¿Cuál era la aplicación que en ese momento era la más chida?
+[01:37] En esa fecha no me acuerdo, fíjate. No me acuerdo. Pero sí era como, acababa
+[01:43] de ser, no había App Store al principio y después empezó a salir y fue como
+[01:47] ¡Ah, huevo! Puedo hacer aplicaciones para el App Store.
+[01:50] No había App Store en el iPhone. Pero en Android sí.
+[01:54] No recuerdo si había, no había. Creo que sí. No, y aparte la licencia estaba en la escuela,
+[01:58] la licencia tenés que pagarla cada año para iOS todavía y para Android eso no solo
+[02:04] hacía la vez y se acabó. Entonces, como que eso fue como era lo que tenemos a la mano,
+[02:08] entonces empecé a hacer ese tipo de cosas y veía mucho en internet eso de
+[02:13] ¡Ah, que esto hubo 100 millones de años haciendo una App, ¿no?
+[02:16] ¡Escaí en la trampa muy temprano! Bueno, eso fue bueno porque caer más tarde gastas
+[02:21] más dinero y desarrollar una idea, pero en este caso no tenía dinero que gastar.
+[02:26] Si hubieras tenido más dinero veías, me había tirado.
+[02:29] Sí, problema. Entonces empecé con eso, después salí de la universidad,
+[02:34] apliqué a una empresa manufacturada donde nos conocimos.
+[02:38] ¿Saliste ingeniero en sistemas?
+[02:40] Ingeniero en computación del Q6. Bueno, mi carrera estuve en el CETI, PrEPA, Técnica,
+[02:46] de ahí me fui al Q6, ingeniería y de ahí me fui a la maestría, la OJ.
+[02:52] Entonces pasé por todas las escuelas, pertenezco a todos los grupos.
+[02:56] Quiero probar, o sea, probar diferentes. Le diera de seguir CETI, CETI, ingeniería,
+[03:01] como que no me gustaba tanto. Entonces empecé a probar diferentes escuelas
+[03:06] y al final de la universidad estaba en un laboratorio de robótica
+[03:10] haciendo mis prácticas sociales y dije, ya voy a salir y dónde voy a trabajar.
+[03:14] Entonces empecé a aplicar a muchos lugares y ahí entré a la manufacturada.
+[03:19] Y ahí estabas, puros experimentos, ¿no? Éramos el equipo de innovación.
+[03:23] Éramos el equipo de innovación. Entonces mi perfilera siempre ha sido de eso.
+[03:27] Estar experimentando y desarrollando cosas nuevas tecnologías,
+[03:31] que a veces se rompe, funciona o no funciona. Y ese es muy perfil.
+[03:35] O sea, soy un generalista, a veces me causa conflicto no ser un especialista,
+[03:40] porque si te acercas a los demás, pues siempre estás abajo.
+[03:44] Pero mi, básicamente mi superpoder es poder resolver problemas
+[03:48] con lo más nuevo, lo más viejo, lo que sea, lo que tenga en la mano.
+[03:51] Entonces siempre sí es así como mi perfil.
+[03:54] Pero me gusta que las cosas que hago salgan a producción
+[03:57] y las tenga el cliente en sus manos.
+[03:59] Entonces ese fue uno de los factores que me obligó o más bien me empujó
+[04:03] a salir de la manufactura a un start-up, ¿no?
+[04:07] Primero era como yo quería hacer un start-up
+[04:10] y después fue por primero que tengo que aprender cómo funciona.
+[04:13] Entonces me fui a Estados Unidos a Entrelis,
+[04:16] donde trabajé, Estados Unidos creo y regresé.
+[04:20] Estaban tratando de poner oficinas aquí en México.
+[04:23] Entonces más o menos vi cómo era, aprendí mucho.
+[04:28] Cosas que no hacer y qué hacer.
+[04:30] ¿Era grande?
+[04:32] No era tan grande. Éramos como 8, ¿verdad Lopers?
+[04:36] Ok. Y en Estados Unidos había 3.
+[04:38] Me fui con ellos a trabajar un rato
+[04:41] y después ya regresé y luego me hablaron otra vez de la manufacturera de
+[04:45] Oye, tenemos un proyecto en Google que es
+[04:47] es super secreto aquí de trabajar y yo...
+[04:49] Le dieron justo donde me lleva la atención pues.
+[04:52] Entonces regresé, hice ese proyecto con el equipo de Google,
+[04:57] fue las oficinas de allá.
+[04:59] Básicamente querían probar una herramienta nueva.
+[05:02] Entonces como la manufactura era un cliente grande de Google,
+[05:05] pues querían que jugaramos con una nueva herramienta
+[05:09] y pues eso a mí me gustaba.
+[05:11] ¿Y qué fue? O fue algo top.
+[05:13] ¿Crees que nunca salió la luz?
+[05:15] Y no sé si puedo decirlo.
+[05:17] Creo que no, creo que no salió la luz.
+[05:19] Pero era una herramienta no-code.
+[05:21] Eso te puedo decir.
+[05:22] Era una herramienta no-code que podías hacer como aplicaciones.
+[05:24] Pero una de las herramientas de la que se llama RETOOL
+[05:27] es básicamente mover componentes
+[05:30] y conectar los avances de datos sin codiar.
+[05:32] ¿Ok?
+[05:33] Y como Manufoctl no se dedica a desarrollo de software
+[05:36] tienen muchos herramientas que necesitan
+[05:39] para conectar esos avances de datos
+[05:41] y es más fácil que la haga alguien que no sea tan técnico.
+[05:44] No?
+[05:45] ¿Todo el mundo necesita conocer algo pero no tan a fondo?
+[05:48] ¿Ok?
+[05:49] Sí, eso era lo que hicimos ya.
+[05:51] Y se acabó el proyecto y...
+[05:53] y conocía a Javier en un Jocatón que es a mi socio-navena
+[05:58] y a la parte de Jocatón estaba con otro socio-navena
+[06:01] haciendo cosas de
+[06:10] otro amigo, un jacatón, creo que en Startup Weekend
+[06:13] se conocían ellos, necesitaban ayuda
+[06:15] y me hablaron a mí, yo fue una junta y conocía a mi socio
+[06:17] que ahora trabajo en una avena.
+[06:19] Pero yo no lo conocí directamente, se fue un rebote.
+[06:22] Es todo bien raro.
+[06:23] Oye, ¿qué es Startup Weekend?
+[06:26] Era un evento que se organizaba,
+[06:28] no sé si todavía, pero se organizaba antes
+[06:30] para juntar a varios personas a resolver problemas.
+[06:35] ¿Cómo?
+[06:36] O sea, habrían convocatoria, tú te inscribías
+[06:39] y te dices, este es mi equipo y yo voy a llegar a hacer algo.
+[06:41] Ah, era un evento, llegabas...
+[06:43] si tenías una idea de alguien apichaba la idea
+[06:45] y dices, a mí me gusta esa idea, me voy a unir a su equipo
+[06:47] y desarrollaban algo en ese momento.
+[06:50] Ahí conocimos también a Carlos, a Charlie.
+[06:52] Ok.
+[06:53] Ahí lo trajimos a nuestro círculo de...
+[06:56] de la manufactura, ¿no?
+[06:58] Lo conocimos en un evento de esos.
+[07:00] Sí, estuvo interesante.
+[07:01] Ok, entonces en ese evento conociste a...
+[07:04] ¿Cómo dices que se llama tu...?
+[07:06] Javier.
+[07:07] Sí, por ese evento conocí a Javier
+[07:09] y yo ya conocí a mi socio de Talos,
+[07:11] Talos Electronics, donde importábamos cosas de China
+[07:13] desde la preparatoria.
+[07:15] Entonces, siempre he estado haciendo muchas cosas a la vez
+[07:17] porque básicamente es muy raro que te pegue una
+[07:20] y te consuma todo el tiempo.
+[07:22] Entonces, pues estás experimentando con una
+[07:24] con otra y con otra para ver cuál más o menos tiene nada.
+[07:28] Básicamente, diversifique el riesgo si lo quieres ver de esa manera.
+[07:30] ¿Y todas orientadas a tecnología de alguna forma?
+[07:33] De alguna manera, sí, Talos era más como...
+[07:36] electrónica, era como...
+[07:38] era un pain en la electrónica y conseguir en el centro
+[07:41] resistencias, esas cosas cuando estudiaba electrónica.
+[07:45] Entonces dijimos por qué no las vendemos en línea
+[07:47] y las traemos de China y las aquí las distribuimos
+[07:52] y eso fue lo que hicimos.
+[07:54] Ahí me di cuenta que no me gusta manejar stock.
+[07:58] Entonces cualquier cosa que tenga que ver stock
+[08:00] que vieron me gusta porque ya sé cómo...
+[08:02] cómo tienes que manejarlo, ¿no?
+[08:04] ¿Por qué? ¿Por qué lo tienes ahí? ¿Se hace viejo o qué?
+[08:08] Lo bueno es que escujimos un producto que no era
+[08:10] para exceder o no tenía...
+[08:12] que a ita, o sea lo puedes dejar ahí años,
+[08:14] pero ese es el problema. T
+[08:15] Tienes dinero sentado en años o meses
+[08:17] en lo que dure tu producto.
+[08:19] No tienes que vender, si no lo vendes
+[08:21] está ocupando espacio y pues básicamente
+[08:24] tienes dinero parado, ¿no?
+[08:26] Y escalarlo también es difícil, bueno
+[08:28] hay empresas que si lo logran hacer Francés,
+[08:30] como Amazon y todas esas cosas, pero
+[08:32] es más difícil, yo creo que es más difícil que software.
+[08:35] Por eso hice el switch, ¿no?
+[08:37] ¿Y lo tenías tu tienda? ¿Lo vendías en...
+[08:39] en Mercado Libre?
+[08:41] Empecé con una tienda en Hook Womers,
+[08:43] creo que era Warpers y un plugin encima.
+[08:46] Después empecemos a tener mucho tráfico,
+[08:48] ya no me daba, entonces lo cambiamos
+[08:50] camiamos a Shopify,
+[08:52] y ya, ahí se quedó el shop,
+[08:53] fue como ya no le muevas,
+[08:55] ellos se encargan de todo, nada más a los de alta
+[08:57] y ahí hice varias cositas,
+[08:59] y hay unos sistemas que sincronizaban
+[09:02] Shopify con Mercado Libre, porque vendías en un lado
+[09:05] y tenías en existencia en otro, y era un desorden.
+[09:08] Después me di cuenta que sería un start-up
+[09:10] que hacía solamente eso, entro a WC.
+[09:12] Siempre he tenido la idea, pero nunca la ejecuto bien.
+[09:15] Pero, pero, parte es eso el equipo,
+[09:17] o sea, tienes que tener un buen equipo,
+[09:19] solamente eso, de las cosas que me di cuenta temprano
+[09:21] es que tú no puedes solo hacer una empresa, ¿no?
+[09:24] No es como en las películas,
+[09:26] como en la radio, no es como lo que se ente crunch,
+[09:30] o sea, de verdad, necesitas un equipo,
+[09:32] no es como que saques un producto solo y se venda.
+[09:34] Entonces, eso me di cuenta,
+[09:36] necesitas un equipo bueno.
+[09:38] O sea, ¿algú más te iba a preguntar
+[09:42] de talos que si trabajaste con,
+[09:44] no sé si tu socio sabía de marketing,
+[09:46] le diste mucha exposición al marketing o no diste...
+[09:48] No, los usamos ingenieros.
+[09:50] Es un pequeño problema.
+[09:53] Gracias a Dios le encontramos como la,
+[09:56] la manera de vender.
+[09:58] Él hizo el MVP, o sea, de hecho Javier,
+[10:01] una vena y César, en talos,
+[10:03] han hecho el MVP yo solos.
+[10:05] O sea, yo llego cuando ya tienen ventas.
+[10:07] Llegan y me dicen, oye, tengo ventas,
+[10:09] estoy vendiendo, tengo estas cosas,
+[10:11] que me ve, si le damos por ahí, ok.
+[10:13] Pero nunca,
+[10:15] siempre yo he necesitado de alguien que venda.
+[10:17] O sea, yo hago, pero,
+[10:19] muy rara vez como que vendo.
+[10:21] Entonces, ese es como mi parte débil, ¿no?
+[10:23] Necesito a alguien de negocio que venda,
+[10:25] lo que estoy haciendo, ¿no?
+[10:27] ¿Y no has buscado desarrollarte también en ese,
+[10:29] en esa área?
+[10:31] ¿Cómo, cómo la tecnología crece tan rápido
+[10:33] y va tan rápido?
+[10:35] No me da tiempo. O sea,
+[10:37] o estoy de un lado o estoy del otro,
+[10:39] porque no puedo los dos.
+[10:41] O sea, y si hay gente,
+[10:43] que pueda hacer las dos cosas,
+[10:45] pero no, en mi caso no, prefiero,
+[10:47] mejor quedarme de un solo lado y tener un socio.
+[10:49] Y eso era Talos.
+[10:51] Ahora, Yavena todavía está vigente.
+[10:53] Si Talos todavía vive,
+[10:55] nada más que mi socio,
+[10:57] pues vimos que no podíamos crecerlo tanto,
+[10:59] o sea, es un buen negocio, no te digo, no es buen negocio,
+[11:01] pero no lo podemos escalar a la
+[11:03] velocidad que queríamos, o es muy difícil.
+[11:05] Entonces, él se fue a Facebook,
+[11:07] aplicó a Facebook, entró a Facebook
+[11:09] y ahí yo me fui a Yavena.
+[11:11] ¿No le tocó recortar esto la última vez que dieron?
+[11:13] Estaba, estaba ahí como,
+[11:15] que, ah, a ver si no me toca,
+[11:17] pero no lo tocó.
+[11:19] Viene otro, Ia está, ya lo pusieron ahí
+[11:21] en público que viene otro,
+[11:23] entonces, vamos a ver, lo paso.
+[11:25] Ching.
+[11:27] Y entonces, Abena.
+[11:29] Bueno, y conozco a Javi,
+[11:31] Javi también le invierto un poco dinero a Javi,
+[11:33] a Javi, lo veía a Facebook,
+[11:35] o sea, se conectamos ese día,
+[11:37] su idea como que no funcionaba,
+[11:39] entonces Javi empezó a hacer otras cosas
+[11:41] y lo tenía a Facebook,
+[11:43] y levantó una rondita de crowdfunding
+[11:45] de dinero, entonces ahí como,
+[11:47] bueno, vamos a ver si funciona, ¿no?
+[11:49] Al poco tiempo,
+[11:51] Javi perdió a su sitio,
+[11:53] entonces fue como, ya tenía algo corriendo,
+[11:55] ya tenía poquitos clientes,
+[11:57] y me digo, oye, necesito ayuda porque
+[11:59] esto no está corriendo, y yo, oh, mi dinero.
+[12:01] Entonces, entré básicamente
+[12:03] a rescatar mi inversión,
+[12:05] pues, ¿no? Me estaba haciendo preguntas
+[12:07] de cómo hacer cosas, y yo le dije,
+[12:09] pues mejor pásame el proyecto, yo lo hago más rápido.
+[12:11] O sea, no le funcionaba literalmente la aplicación,
+[12:13] el sistema no servía.
+[12:15] Ah, se basaba en un chat,
+[12:17] no servía, algo pasó en una actualización
+[12:19] que no servía, entonces necesitaba
+[12:21] sacarlo porque había gente que necesitaba chat
+[12:23] para la... en ese entonces era solo chat,
+[12:25] entonces
+[12:27] vendía por Mercado Libre,
+[12:29] o sea, estaba bien raro su MVP.
+[12:31] Si quieres antes de eso, platíquenos,
+[12:33] que es Abena, para no estar escuchando.
+[12:35] Abena es un software de nutrición,
+[12:37] pero no es como empezó,
+[12:39] empezó como
+[12:41] dando servicio
+[12:43] a personas que querían
+[12:45] un plan nutricional
+[12:47] y les daban coaching
+[12:49] a través del chat, por eso el chat era
+[12:51] necesario, les mandaban un pdf,
+[12:53] no existía nada digital,
+[12:55] y nada más el chat para que se comunicar and
+[12:57] y eso era la aplicación.
+[12:59] O sea, yo como usuario
+[13:01] quería hablar con alguien que me diera
+[13:03] un plan nutricional, me metí a la app
+[13:05] y chateaba con alguien así random.
+[13:07] Veías es un plan en pdf,
+[13:09] un plan super básico y el chat
+[13:11] era lo importante porque era como el soporte
+[13:13] del Vacanfor de tener una duda que me yudes.
+[13:15] Entonces era como la parte del principio.
+[13:17] Entonces así empezó
+[13:19] Abena,
+[13:21] vendiendo al B2C
+[13:23] al customer, al cliente final.
+[13:25] Empezamos a
+[13:27] a crecer, ahí Javi fue
+[13:29] a Silicon Valley
+[13:31] un tiempo,
+[13:33] bajo una renta de inversión chiquita,
+[13:35] es básicamente un angel,
+[13:37] que aquí nos vea un friends and family.
+[13:39] Y con eso empezamos a
+[13:41] gustar a pegar la aplicación.
+[13:43] Nuestra idea
+[13:45] era ser rentables, antes de morirnos,
+[13:47] porque
+[13:49] no tenemos credenciales
+[13:51] como nos somos de Stanford,
+[13:53] no somos de ninguna
+[13:55] Ivy League.
+[13:57] Entonces bajar en Lana es un poco difícil,
+[13:59] en México, todavía en ese entonces era más difícil.
+[14:03] Entonces nuestra idea fue como
+[14:05] bajamos esto, tenemos que sobrevivir con esto
+[14:07] y iterar la idea con esto.
+[14:09] Y si morimos, pues morimos.
+[14:13] Pero ese fue como el inicio
+[14:15] de cómo empezó esto.
+[14:17] Y ahí empezamos a hacer producto,
+[14:19] que nadie sabía hacer producto
+[14:21] y empezamos a iterar.
+[14:23] Y ahí fue cuando pues toda la
+[14:25] creo que grupito de innovación
+[14:27] en la manufacturera fue como que
+[14:29] mucha gente quería hacer producto hoy.
+[14:31] Que, que quería
+[14:33] desarrollar producto, entonces empezaron a ir
+[14:35] a startups, se pusieron a
+[14:37] hacer cosas de producto.
+[14:39] Entonces creo que eso a
+[14:41] a Bola nos tocó.
+[14:43] Eso a Bola nos llevó, entonces yo veía que ustedes
+[14:45] hacían. Entonces, ah, está interesante,
+[14:47] ¿no? Entonces nos fuimos como empujando
+[14:49] entre todos, creo.
+[14:51] Uno se fueron a desarrollar
+[14:53] con alguien más grande, en el caso
+[14:55] de Weiss, de Uyala
+[14:57] y otros nos fuimos a como más
+[14:59] abajo, empezando nosotros solos
+[15:01] desde abajo. Pero sí,
+[15:03] seguimos el mismo pat, no más
+[15:05] diferentes, caminos.
+[15:07] Sí. Entonces,
+[15:09] pero y que al final que pasó con
+[15:11] con Abena, a quien que se convirtió
+[15:13] de ese negocio. Está bien raro porque
+[15:15] Abena
+[15:17] necesitaba un software para
+[15:19] tener a tanta gente. Entonces
+[15:21] no había un software que pudieras
+[15:23] atender gente en línia, no existía.
+[15:25] Entonces lo creamos nosotros, para
+[15:27] nosotros. Entonces nos dimos cuenta
+[15:29] de, oh, esperá un momento.
+[15:31] Si este software
+[15:33] lo vendemos nosotros
+[15:35] creo que funciona
+[15:37] más el negocio así. ¿Por qué?
+[15:39] Porque una gente que hace
+[15:41] dieta tiende a tener un comportamiento
+[15:43] de yo-yo.
+[15:45] Tres meses dejas.
+[15:47] Tres meses dejas. Ok.
+[15:49] Entonces tu negocio necesita meter
+[15:51] y meter y meter gente.
+[15:53] Aparte, estás en un negocio de marketing.
+[15:55] Mucha gente te puede
+[15:57] dar una solución a ese problema, ¿no?
+[15:59] Entonces nos dimos cuenta que ese
+[16:01] problema de atender en línia
+[16:03] no tenía una solución.
+[16:05] No había nada que pudieras hacer.
+[16:07] Tenías que mandar PDFs
+[16:09] y ya lo máximo que
+[16:11] podías hacer. Hablé aplicaciones
+[16:13] especializadas en nutrición
+[16:15] pero la línea estaba muy verda.
+[16:17] No servía. No servía.
+[16:19] Porque nuestra meta era que nuestro cliente
+[16:21] nos durara más.
+[16:23] Si logramos que nuestro cliente nos durara
+[16:25] más, que comparado
+[16:27] con el mercado.
+[16:29] Pero todo el mundo no era suficiente
+[16:31] para seguir creciendo.
+[16:33] Entonces ahí fue cuando dijimos, ¿qué tal
+[16:35] si vendemos el software? Y ahí fue
+[16:37] una de verdad despegamos.
+[16:39] Vimos una retención que la gente
+[16:41] jalaba el producto. No era como de
+[16:43] me lo compras, me lo compras, te lo quiero comprar.
+[16:45] O sea, no lo jalaban.
+[16:47] O sea, lo convirtieron de un B2C
+[16:49] a un B2B.
+[16:51] A un B2B.
+[16:53] Porque nosotros tomamos...
+[16:55] Si nos encargamos de que tú tengas
+[16:57] más negocio, si tú tienes más negocio
+[16:59] te quedas más.
+[17:01] O sea, tú le vendes el negocio
+[17:03] a nutriólogos y esos nutriólogos se encargan
+[17:05] de conseguir a sus clientes.
+[17:07] A las clientes y nosotros nos encargamos
+[17:09] de retener a sus clientes lo más que podamos.
+[17:11] De darles el mejor servicio que podamos
+[17:13] y de hacer herramientas encima de
+[17:15] para que tu consulta sea
+[17:17] más o más, diez veces mejor
+[17:19] o más rápida.
+[17:21] Entonces depende de quiénes buscando.
+[17:23] Yo soy un usuario que quiero un plan
+[17:25] nutricional, no...
+[17:27] O sea, descargar la aplicación como tal
+[17:29] no me funcionara de mucho.
+[17:31] Hay un catálogo, si puedo dirías
+[17:33] encontrar a alguien del catálogo, pero el
+[17:35] pad más
+[17:37] fácil es encontrar a un nutrióloga
+[17:39] que nos use.
+[17:41] Fácil entre comillas porque
+[17:43] encontrar que quien lo tiene, pero
+[17:45] es el mejor.
+[17:47] Porque esa decisión de
+[17:49] quién te atiende está rara.
+[17:51] Si no tienes una confianza,
+[17:53] eso es médico de salud.
+[17:55] Tiene ese pequeño
+[17:57] comportamiento, no es como que vas con el
+[17:59] primero que te encuentres en internet.
+[18:01] Generalmente vas con el que te recomiendan.
+[18:03] Entonces, está raro.
+[18:05] Y poner algo así como reviews
+[18:07] en la vez que estaré extraño,
+[18:09] porque le estaré dando prioridad
+[18:11] a ciertas personas y al final
+[18:13] quieres que todos te compren a ti.
+[18:15] Ah, así es un marketplace.
+[18:17] Si tienes que tener un rango
+[18:19] que tiene mejor que otro, no nos hemos
+[18:21] metido ahí.
+[18:23] Eso sí es una oportunidad que podemos
+[18:25] empezar a explorar. No nos hemos metido
+[18:27] ahí todavía.
+[18:29] Lo que queremos es básicamente la mente
+[18:31] de la supera de salud. No, no sea la
+[18:33] mente de nutrición.
+[18:35] Entonces ese tipo de marketplace
+[18:37] no llegamos hasta allá. Lo que estamos
+[18:39] ahorita es nutrición, ejercicio,
+[18:41] suplementación.
+[18:43] Y algunos doctores nos usan.
+[18:45] Algunas empresas nos usan.
+[18:47] Algunas farmacéuticas nos usan.
+[18:49] Está interesante.
+[18:51] ¿Y cómo? Porque ellos tienen a sus pacientes
+[18:53] una farmacéutica
+[18:55] se la vende a,
+[18:57] se la proporciona a alguna
+[18:59] clínica que tengan ellos como cliente
+[19:01] y es un programa soporte
+[19:03] a pacientes.
+[19:05] Entonces ellos atienden a sus
+[19:07] propios pacientes. Ok, o sea no lo usan
+[19:09] por la parte de nutrición, sino
+[19:11] sino usan las bondadas de la aplicación
+[19:13] para dar servicio de salud. Ah, es la
+[19:14] de nutrición y aparte
+[19:15] de salud pues. Ok.
+[19:17] O sea van como muy de la mano siempre
+[19:19] y otras farmacéuticas lo usan para
+[19:21] sus empleados internos.
+[19:23] No es realmente a cliente final
+[19:25] sino las empresas tienen un
+[19:27] nutriólogo de nutriólogos que tienen a
+[19:29] toda la empresa entonces no les daba
+[19:31] necesidad en un software para tanta
+[19:33] gente y nos usan a nosotros.
+[19:35] No, no le doy. Si, es como funciona.
+[19:38] Y entonces la forma
+[19:40] de tu promocionarla
+[19:42] tu aplicación es que consiguiendo
+[19:44] o sea le mandas correos a los
+[19:46] nutriólogos que ves. Bueno obviamente
+[19:48] tú no pues pero hay una persona que está
+[19:50] constantemente buscando nutriólogos o
+[19:52] empresas para venderle el software.
+[19:54] Nosotros, cuando empezamos a ver en la
+[19:56] parte de cliente apetiendo B2C
+[19:58] entramos a esa guerra de marketing
+[20:00] y nos dimos cuenta que no era por
+[20:02] ahí porque tu costo de adquisición de
+[20:04] cliente es variable
+[20:06] tiende a subir estas adespensas
+[20:08] de Facebook, Google
+[20:10] de que tu costo de adquisición por cliente
+[20:12] varía o la puja
+[20:14] quien quiere ese cliente y no se la
+[20:16] puja empieza a subir. Al principio daban
+[20:18] los números después ya no. Entonces
+[20:20] cambiamos un poquito el enfoque a product
+[20:22] Magnet. Entonces el producto
+[20:24] genere más leads.
+[20:26] Si tú como especialista traes un
+[20:28] paciente nosotros hacemos todo lo posible
+[20:30] para que ese paciente traiga otro paciente.
+[20:32] Entonces así como lo hacemos para tus
+[20:34] pacientes lo hacemos para los especialistas.
+[20:36] Cada especialista que llega
+[20:38] hacemos lo posible para que traiga otro
+[20:40] y otro y otro.
+[20:42] Cómo lo hacemos con mecanismos de referidos
+[20:44] features que te hacen
+[20:46] compartir cosas así
+[20:48] o sea el producto tiene que ser
+[20:50] el magnet
+[20:52] de los leads. Porque es la
+[20:54] manera más barata y la manera más
+[20:56] más orgánica de crecer. Y te ha funcionado
+[20:58] les ha funcionado. Si, se ha funcionado.
+[21:00] Los canales estresan
+[21:02] o sea no siempre te funciona funciona
+[21:04] o hay ciclos te funciona
+[21:06] algunos veces y no. Pero si
+[21:08] para mí ha sido lo mejor que
+[21:10] podemos hacer pues.
+[21:12] Porque si es un producto bueno
+[21:14] y otro y otro y otro. La base
+[21:16] es que tengas un producto sólido.
+[21:18] Si no haces eso y no tienes un producto
+[21:20] sólido no lo van a compartir.
+[21:22] Y ahorita
+[21:24] platicamos
+[21:26] de White Combinator
+[21:28] esta incubadora la que has
+[21:30] nido a presentar
+[21:32] pero como es el proceso con ellos.
+[21:34] Si lo quieres ver
+[21:36] y lo quieres ver.
+[21:38] Es como el hardware de startups
+[21:40] uno de los aceleradores más
+[21:42] más en el mundo.
+[21:44] Compites con puro crack
+[21:46] aplicas
+[21:48] hay un periodo como batches
+[21:50] tu aplicas presentas tu idea
+[21:52] tus números. Si ellos
+[21:54] consideran que es suficientemente bueno te hablan
+[21:56] te agendan una
+[21:58] entrevista
+[22:00] haces la entrevista
+[22:02] si pasas te marcan por teléfono
+[22:04] si estás dentro y entras al batch
+[22:06] y te dan
+[22:08] a cambio de equity.
+[22:10] Si no entras te mandan un fabuloso correo
+[22:12] con el feedback de porque no.
+[22:14] Entonces ya hemos llegado
+[22:16] a esa última instancia varias veces
+[22:18] el feedback
+[22:20] es muy bueno.
+[22:22] Es como el con tu mentor
+[22:24] a que te dé una regañada
+[22:26] de que estás haciendo mal en tu negocio.
+[22:28] Una de las que nos han dado
+[22:30] esos mercados muy pequeños
+[22:32] que nos han dado un feedback
+[22:34] muy bueno.
+[22:36] Es gente muy buena
+[22:38] en su negocio
+[22:40] que se hace muy bien
+[22:42] son los cracks
+[22:44] detectan cualquier
+[22:46] error que tengas
+[22:48] cualquier cosa que quieras
+[22:50] ocultar bajo la alfombra
+[22:52] ellos huelen eso
+[22:54] se está ocultando
+[22:56] o decir
+[22:58] y hemos llegado hasta la última instancia
+[23:00] nos llevaron a las oficinas
+[23:02] te pagan el viaje
+[23:04] para la entrevista
+[23:06] la entrevista es en persona
+[23:08] ya con la pandemia lo cambiaron en línea
+[23:10] pero sí
+[23:12] está interesante está chido.
+[23:14] Pero te cobran algo o sea te pagas algo
+[23:16] por entrar a ese proceso
+[23:18] Si te pagan en una saledadora
+[23:20] si tienes que pagar una saledadora
+[23:22] para entrar es mala saledadora
+[23:24] no lo hagas salte de ahí.
+[23:26] Yo lo digo por el hecho de que vas
+[23:28] por venir a checar tu empresa
+[23:30] como está y lo que estás haciendo
+[23:32] y darte un feedback así de ese estilo.
+[23:34] Son personas que han vendido sus empresas
+[23:36] en millones de dólares
+[23:38] gente que sabe mucho
+[23:40] yo creo que ni siquiera lo hacen por el dinero
+[23:42] lo hacen por amor al arte
+[23:44] si yo
+[23:46] a lo que los vi
+[23:48] a lo que yo hable con ellos
+[23:50] la verdad es que
+[23:52] te dan un feedback así
+[23:54] pero tú
+[23:56] obviamente
+[23:58] no conocen todo tu contexto
+[24:00] también hay que tomarlo con un poquito de pincitas
+[24:02] pero sobremente
+[24:04] tienes experiencia que tú no tienes
+[24:06] y más si vives en México
+[24:08] quién más tienes experiencia con quién tienes que hablar
+[24:10] si tenemos algunos
+[24:12] como conocidos
+[24:14] que tienen startups
+[24:16] Javier mucho con Nadal de Cuesqui
+[24:18] le manda correos por ahí
+[24:20] le pide feedback cuando estamos atuados en cosas
+[24:22] si nos apalangamos de la comunidad
+[24:24] también
+[24:26] pero he tenido que
+[24:28] generar un combina editor
+[24:30] está muy bueno
+[24:32] y cómo te preparas
+[24:34] aparte de lo que le mandas
+[24:36] tú vas y pichéas tu idea
+[24:38] o ya nada más vas y
+[24:40] a lo que te pregunten
+[24:42] es una plática como ahorita de tu negocio
+[24:44] es como si te dijera ¿cuánto estás vendiendo?
+[24:46] quién es tu cliente
+[24:48] cuál es el problema que resuelves
+[24:50] pero estilo más como Shark Tank
+[24:52] o de convencenos
+[24:54] Shark Tank es como un show
+[24:56] es entretenimiento
+[24:58] el tema de YC es más
+[25:00] es una plática como ahorita, informal
+[25:02] no te piden que llevas presentación
+[25:04] simplemente conoce tu negocio
+[25:06] háblanos de tu negocio
+[25:08] háblanos de la problemática
+[25:10] que estás resolviendo
+[25:12] convencenos de que tienes un buen negocio
+[25:14] tienes una buena idea que puede llegar a ser muy grande
+[25:16] y ahí es
+[25:18] donde tú tienes que empezar a desarrollar la idea
+[25:20] pero te hacen preguntas súper básicas
+[25:22] quién es tu cliente
+[25:24] el problema que estás resolviendo
+[25:26] cuánto te dura un cliente
+[25:28] estás pagando Dats para adquirir al cliente
+[25:30] lo haces orgánico
+[25:32] todas esas preguntas te las hacen ellos ahí
+[25:34] y en base a tus respuestas
+[25:36] van haciendo más dpdpdp las preguntas
+[25:38] ¿y cuántas veces van que bases?
+[25:40] nada más una
+[25:42] pero nos han entrevistado
+[25:44] como cuatro veces
+[25:46] la última nos entrevistaron dos veces
+[25:48] porque si tienen dudas te vuelven a hablar
+[25:50] y te dicen a ver pues entran otra vez otra llamada
+[25:52] y son otros partners
+[25:54] son otras personas
+[25:56] entonces está tensa
+[25:58] te pones muy nervioso
+[26:00] pues es como
+[26:02] creo que es de las cosas más difíciles que he hecho
+[26:04] en esta entrevista
+[26:06] ponen más nervioso
+[26:08] y no tanto porque no conozcas tus números
+[26:10] sino porque no sabes
+[26:12] cómo contestarlos de alguna forma
+[26:14] no, es gente que no conoces
+[26:16] es gente muy importante
+[26:18] gente que ya ha hecho cosas importantes
+[26:20] eso me refiero con importante
+[26:22] es en inglés
+[26:24] entonces el idioma en la barrera
+[26:26] es una barrera
+[26:28] una barrera pues
+[26:30] o ya sea que tú no le entiendas bien
+[26:32] a lo que te dijo o que tú no expreses bien
+[26:34] lo que quieres decir
+[26:36] una barrera de comunicación
+[26:38] que tienes que resolver
+[26:40] eso te pone nervioso aunque sepas inglés
+[26:42] lo hayas usado un montón de veces
+[26:44] pones tu lengua nativa y te pone nervioso
+[26:46] no tanto
+[26:48] tu negocio en sí, yo creo que todos esos factores
+[26:50] alrededor
+[26:52] de la plática te pone nervioso
+[26:54] pero ya cuando lo habíamos hecho varias veces
+[26:56] ya las últimas son como más tranquiles
+[26:58] a lo que vamos
+[27:00] pero la primera sí era como de oh Dios mío santo
+[27:02] ¿qué está pasando? y van a seguir intentando
+[27:04] sí, sí vamos a seguir intentando
+[27:06] aunque no entremos el feedback que te dan
+[27:08] es muy bueno y nos ha enderizado el barco varias veces
+[27:10] o sea es ese cambio
+[27:12] de v2c
+[27:14] a v2b fue por una entrevista de
+[27:16] oye no te están durando nada aquí no hay retención
+[27:18] si
+[27:20] es más grande que el
+[27:22] estándar en el mercado pero no es lo suficiente
+[27:24] te metes grande
+[27:26] para hacer un súper negocio
+[27:28] de esto entonces
+[27:30] que hay gente que lo hace
+[27:32] o sea es lo que te digo que el feedback
+[27:34] tienes que tomarlo con pincitas
+[27:36] porque luego ves ejemplos de gente que sí lo ha logrado
+[27:38] pero hay que comparar
+[27:40] con qué lo hicieron
+[27:42] con qué quienes son esas personas
+[27:44] obviamente no son igual que nosotros
+[27:46] entonces
+[27:48] qué background tienen ellos
+[27:50] qué información tienen ellos que no tenemos nosotros
+[27:52] todo ese tipo de cosas
+[27:54] a veces no nos tomamos en cuenta
+[27:56] y vemos los titulares de tech crunch
+[27:58] pero no sabes quién es
+[28:00] a lo mejor es el hijo de alguien que
+[28:02] está súper bien posicionado en la industria
+[28:04] y sabe un montón de cosas que tú no sabes
+[28:06] entonces esos tipos de cosas
+[28:08] que tienes como que tú también analizar
+[28:10] e interiorizar y ver
+[28:12] esto aplica, esto no aplica así
+[28:14] voy a darle o no lo voy a dar
+[28:16] porque ellos no te van a dar respuesta
+[28:18] ellos nomás te van a dar como una guía
+[28:20] y cuántos años tiene ya
+[28:22] Abena
+[28:24] ni sé cuántos años tenemos ya trabajando
+[28:26] pero yo lo que curo como 5
+[28:28] 5 o 6 tiene más
+[28:30] si yo entre tarde pero ya tiene como 5 o 6 años
+[28:32] y la meta en sí
+[28:34] cuál es
+[28:36] cuál sería por ejemplo para ti
+[28:38] fíjate que
+[28:40] a mí mismo todo lo que me mueve todos los días
+[28:42] y lo que me hace traer trabajando es hacer producto
+[28:44] es lo que te decía que
+[28:46] está experimentando con cosas
+[28:48] me gusta a mí la gente usa
+[28:50] la cosa que yo hago
+[28:52] saber que la gente de verdad lo está usando
+[28:54] eso me gusta demasiado
+[28:56] el tema competitivo de ser el número 1
+[28:58] me gusta
+[29:06] no hay nadie investigar
+[29:08] eso a mí me gusta
+[29:10] y también te voy a preguntar si están enfocadas solamente aquí
+[29:12] a México
+[29:14] está r
+[29:20] en Latinoamérica en Estados Unidos
+[29:22] no los hemos buscado, solo los han llegado
+[29:24] hay patrones cuando empiezas a sacar tu producto
+[29:26] al cliente final empiezan a suceder cosas
+[29:28] que tú nunca tenés plenado
+[29:30] no tenés plenado
+[29:32] y tienes que decidir si te eras
+[29:34] sobre eso
+[29:36] o lo dejas de lado
+[29:38] porque hay mucho ruido alrededor de cuando sacas un producto
+[29:40] allá afuera
+[29:42] no llega el cliente que tú esperabas
+[29:44] llega otro
+[29:46] entonces no sabes que ser
+[29:48] o te llegan mucho feedback
+[29:50] y como
+[29:52] como decides
+[29:54] cuál hacer y cuál no porque el equipo no es tan grande
+[29:56] entonces este tipo de decisiones
+[29:58] me gusta interesante
+[30:00] me gusta aprender de eso
+[30:02] ella
+[30:04] y ahorita ya se mantiene sola
+[30:06] no necesitan de fondueo
+[30:08] para subsistir
+[30:10] si ahorita ya somos
+[30:12] pues si ya estamos en números verdes
+[30:14] ya no, necesitamos este funding pero hay que invertir
+[30:16] entonces
+[30:18] básicamente el excedente
+[30:20] contratas más equipos y es que lo necesitas
+[30:22] o inviertes en otras cosas de herramientas o tecnología
+[30:24] por ejemplo chat y piti le metes
+[30:26] que hay acreditos, de hecho
+[30:28] no más para probar, sacar algo al mercado
+[30:30] que está pasando, como lo están usando
+[30:32] que están preguntando
+[30:34] y en base de eso como empezar a iterar
+[30:36] ¿Cómo metiste chat y piti
+[30:38] a tu producto?
+[30:40] o sea que es lo que hace chat y piti ahí
+[30:42] nos dimos cuenta
+[30:44] que en el proceso de atender a un paciente
+[30:46] o sea nutrición o sea
+[30:48] o sea lo que sea
+[30:50] hay un montón de preguntas repetitivas
+[30:52] entonces
+[30:54] puedes hacer dos cosas
+[30:56] o le pones al cliente final
+[30:58] o sea el paciente
+[31:00] el chat y piti o alguien que responda
+[31:02] o se lo pones a la especialista
+[31:04] que le ayude a responder
+[31:06] nosotros detectamos
+[31:08] que la automatización generalmente
+[31:10] no le gusta al paciente final
+[31:12] ellos les gusta
+[31:14] que los papachen
+[31:16] sobre todo en ese tipo de servicios
+[31:18] si, si, si a ellos les gusta sentir
+[31:20] que les hacen caso, que les escuchan
+[31:22] que están llevando su avance
+[31:24] entonces que hacemos herramientas para la especialista
+[31:26] para que una sola especialista
+[31:28] pueda atender a mas personas
+[31:30] entonces por ejemplo en avena te avisamos
+[31:32] hoy es cumpleaños de carlos andonei
+[31:34] le mando una felicitación
+[31:36] o carlos tiene tres días que no entran a avena
+[31:38] que esta pasando a lo mejor tiene ningún problema
+[31:40] entonces tu tienes que hablar
+[31:42] entonces esos mensajes por ejemplo
+[31:44] pueden ser autogenerados con chat y piti
+[31:46] entonces ya lo mandas
+[31:48] feliz cumpleaños generado por chat y piti
+[31:50] o sea seria un
+[31:52] un escribe o un mensaje de feliz cumpleaños
+[31:54] con tal
+[31:56] como se dice
+[31:58] como que sea formal
+[32:00] amigable
+[32:02] un mensaje de cumpleaños para carlos
+[32:04] divertido y a lo genera
+[32:06] y se lo manda
+[32:08] este tipo de cosas que estamos haciendo probando ahorita
+[32:10] que chido
+[32:12] básicamente para darle mas tiempo
+[32:14] a la especialista
+[32:16] entonces tu recibes créditos
+[32:18] de chat y piti pero
+[32:20] en base a que o tu los pides
+[32:22] no tu los pagas
+[32:24] ah tu compras créditos
+[32:26] y esos créditos se transforman
+[32:28] en llamadas a su servicio
+[32:30] se los venden por tokens
+[32:32] nos llaman como tokens no son palabras tal cual
+[32:34] esta difícil como de saber
+[32:36] como es no lo entendido muy bien
+[32:38] pero les llaman tokens
+[32:40] como palabras de valor
+[32:42] una cosa extraña pero
+[32:44] necesito todavía revisar eso estamos
+[32:46] implementandolo apenas
+[32:48] pero si nosotros
+[32:50] con el exidente
+[32:52] porque son pruebas para nosotros
+[32:54] como lo usan de verdad les funciona
+[32:56] entonces lo ponemos
+[32:58] básicamente nuestro método es
+[33:00] sacar, feature y pedir feedback
+[33:02] o sea lo pruebas
+[33:04] funciona o no funciona si funciona se queda
+[33:06] y si no
+[33:08] pues le das gas o que
+[33:10] esta es todo un arte pero
+[33:12] lo sacas, tu tienes un métrico
+[33:14] de tanto porcentaje que lo use
+[33:16] es bueno o es malo
+[33:18] sobrepasa o esta bajo
+[33:20] si sobrepasa esta de ley, lo quitaras
+[33:22] si esta bajo y es la decisión
+[33:24] lo matamos
+[33:26] o le damos otra iteración
+[33:28] porque el MVP no fue lo suficientemente bueno
+[33:30] para que lo usaran
+[33:32] a lo mejor esta muy escondido
+[33:34] entonces
+[33:36] ahí vienen las decisiones de matarlo
+[33:38] o dejarlo vivir pues
+[33:40] que hay cosas que hemos matado
+[33:42] y después lo volvemos a revivir
+[33:44] o hay cosas que fosítero en la primera
+[33:46] y después de eso no era su tiempo
+[33:48] de hecho metimos un chat
+[33:50] es un montón
+[33:52] y luego con el chat GPT
+[33:54] de tecnologías mejor de lo que había antes
+[33:56] lo revivimos
+[33:58] pero siempre estamos haciendo ese tipo de
+[34:00] cosas
+[34:02] no le voy
+[34:04] pues literalmente
+[34:06] son experimentos
+[34:08] te la pasas experimentando todo el tiempo
+[34:10] si, ahí tenemos cuidado porque también es algo
+[34:12] entonces por ejemplo el especialista les aparece
+[34:14] o oye estas respuestas pueden estar sesgadas
+[34:18] puede ser información que no es real
+[34:20] no es verdadera
+[34:22] entonces confirma con una fuente
+[34:24] tenemos como
+[34:26] ese tipo de labels
+[34:28] pero si ahorita
+[34:30] hasta ahorita son para mensajes de cumplidañados
+[34:32] y cosas así no importa tanto
+[34:34] que sea
+[34:36] verdadero no lo que dice chat GPT
+[34:38] no ha afectado
+[34:40] directamente lo que ha
+[34:42] pasado en estados unidos los leyados que ha habido
+[34:44] o por ejemplo el pedo que hubo
+[34:46] con el banco de Silicon Valley
+[34:48] si
+[34:50] si nos impactó a nosotros el tema
+[34:52] de Silicon Valley Bank
+[34:54] afortunadamente pues, pues ya entre el gobierno
+[34:56] a rescatar el banco entonces
+[34:58] pero si fue estresante
+[35:00] y un día antes, osea
+[35:02] estaba en twitter y Silicon Valley Bank
+[35:04] saca en su dinero y yo go
+[35:06] Javi
+[35:08] que esta pasando, sabes que esta pasando
+[35:10] Javi no me que yo, me dijo ah no creo que pasa
+[35:12] es un bank, es Silicon Valley Bank
+[35:14] como se va a caer Silicon Valley Bank no
+[35:16] entonces el siguiente, no podemos sacar el dinero
+[35:18] como de oh demonios
+[35:20] pero bueno como le avise antes
+[35:22] el alcanzó a hacer una transferencia
+[35:24] para pagar denómina y todo eso porque era también
+[35:26] un día cercano al pagar denómina
+[35:28] entonces el alcanzó a sacar algo
+[35:30] pero si si nos pegó
+[35:32] el tema de Silicon Valley Bank
+[35:34] es el banco predilecto de las startups
+[35:36] porque tu no vives allá
+[35:38] entonces es el único banco que te daba
+[35:40] te abrió una cuenta de banco sin tener toda la
+[35:42] documentación que te pidió un banco
+[35:44] mas grande, ellos confían
+[35:46] confían mucho
+[35:48] en las startups
+[35:50] en los emprendedores de ella
+[35:52] que no son de ella, entonces
+[35:54] era como el banco de facto
+[35:56] entonces por correderos
+[35:58] en twitter en el corredero, los chats en la mañana
+[36:00] era como de que saben
+[36:02] si lo como la vengan y otros
+[36:04] no bro ya vas muy tarde
+[36:06] de eso de haber corrido hace dos días
+[36:08] demonios pues
+[36:10] pero no vamos, parte del juego, somos
+[36:12] el adopters, osea nosotros somos el adopters
+[36:14] ya sabemos, estamos acostumbrados a que
+[36:16] cosas se preocupan
+[36:18] pero estuvo bien cabrón que todo eso pasó
+[36:20] a raíz de espe
+[36:31] pero bueno, dentro de lo legal
+[36:33] osea no es nada legal, no es nada raro
+[36:35] este
+[36:37] y si, pues puro miedo
+[36:39] y como
+[36:41] los ya no se mueven a la misma velocidad del mundo
+[36:43] osea un bank run en otros años
+[36:45] hubiera sido vas al banco
+[36:47] lo sacas tu dinero, no
+[36:49] en un horario de oficina, pero ahorita todos
+[36:51] con sus apps sacaron de dinero rápido
+[36:53] entonces nadie está preparado a esa velocidad
+[36:55] y eso también me estresa mucho
+[36:57] cuando eres un producto la velocidad
+[36:59] en la que te pueden una, adoptar
+[37:01] eso está chido
+[37:03] tu producto es bueno viral, chat GPT
+[37:05] osea tienen un bloqueo
+[37:07] no puedes consumir más de 120 dolares
+[37:09] al día porque
+[37:11] no se, entonces magia tener un producto
+[37:13] que bloqueas la caja
+[37:15] no me gusten tanto
+[37:17] por favor no me compren, si, lo que vendo
+[37:19] entonces, ese producto
+[37:21] es super bueno, te das cuenta en eso
+[37:23] porque te bloquean, osea
+[37:25] pues está rarísimo
+[37:27] entonces, eso es
+[37:29] como es bueno como es malo, si es muy malo
+[37:31] todos se van a ir
+[37:33] en un día, como le pasó a Silicone
+[37:35] un rumor de algo y en un día todo se fueron
+[37:37] entonces, hay que tener curiosidad
+[37:39] incluso ayer con la velocidad
+[37:41] que no deberíamos de preocuparnos por bancos
+[37:43] también es un tema porque deberías
+[37:45] de preocuparte que tu banco guarde tu dinero
+[37:47] a la start of donde yo estoy
+[37:49] este, estamos
+[37:51] debo no sé que tanto puedo hablar
+[37:53] yo de super
+[37:55] se hice
+[37:57] en un round way
+[37:59] tanto dinero y en base
+[38:01] al dinero que tienes calculas cuánto tiempo
+[38:03] te queda de vida y cuánto puedes contratar
+[38:05] por ejemplo ahorita nosotros
+[38:07] estamos, osea no estamos contratando
+[38:09] gente
+[38:11] y nuestra preocupación principal
+[38:13] era, bueno pues hay que
+[38:15] hacer ventas, traer clientes nuevos
+[38:17] para que el round way
+[38:19] crezca, osea para tener más dinero
+[38:21] y pasa esto wey, osea nosotros
+[38:23] nos afectó
+[38:25] y platicaba con la
+[38:27] CEO de la empresa le digo we
+[38:29] osea es lo que menos deberías
+[38:31] de preocuparte wey
+[38:33] te preocupas por hacer producto
+[38:35] y por vender y aparte porque
+[38:37] tu pinche dinero no desaparezca
+[38:39] pero incluso como persona que no tiene un start
+[38:41] of, porque estás trabajando
+[38:43] tienes tu
+[38:45] restaurante y te tienes que preocupar
+[38:47] porque el dinero tenga tu dinero
+[38:49] el banco tenga tu dinero y real pues
+[38:51] pero, no, así funciona
+[38:53] y estaba investigando en México también
+[38:55] también los bancos, más bien las
+[38:57] soffipos, una cosa así
+[38:59] también tienen como un seguro
+[39:01] hasta cierto límite
+[39:03] donde vietan y te dan rendimientos
+[39:05] también tienen cierto límite, no, no
+[39:07] no sé si los bancos pero, osea en
+[39:09] realidad es muy común de lo
+[39:11] más común de lo que creemos
+[39:13] y no solamente ya, hay muchos lugares
+[39:15] como en México
+[39:17] otra cosa de preocuparnos
+[39:19] al parte de
+[39:21] y como, osea
+[39:23] entonces también ustedes no quieren bajar la inversión
+[39:25] osea quieren
+[39:27] estar en la...
+[39:29] bien bien bien eso
+[39:31] nada más sé que ahorita
+[39:33] estaban
+[39:35] estamos buscando más bien esas
+[39:37] como esos clientes
+[39:39] conseguir esos clientes para poder ir a pedir
+[39:41] más inversión
+[39:43] se manejan diferentes digo ya cuando
+[39:45] eres
+[39:47] cuando eres un founder que ya tuvo un exit
+[39:49] esto es cuando otro juego es diferente
+[39:51] osea cuando
+[39:53] cuando eres nuevo en el
+[39:55] en el field pues tienes
+[39:57] que ganarte el respeto de todos
+[39:59] la confianza de todos pues
+[40:01] nosotros estamos más o
+[40:03] en ese tipo de juego no
+[40:05] ver si de verdad estos
+[40:07] si, esta muy interesante porque no
+[40:09] osea por ejemplo en este
+[40:11] momento no tienes
+[40:13] poco dinero y a lo mejor
+[40:15] el way que es nuestro chairman
+[40:17] puede ir a buscar más inversión y se la dan
+[40:19] pero el cuida mucho el valor
+[40:21] de la empresa dice si ahorita voy
+[40:23] y pido más inversión pues obviamente le va a afectar
+[40:25] al valor
+[40:27] de la empresa
+[40:29] entonces el busca agregar valor para la hora
+[40:31] de que vaya a buscar a inversionistas pues
+[40:33] no se degraden tanto
+[40:35] si, si, si, esta como
+[40:37] si no esta bien, osea lo es que
+[40:39] si estas vendiendo de equity de tu empresa
+[40:41] mas barata
+[40:43] entonces para que lo venderías mas barato
+[40:45] si puedes esperarte tener puedo
+[40:47] marketing pidi venderlo mas caro
+[40:49] el mismo pedazo de tu empresa
+[40:51] si, pues si, presionas a la gente
+[40:53] que busque mas clientes
+[40:55] digo a fin de cuentas
+[40:57] a diferencia de contigoo
+[40:59] pues la empresa es
+[41:01] pues tu eres dueño de la empresa
+[41:03] si, si, si, si, acá pues
+[41:05] no, acá pues yo soy un
+[41:07] no es dan stock no
+[41:09] nos dan stock si
+[41:11] y tenemos inversión pero
+[41:13] no influimos
+[41:15] en decisiones de la empresa
+[41:17] ni a nivel indirecto
+[41:19] pues no
+[41:23] osea podemos
+[41:25] podemos ingerir en lo que
+[41:27] estamos haciendo el producto pero en
+[41:29] en negociación
+[41:31] ah, ok
+[41:33] hacer una empresa es muy
+[41:35] complicado
+[41:37] muchos variables hay que controlar, algunas no las puedes
+[41:39] controlar y tienes que vivir con ello
+[41:41] como fundador
+[41:43] como cofundador
+[41:45] incluso como parte del equipo de desarrollo
+[41:47] algunas cosas son como
+[41:49] como esas no, osea no puedes
+[41:51] controlar el rumbo
+[41:53] ellos no pueden controlar
+[41:55] quien les da dinero y quien no
+[41:57] ellos no pueden controlar el mercado si les gusta o no
+[41:59] entonces
+[42:01] incluso la velocidad tienes que tener una cadencia
+[42:03] porque si tu como empresa tienes
+[42:05] una cadencia y uno de tus
+[42:07] personas que trabaja contigo
+[42:09] en el equipo de desarrollo tiene una cadencia mas rápida
+[42:11] va a crecer mas que tu
+[42:13] te va a exigir
+[42:15] oye pues yo no tengo una quina aprenderle
+[42:17] este, creo que ya no
+[42:19] necesito a gusto, necesito aprender de alguien
+[42:21] mas, entonces a ver un startup que vaya mas adelantado
+[42:23] o a una empresa mas grande
+[42:25] también al revés
+[42:27] si la persona que trabaja contigo
+[42:29] va mas lento y tu vas mas rapido
+[42:31] pues es que donarte
+[42:33] o algo que también nos pasa a nosotros es que
+[42:35] entró personas o contratamos personas
+[42:37] que no
+[42:39] no estaban familiarizadas con este
+[42:41] ambiente de startup, entonces
+[42:43] pues es, digo
+[42:45] tengo ya
+[42:47] como 7 o 8 años
+[42:49] o sea te acostumbras a tanto movimiento
+[42:51] no me ha durado un
+[42:53] manager o director a mi mas de
+[42:55] un año oye y tu no duras tampoco afuera
+[42:57] osea si como ellos no entran aquí
+[42:59] y les cuesta
+[43:01] tu sales de aquí y te cuesta
+[43:03] te sientes como en el
+[43:05] limbo
+[43:07] que todo vaya lento, ah cuando sales
+[43:09] a otro tipo de movimiento, ah como tu que trabajas
+[43:11] un startup y luego te mueves, si
+[43:13] es como oh no es porque
+[43:15] estos viven tan lento
+[43:17] entonces regresas, no?
+[43:19] si term, terminas regresando porque este es el ambiente
+[43:21] que te hace sentir así vivo
+[43:23] entonces hay gente que no está
+[43:25] acostumbrada a ese ritmo y
+[43:27] se esperan osea entrenan
+[43:29] dicen no wey yo no puedo con este ritmo de trabajo
+[43:33] ahí tratamos, no se
+[43:35] en el startup que
+[43:37] que entren a primera vez tratábamos
+[43:39] de
+[43:41] decirle a los candidatos nosotros como
+[43:43] parte del equipo de desarrollo a lo que se estaban metiendo
+[43:47] porque justamente no mucha gente no entendía que era un
+[43:49] startup, entonces llegaban y
+[43:51] nosotros de que veíamos el perfil
+[43:53] decíamos ah no me se me sé que
+[43:55] no va a ser, no va a ser macho
+[43:57] si la velocidad no va a ser la misma
+[43:59] entonces le avisábamos y
+[44:01] me acuerdo que el sitio nos decía
+[44:03] es que me aspantan a los candidatos
+[44:05] simplemente les decimos
+[44:07] lo que van a hacer osea no es como que
+[44:09] te sale mas barato de hecho
+[44:11] porque no
+[44:13] no vas a entrenarlo, no va a entrar
+[44:15] no va a ser todo el papeleo
+[44:17] para que el final, no de
+[44:19] lancho, no y
+[44:21] está bien que no le gusta
+[44:23] está bien, no se no digo que esté mal
+[44:25] si lo bueno es que hay para todos
+[44:27] para todos, bueno con chat y pitilla
+[44:29] no se si para todos
+[44:31] tal vez
+[44:33] la central ever la van a sufrir un poquito mas
+[44:35] o tal vez el mercado simplemente va a
+[44:37] saciar el hambre que tenía
+[44:39] los developers no
+[44:41] que antes no había
+[44:43] y a lo mejor los salarios
+[44:45] desarrollaron a bajar, no se
+[44:47] si, ahora si que es muy
+[44:49] incierto y era una de las preguntas
+[44:51] que tenia para ti que veias
+[44:53] para el futuro pero la verdad es que si es
+[44:55] muy incierto
+[44:57] si, cambia demasiado
+[44:59] es el futuro
+[45:01] para nosotros y le he practicado
+[45:03] con mi socio es
+[45:05] tenemos que
+[45:07] implementar inteligencia artificial en el producto
+[45:09] porque no es una ventaja competitiva
+[45:11] es un comodity, cualquier
+[45:13] gente ya va a poder instalarlo en sus servicios
+[45:15] porque chat y pitilla lo hizo
+[45:17] ponerle para todos, entonces es
+[45:19] un pay to
+[45:21] tu play
+[45:23] no es un pay to win, necesitas
+[45:25] pagar eso para jugar
+[45:27] no para ganar, entonces
+[45:29] queremos adelantarnos a eso
+[45:31] implementar lo mas que podamos para
+[45:33] que no nos agarren curva
+[45:35] incluso en nuestro equipo de desarrollo
+[45:37] tambien
+[45:39] ya les pagamos el copilot, mas bien lo pagamos
+[45:41] para nosotros el copilot
+[45:43] estamos implementando chat y pitilla de mi parente
+[45:45] desarrollo porque
+[45:47] es una ventaja, entonces
+[45:49] entremas ventajas tengamos
+[45:51] mejor, entonces y nuestra ventaja
+[45:53] es la velocidad, entonces
+[45:55] tenemos que implementar las cosas mas rapidas
+[45:57] que la competencia
+[45:59] y que el mercado que ya es establecido
+[46:01] que todas las grandes empresas
+[46:03] que ellos van a estar prepuados de políticas de privacidad
+[46:05] de que si
+[46:07] que dicen que no dicen en el chat
+[46:09] que implicaciones tiene
+[46:11] nosotros no, osea
+[46:13] somos tres pelados en el cuarto
+[46:15] entonces
+[46:17] es lo bueno, a mi me gusta este stage
+[46:19] tambien yo se que no va a ser para siempre
+[46:21] yo se que si a ver a funciona
+[46:23] que ojalá funcione y crezca
+[46:25] eso va a desaparecer
+[46:27] y mi rol va a tener que cambiar y a mejor no voy a ser generalista
+[46:29] pero eso que dices de que si funciona
+[46:31] y a mejor no se esta funcionando
+[46:33] aja, esta raro porque no lo
+[46:35] sientes, como vas arriba del
+[46:37] del producto
+[46:39] para ti no es un 010
+[46:41] para ti es un 0, 1, 2, 3, 4
+[46:43] entonces llegas al 10 y no
+[46:45] para ti es normal
+[46:47] llegas al 10 y ves
+[46:49] y me faltan 50 para llegar al 70
+[46:51] tu siempre vas en eso
+[46:53] si o veces volteo para atrás y digo
+[46:55] 60 mil pacientes al mes
+[46:57] osea 2.500
+[46:59] 5.500
+[47:01] 1.000.000 de consultas
+[47:03] es un numero ching, es un montón
+[47:05] se cae
+[47:07] un poquito, se cae un minuto
+[47:09] soporte esta ardiendo
+[47:11] entonces hay donde me de cuenta
+[47:13] o de verdad estamos haciendo algo que ya estan usando
+[47:15] ya estamos en medio de muchos procesos que yo no
+[47:17] no
+[47:19] no te pones a pensar cuando
+[47:21] inici eniciaste que ibas a estar a medio de
+[47:23] entonces eso ya es una gran responsabilidad
+[47:25] estar ahi ya
+[47:27] pensando
+[47:29] que esta no tiene que caer
+[47:31] esta chido, osea es una cosa que yo
+[47:33] siempre me he querido hacer
+[47:35] saca mi producto y que lo usen
+[47:37] dicen que cuando ya tus problemas
+[47:39] bueno en ese tipo de
+[47:41] de área dicen que cuando tus problemas
+[47:43] dejan de ser técnicos
+[47:45] que ya estas en otro nivel
+[47:47] pero yo creo que los técnicos nunca dejan de
+[47:49] aparecer porque incluso el código que no tocas
+[47:51] empieza a generar
+[47:53] problemas mas adelante
+[47:55] que actualizarlo
+[47:57] esa no te vas a salvar
+[47:59] no te vas a salvar
+[48:01] pero bueno al menos vas a tener como
+[48:03] dinero para
+[48:05] tener mas gente en el equipo que te ayude
+[48:07] a solucionar esos problemas porque en principio eres tu para todo
+[48:09] y ya se que ya la vas a dar
+[48:11] tu se va a correr la vas a dar
+[48:13] esos sombreros de BA no
+[48:15] entonces esta chido, esta chido
+[48:17] esta interesante
+[48:19] bien Ruben pues
+[48:21] yo que ya es tiempo de cortar
+[48:23] te crea que comparteras
+[48:25] como pueden encontrar a avena
+[48:27] a los especialistas
+[48:29] claro a avena y yo
+[48:31] a avena software lo pueden googlear y somos los primeritos que salimos
+[48:33] por termino a avena
+[48:35] pero si
+[48:37] si eres
+[48:39] básicamente un doctor variata también lo puedes utilizar
+[48:41] que das este algún tipo
+[48:43] de soporte
+[48:45] de nutrición
+[48:47] lo puedes utilizar
+[48:49] estamos abriendo también un poquito a entrenadores fisicos
+[48:51] tenemos unas rutinas de video también
+[48:53] básicamente la idea de avena es ser la superable salud
+[48:55] pero que los
+[48:57] en los especialistas
+[48:59] chingón
+[49:01] bien Ruben pues muchas gracias
+[49:03] gracias por venir Ruben
+[49:05] gracias a todos por escuchar
+[49:07] espero les haya gustado si si
+[49:09] den like compartan y nos vemos en el siguiente
+[49:11] episodio gracias
+[49:13] bye

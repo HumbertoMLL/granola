@@ -1,0 +1,325 @@
+Avena ronda 2
+
+# Avena, ronda 2: hate, cobros, adquisición y geografía
+
+Para Beto · 13 oct 2026 · scraping propio (App Store 19 países, Google Play, Trustpilot, Meta Ad Library 21 países, sitemaps, bundle JS). Nada inventado: cada número trae su fuente; lo no confirmado dice HIPÓTESIS.
+
+194reseñas de 1 a 3★ leídas y clasificadas, de 1,867 reseñasApp Store 755 · Google Play 971 · Trustpilot 141
+
+3 de 3reseñas orgánicas de Trustpilot son de 1★; 138 invitadas son 4 a 5★trustpilot.com/review/avena.io
+
+10%comisión de Avena sobre cobros del nutriólogo a pacientes, más Stripeavena.io/precios + bundle del panel
+
+Stripe ConnectstripeAccount: session.stripe_account en avena-payments.js línea 836payments.avena.io
+
+27 / 0anuncios activos de "Avena Salud" en México / en los otros 20 países revisadosMeta Ad Library 13 oct 2026
+
+119 díassin publicar en el blog (último post 16 jun 2026); 238 posts en ráfagasavena.io/blog/post-sitemap.xml
+
+38K · 36Kseguidores Instagram · Facebook; TikTok 3.9K; YouTube 3.85Kperfiles públicos
+
+49,535 vs 4,296calificaciones App Store México vs EE.UU.; resto de países < 350iTunes lookup por tienda
+
+### Hallazgos clave
+
+- El hate es de pacientes, no de nutriólogos. En tiendas la queja #1 es recetas, porciones y cálculos que no cuadran (57), luego bugs que borran el plan (37), lista del súper y PDF (36) y UX confusa (30, casi toda 2025 a 2026). Las quejas de cobro (31) son casi todas de la era B2C 2018 a 2021.
+
+- Su reputación pública está gestionada. Trustpilot pasó de 4 reseñas con TrustScore 2.9 (2024) a 141, con 136 publicadas mar a ago 2026 vía invitación; las únicas 3 orgánicas son de 1★. El programa de certificación del panel pide "al menos 3 reseñas de 5 estrellas de tus pacientes".
+
+- Sí cobran a pacientes por el nutriólogo: servicios de pago único o suscripción mensual en perfil web y app, retos con link de pago, Stripe Connect con la cuenta del nutriólogo, 10% de Avena + Stripe (~4%). OXXO, transferencia y PayPal solo existen para comprar Avena, no para el paciente del nutriólogo. No hay CFDI al paciente.
+
+- Monetizan el paciente también: suplementos dentro de la app con 15% de comisión al nutriólogo (texto en español), marketplace con precio de mayoreo y retos grupales con 10% de comisión.
+
+- Adquisición = Meta Ads en México + product-led. 27 anuncios activos, todos entregados en MX, 9 de ellos sobre IA; lead magnets gratis; UGC de "embajadoras" pagadas por vistas; referidos (colega 90% de descuento, tú $299 MXN de crédito); universidades y Avena Weekend en Zoom.
+
+- Contenido propio flojo: blog en ráfagas generadas para SEO (44 posts en ene 2025, 44 en feb 2025, 23 en may 2026), parado desde junio; YouTube es soporte (videos de 23 a 851 vistas, último hace ~6 meses); TikTok propio 3.9K seguidores. El link de Facebook del home lleva a una página no disponible.
+
+- Geografía: México y nada más. 71% del directorio, 92% de las calificaciones App Store y el 100% de la pauta Meta son México. EE.UU. es segundo (4,296 calificaciones, 147 perfiles) y lo atacan con otra marca, Alva Health (USD 99/mes, seguros, HIPAA, early access). Brasil tiene landing pt-br pero 8 calificaciones; Argentina tiene el peor promedio (3.6★).
+
+- Por dónde entrar: app de paciente flexible y que no falle, cobros locales al paciente (OXXO, SPEI, Mercado Pago, CFDI) sin 10% de comisión, reseñas honestas, y LATAM fuera de México (Perú, Colombia, Ecuador, Centroamérica) donde Avena no anuncia.
+
+## 1. HATE: qué critican nutriólogos y pacientes
+Método. 1,867 reseñas descargadas el 13 oct 2026: App Store RSS de 19 tiendas (755; las 500 más recientes de MX, desde jul 2025), Google Play MX (971, muestra de la ronda 1) y Trustpilot completo (141 visibles de 153). Se tomaron las de 1 a 3★ (194) y se etiquetaron por palabras clave; una reseña puede caer en varias categorías. No accesible sin sesión: grupos y comentarios de Facebook, comentarios de Instagram, TikTok y YouTube (YouTube y TikTok bloquean la IP del box). Sin resultados: Reddit (0 hilos sobre la app), X (24 posts con "avena salud", ninguno sobre la app). Foros: solo comparativas escritas por competidores (abajo, con su sesgo).Conteo por categoría y era. Rojo = 2022 a 2026 (Avena ya es B2B y la app la usa el paciente del nutriólogo). Gris = 2018 a 2021 (Avena vendía planes directo al consumidor).
+CategoríaNCita textualFuente
+Recetas, porciones y cálculos57"Las recetas que tiene la app son generadas por IA y son bastante malas y a veces ni siquiera corresponden los ingredientes con las instrucciones."App Store MX, 1★, 23 sep 2025
+Bugs: el plan no carga o se borra37"Cada vez que armo mi plan, lo guarda un par de minutos y en cuanto intento ver mi lista de compra, lo resetea. He pedido ayuda por correo varias veces y no logran resolverlo."Google Play, 1★, 20 may 2025
+Lista del súper, PDF, imprimir36"Siempre son los mismos problemas de que ni deje descargar en pdf la dieta y/o no deja ver mis porciones al final"App Store MX, 1★, 31 ago 2026
+Cobros, cancelación, reembolsos31"Tomaron la cuenta con la que pagué mi primer suscripción para pagar la siguiente suscripción ... SIN MI AUTORIZACIÓN ... y ahora no quieren hacer un reembolso"Google Play, 1★, 22 jun 2026
+UX confusa30"Muy complicada de usar. El diario de alimentación es horrible. No te permite modificar cantidades ... Cero intuitiva."App Store MX, 1★, 1 jun 2026
+Plan rígido22"no permite guardar recetas si no tiene todos los grupos de alimentos, no deja elegir varios del mismo grupo si añades otro te borra el anterior"Google Play, 1★, 26 may 2026
+Soporte o nutriólogo no responde22"No aparecen las porciones en la app. He contactado por correo pero no tengo respuesta para solucionarlo"Google Play, 1★, 31 ago 2026
+"Antes era mejor"12"Antes era visual e intuitiva. Ahora para registrar 60 min de ejercicio tengo que hacer mil pasos ... se siente como un retroceso."Google Play, 2★, 25 oct 2025
+Precio9"Muy caro para tener cualquier falla y no se pueda reportar y solucionar de inmediato"App Store MX, 1★, 6 ago 2026
+IA y planes genéricos7"Para el o la nutriólog(o)a es muy cómodo que la aplicación le cree los menús, sin embargo no se contemplan los gustos ... me niego a ser paciente de App."Google Play, 1★, 8 nov 2023
+### Lo que critican los nutriólogos
+En tiendas casi no escriben (la app es del paciente). Su voz aparece en reseñas sueltas, en el propio flujo de cancelación de Avena y en las comparativas de competidores.
+
+“Exagerado el cambio de costos en la mensualidad como usuario (nutriólogo) con 4 años de antigüedad ... (cobrar x paciente individual)”Google Play, 1★, 31 mar 2022
+“la app para móvil está terrible, no deja ver la información y editar a gusto ... En sí, Avena es buenísima para el trabajo del nutriologo”Google Play, nutrióloga, 21 mar 2025
+“aún a los nuevos se les dificulta un poco aprender a usarla. Me gustaría implementar marketing o algo para hacer publicidad de mi servicio.”Trustpilot, nutrióloga, 4★, 6 jul 2026
+“Deberían quitar el registro de pago al inicio, muchos de mis pacientes no tienen tarjeta ni métodos de pago en Google.”Google Play, nutrióloga, 3★, 30 oct 2019
+Razones de cancelación que Avena ya prevé (textos del panel, bundle index-Cd6aFKDJ.js):
+Opción en el formulario de baja
+El producto es difícil de usar
+El proceso para crear un plan nutricional es muy largo
+Es difícil configurar mis métodos de trabajo
+Funcionalidad clave que Avena no tiene o no es suficiente
+Encontré otra herramienta
+El precio es elevado para mi presupuesto actual
+No aceptan mi método de pago preferido
+Aún no tengo pacientes reales para usar Avena
+Terminé mis prácticas o el semestre
+Tengo pocos pacientes
+Contraofertas en la baja: pausa de 1 mes (máx. 2 al año), "precio especial" solo para 10 pacientes activos, plan estudiante de 8 pacientes. Si pagas con PayPal, el mes gratis por referido se pide por correo.
+### Críticas desde comparativas (ojo: escritas por competidores)
+SitioQué dice de AvenaSesgo
+softwaredenutricion.org"Suscripción mensual en 2 años $19,176 MXN con 40+ pacientes" vs pago único Nutrimind; "Pacientes limitados por tier"; "Avena no cuenta con" antropometría ISAK ni somatocartaPro Nutrimind
+vidanutritiva.comNo incluye a Avena en su tabla; se autoproclama #1Autopromoción
+realreviews.io11 reseñas positivas con nombres genéricos ("Cecil Page", "Marie River")Baja credibilidad
+HeyNutre (ronda 1)Vende "Stripe sin comisión" frente al 10% de AvenaCompetidor directo
+### Reseñas gestionadas: el número 4.9 no cuenta la historia completa
+
+Trustpilot: 138 reseñas con etiqueta de invitación (BasicLink) y 3 orgánicas. 136 publicadas entre mar y ago 2026 (37 en junio, 57 en julio). En la ronda 1 se registró TrustScore 2.9 con 4 reseñas en 2024.
+Perfil Trustpilot 13 oct 2026 · https://www.trustpilot.com/review/avena.io“La aplicación no te deja evaluar al nutriólogo te obliga a calificarlo siempre con 5 estrellas”App Store MX, 1★, 1 ago 2025
+Panel, programa de certificación: "2. Recibir al menos 3 reseñas de 5 estrellas de tus pacientes" (clave referrals.modal_step_2).
+### Dónde no lo hacen bien y por dónde entrar
+Debilidad de AvenaEvidenciaEntrada para el clon
+App del paciente rígida: no deja cambiar alimentos, registrar libre ni comer fuera22 quejas de rigidez + 30 de UX, casi todas 2025 a 2026Modo flexible: tabla de equivalencias editable, registro libre con foto, "comí fuera" con estimación, kcal visibles si el nutriólogo lo permite
+Fiabilidad: planes que se borran, porciones que no aparecen, semanas que se mueven37 quejas de bugs; "He contactado por correo pero no tengo respuesta"Offline-first y sincronización robusta; soporte in-app al paciente con SLA
+Lista del súper y PDF36 quejasLista por pasillo, editable, compartible por WhatsApp; PDF de una hoja
+Recetas de IA sin revisar"generadas por IA y son bastante malas"Recetas verificadas por nutriólogos, marcadas como tales
+Cobro al paciente solo con tarjeta vía Stripe y 10% de comisiónavena-payments.js limita OXXO, transferencia y PayPal a ventas de AvenaCobro con OXXO, SPEI, Mercado Pago, MSI y CFDI automático; comisión 0% o fija
+Reputación inflada3 de 3 reseñas orgánicas en 1★; 5★ obligatoriasReseñas verificadas y públicas como diferenciador de confianza
+Precio que escala por paciente activoQueja 2022; comparativa de 3 añosPrecio plano o por nutriólogo, sin contar pacientes
+Clínico profundoSin ISAK ni somatocarta según competidoresISAK, curvas OMS, NOM-004, renal y diabetes
+Fuera de México0 anuncios fuera de MX; Argentina 3.6★; Brasil 8 calificacionesLanzar en Perú, Colombia, Ecuador y Centroamérica con bases de alimentos locales
+## 2. Evidencia de Stripe: cómo se detectó, paso a paso
+
+1. La página de preciosavena.io/precios/ incluye en la línea 1369 del HTML:
+<script src="https://payments.avena.io/js/avena-payments.js?d=08/08/26-09:00">
+2. Se descarga el scriptcurl https://payments.avena.io/js/avena-payments.js → 73,001 bytes, 1,918 líneas, servido por Google Frontend (App Engine)
+3. Carga Stripe.jsLínea 720: loadJS("https://js.stripe.com/v3")
+4. Pide sesión a su APILínea 1867: POST api.avena.io/_ah/api/stripe/v1/session
+5. Abre Checkout de StripeLíneas 833 a 842: Stripe(publishable_key, {stripeAccount}) y initEmbeddedCheckoutCarga de Stripe.js y configuración (líneas 718 a 737) 718      //Load Stripe
+ 719      if(typeof Stripe === 'undefined') {
+ 720        loadJS("https://js.stripe.com/v3")
+ 721          .then(() => {
+ 722            getConfiguration(
+ 723              configuration => {
+ 724                paymentsConfiguration = configuration;
+ 725                showAccount(configuration);
+ 726                initPayPal();
+ 727              },
+ 728              // Without a configuration the header falls back to what the page gave us
+ 729              _error => { showAccount(null); }
+ 730            );
+ 731          })
+ 732          .catch(_error => { });
+ 733      }
+ 734    }
+ 735    getConfiguration = (success, error) => {
+ 736      let url = `${properties.api}/_ah/api/stripe/v1/config?alias=${CONFIGURATION.alias}&origin=${CONFIGURATION.origin}`;
+ 737      if(properties.utmSource) {Stripe Connect: cobra en la cuenta de otro (líneas 831 a 846) 831        session => {
+ 832          if (session && session.publishable_key) {
+ 833            stripe = Stripe(session.publishable_key);
+ 834            if (session.stripe_account) {
+ 835              stripe = Stripe(session.publishable_key, {
+ 836                stripeAccount: session.stripe_account,
+ 837              });
+ 838            }
+ 839  
+ 840            // Stripe Checkout Modal
+ 841            if(session.clientSecret) {
+ 842              stripe.initEmbeddedCheckout({
+ 843                clientSecret: session.clientSecret,
+ 844              })
+ 845              .then(checkout => {
+ 846                // Hide modal
+
+Métodos de pago que pide a Stripe (808 a 820) 808          mode: isSubscription 
+ 809            ? 'subscription' 
+ 810            : 'payment',
+ 811          plan: price.plan,
+ 812          enableOXXO: gateway == 'stripe-oxxo',
+ 813          enableBankTransfer: gateway == 'stripe-bank',
+ 814          title: price.title,
+ 815          description: price.description,
+ 816          amount: price.amount * 100,
+ 817          currency: price.currency,
+ 818          interval: price.interval,
+ 819          allowPromotionCodes: price.allowPromotionCodes,
+ 820          coupon: price.coupon // from price configuration
+Selector de pasarela solo cuando vende Avena (1078 a 1084)1078      // Select gateway
+1079      const isAvena = !CONFIGURATION.alias || CONFIGURATION.alias === 'avena';
+1080      const stripeAndPayPal = price.plan && price.paypalPlan;
+1081      const stripeCandidate = (price.amount && price.currency) || price.plan;
+1082      const OXXOCandidate = price.amount && price?.currency?.toLowerCase() === 'mxn' && !price.interval;
+1083      const payPalCandidate = ((price.amount && price.currency && !price.interval) || price.paypalPlan) && !price.coupon;
+1084      const chooseGatewayCandidate = isAvena && (stripeAndPayPal || (stripeCandidate && OXXOCandidate) || (stripeCandidate && payPalCandidate));
+Cómo leerlo. Stripe(...) con stripeAccount es la forma documentada de Stripe Connect para cobrar "a nombre de" una cuenta conectada. El parámetro alias identifica quién vende: en avena.io/precios vale avena (código de la página: alias:`avena`, origin:`https://avena.io`); con otro alias el mismo script cobra para un especialista y solo ofrece tarjeta por Stripe. PayPal se carga aparte (línea 930, currency=MXN). En el bundle del panel aparecen los textos "Recibe pagos en línea con Stripe", "Conecta tu cuenta de Stripe" y "Tu cuenta de stripe es independiente de tu cuenta Avena" (offsets 2,403,254 a 2,403,931 de panel.avena.io/assets/index-Cd6aFKDJ.js). Para reproducir: abrir el script en el navegador y buscar stripeAccount.
+## 3. ¿El nutriólogo puede cobrar a sus pacientes desde Avena?
+Sí. Resumen por pieza:
+PiezaEstadoEvidencia
+Cobrar consultas o servicios desde perfil web y app (pago único o suscripción mensual)CONFIRMADOPanel: "Único · No se repite el cobro", "Suscripción mensual · Se repite el cobro automáticamente cada mes"; "Los pacientes online verán una pantalla de pago con tus honorarios cuando ingresen a la app"; landing: "Pagos en línea y suscripciones." (precios)
+Pasarela: Stripe ConnectCONFIRMADOstripeAccount: session.stripe_account (avena-payments.js l. 836 y 992); "Conecta tu cuenta de Stripe"
+Tipo de cuenta Connect: Standard (cuenta propia del nutriólogo)HIPÓTESIS"Tu cuenta de stripe es independiente de tu cuenta Avena" y paso "Información bancaria"; no se vio el onboarding
+Comisión Avena 10% + StripeCONFIRMADO"Comisión de Avena 10%. Consulta la comisión de Stripe"; landing: "10% Comisión de Avena Health - Integración con Stripe"; calculadora de retos: "menos la comisión de Avena (10%) y la pasarela de pago (~4%)"
+Links de pagoCONFIRMADORetos: "Obtener link de pago", "Cobros automáticos con links de pago ... cargo único o suscripción, procesado por Stripe" (retos)
+Link de pago suelto por consulta (fuera de retos)HIPÓTESISEl checkout del perfil existe; no se vio un generador de links por consulta
+OXXO y transferencia para el pacienteNO ENCONTRADOSolo se ofrecen si isAvena y precio MXN de pago único (l. 1079 a 1094). Para especialistas: hipótesis de que solo hay tarjeta
+PayPal para el pacienteNO ENCONTRADOPayPal solo dentro del selector de Avena
+Factura CFDI al pacienteNO ENCONTRADOTextos Invoice.* (RFC, "Datos de facturación") son para que Avena facture al nutriólogo. Hipótesis: el nutriólogo factura por fuera
+Suplementos vendidos en la appCONFIRMADO"Los productos marcados generan una comisión del 15% cada que un paciente compra dentro de la app. Nosotros nos encargamos de procesar el pedido y hacer el envío." (versión en inglés dice 5% y pagos cada 2 semanas a Stripe)
+Marketplace con precio de mayoreoCONFIRMADO"Precio de mayoreo · hasta -{rate}% por volumen" (claves Marketplace.*)
+Términos y condicionesHIPÓTESIST&C mencionan "PayPal, PayU, MercadoPago o un servicio similar" y "no habrá reembolsos"; no regulan el 10% ni el cobro a pacientes (T&C)
+
+Pacientepaga consulta, suscripción o reto con tarjeta en Stripe Checkout embebido
+Stripe~4% de pasarela (según la calculadora de Avena)
+Avena10% de comisión (application fee: hipótesis del mecanismo)
+Nutriólogorecibe el resto en su cuenta Stripe; Avena sugiere precio promedio $700 MXN por consulta
+Extrasuplementos 15%, retos 10%, créditos por referidos para pagar su suscripción
+Landing de retos: cobro con links de Stripe · https://avena.io/retos/
+“Ingreso del reto ({gross}) menos la comisión de Avena (10%) y la pasarela de pago (~4%)”Panel, clave challenges.opportunity.result.mathLine
+“Se aplicará una comisión del 10% más la comisión de Stripe, sobre el monto que definas para tu servicio”Panel, clave ChallengeField.minPriceErrorDescription
+“El precio de consulta promedio reportado por especialistas en Avena es de $700 mxn.”Panel, clave AssigningPlan.averagePriceHint
+Tutorial YouTube: "Configuración de perfil: personaliza tus métodos de pago, sitio web, agenda desde cero" (9Jv_y6pC1h4).
+## 4. Adquisición y presencia de marca
+
+CanalQué se ve
+Instagram@avena.io: 38K seguidores, 611 publicaciones (meta pública). Frecuencia y mejores posts: requiere sesión
+Facebook/avenaapp "Avena Salud": 35,988 seguidores, activo hace 6 días. El link del home (facebook.com/avena.io) da "contenido no disponible"
+TikTok@avena.io: 3,914 seguidores, 143 videos, 158.3K likes, cuenta de oct 2021. El alcance viene de creadoras: embajadoras con 6.0M vistas acumuladas (autodeclarado)
+YouTubeSoftware Para Nutriólogos: 3.85K suscriptores, 126 videos; tutoriales de 23 a 851 vistas; último video hace ~6 meses; versiones en portugués hace ~1 año
+LinkedInAvena Health: 907 seguidores, 11 a 50 empleados, sede San Francisco y Zapopan
+Threads@avena.io: 5,015 seguidores (buscador)
+### Blog: último post y ritmo
+Último post: "Cómo Elegir un Nutrition Site en 2026" (16 jun 2026). Las ráfagas publican un post diario a la misma hora (~07:20 UTC) con títulos tipo keyword ("Nutrium Software: Análisis Completo para Nutriólogos 2026", "Nutrition AI", "E Diet"): SEO programático, 22 slugs en inglés sobre blog en español.
+### Meta Ads: solo México
+
+Ad Library MX, búsqueda "avena.io", activos · https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=MX&q=avena.io&search_type=keyword_unordered
+En los otros países la búsqueda devuelve 1 a 8 anuncios, pero de terceros (avena como cereal, otras marcas, nutriólogas). El anuncio activo más antiguo es del 17 ago 2026: rotan creativos cada pocas semanas. Ejemplos: "¿Todavía haces tus planes de alimentación en Excel?", "Terminas la consulta y la nota ya está escrita", "La inyección hace su parte. El resto pasa en tu cocina a las 11 de la noche" (B2C GLP-1).
+### Estrategia B2B y comunidad
+PalancaMecánicaFuente
+UniversidadesLicencias institucionales por generación, reporte por alumno, factura a la institución; patrocinan congresos con ponencia, stand y licencias gratishttps://avena.io/universidades/
+Estudiantes y profesoresPlan estudiante (en la baja: 8 pacientes activos, pago único); página para docenteshttps://avena.io/estudiantes/ · https://avena.io/profesores/
+EmbajadorasCuenta gratis + bonos por vistas + pago por pieza usada en campañas; solo TikTok; 9 embajadoras, 6.0M vistas (autodeclarado)https://avena.io/embajadoras/
+ReferidosColega recibe 90% de descuento el primer mes; tú $299 MXN de crédito o 1 mes gratis; sin límitePanel, claves Menu_banner.*
+CertificaciónAsignar plan a 7 pacientes + 3 reseñas de 5★ + perfil completoPanel, claves referrals.*
+Avena WeekendEvento gratis en Zoom: 10 y 11 ene 2025, 9 y 10 ene 2026; CEO como ponentehttps://weekend.avena.io/
+Webinars y lead magnetsWebinars dentro de la plataforma; Manual de Medidas, Tabla gastro, material deportivo gratis (anuncios)Meta Ad Library
+Retos con influencersCaso @tannhealthy (695K seguidores), reto $999 MXNhttps://avena.io/retos/
+AlianzasJüsto (2022); Google for Startups 2022; aceleradora Bayer; Novo Nordisk y PepsiCo (TFN, tono de nota pagada)ronda 1 · TFN
+AcademiaSesión de NutrConCiencia con Javier Álvarez (dic 2024)X
+Programa de embajadoras · https://avena.io/embajadoras/Universidades · https://avena.io/universidades/Avena Weekend 2026 · https://weekend.avena.io/
+### Prensa
+FechaMedioNota
+jun 2023El EconomistaIA para nutriólogos; ~20,000 usuarios; 5% en EE.UU.
+jun 2023Revista FortunaAsistente IA; 90% de consultas de pacientes mexicanos, 5% EE.UU.
+2022Mexico Business News / El FinancieroEntrevistas al CEO (enlazadas en /nosotros)
+mar 2025LinkedIn CEOMover la startup a EE.UU., visa O-1
+ago 2025LinkedIn CEO"queremos crecer nuestro MRR 500% en 18 meses"; contratan marketing de distribución pagada
+jun 2026TechFundingNewsAlva Health en EE.UU.; +4M consultas, +15K especialistas
+### SEO
+SeñalDato
+robots.txtBloquea AhrefsBot, SemrushBot, Majestic, Sistrix y otros; permite OAI-SearchBot. Publica /llms.txt
+Directorio de especialistas10,128 URLs en /especialista/sitemap.xml (generado con Screaming Frog, lastmod 2023): /nutriologos/{estado}/{ciudad}/{nombre}
+Programáticas~100 plantillas de planes en /plantillas/, landings de intención ("software para nutriólogos méxico", "chatgpt para nutriólogos", "generador de menús con IA")
+Blog238 posts en WordPress + Yoast, parado desde 16 jun 2026
+Localeses-mx, es-co, pt-br, en-us con selector MX·MXN / CO·COP / BR·BRL / US·USD
+TráficoSimilarweb bloquea la consulta desde el box (403). Hypestat (dato de 2022, viejo): 36.9K visitas/mes, 89% directo, 5,977 keywords SEMrush. No usar como dato actual
+### Timeline
+
+dic 2015 · Registro de avena.io (WHOIS)
+abr 2016 · App Android publicada
+2017 · Constitución en Delaware
+2018 a 2021 · Era B2C: prueba 7 días, cobros de 6 meses; origen de las quejas de cobro
+jun 2021 · Primer post del blog
+oct 2021 · Cuenta de TikTok
+2022 · Google for Startups Latino Founders; alianza Jüsto; cambio a cobro por paciente activo (queja de mar 2022)
+abr a jun 2023 · Asistente IA; prensa en El Economista y Fortuna; perfil Trustpilot reclamado
+jul a ago 2023 · Directorio de 10,128 perfiles; ráfaga de 48 posts
+dic 2024 · Podcast Emprende Healthy (CEO); sesión NutrConCiencia
+ene a feb 2025 · Avena Weekend 2025; 88 posts de SEO
+mar 2025 · CEO: mover la empresa a EE.UU.
+ago 2025 · Meta: crecer MRR 500% en 18 meses; contratan marketing pagado
+ene 2026 · Avena Weekend 2026
+mar a ago 2026 · 136 reseñas invitadas en Trustpilot
+may a jun 2026 · 29 posts; último el 16 jun
+jun 2026 · Alva Health en EE.UU. (TFN)
+ago a oct 2026 · 27 anuncios activos en Meta, todos en México
+6 oct 2026 · App v8.2.23: Avena Boost B2C a $199 MXN/mes
+### Funnel observado
+
+Atracción · Meta Ads MX (IA, Excel, GLP-1), TikTok de embajadoras, SEO programático, universidades, Avena Weekend
+Captura · Lead magnets por Typeform y WhatsApp, landing con contador y cupón (INTRO100 = primer mes $0 USD en EE.UU.)
+Conversión · Checkout Stripe embebido; Avena acepta tarjeta, OXXO, transferencia, PayPal
+Activación · Credenciales por correo, tutoriales, asignar el primer plan, invitar al paciente a la app
+Monetización extra · 10% de cobros a pacientes, retos, suplementos 15%, upgrade por pacientes activos
+Retención y loop · Reseñas de pacientes en la web del nutriólogo, certificación, referidos 90%, pausa en vez de baja
+## 5. Geografía: dónde son fuertes y dónde no
+
+PaísApp Store (calif. · prom.)DirectorioAnuncios MetaMoneda/landingLectura
+México49,535 · 4.97,14627MXN, es-mxMercado núcleo
+EE.UU.4,296 · 4.91470USD, en-us; Alva HealthHispanos en EE.UU. + marca nueva
+Perú333 · 4.8710sin landing; plantilla "peru-1300-kcal"Débil pero orgánico
+El Salvador / Honduras / Guatemala234 / 182 / 147 · 4.96 / 24 / 190sin landingSorpresa: más que Colombia
+Ecuador183 · 4.7690sin landingDébil
+Canadá180 · 4.970sin landingResidual
+Colombia138 · 4.6610COP, es-coLanding sin tracción
+España81 · 4.7210sin landing (reto pagado en EUR)Residual
+Chile / Argentina56 · 4.3 / 32 · 3.646 / 320sin landingDébil y peor calificado
+Brasil8 · 5.050BRL, pt-br, videos en portuguésIntento sin tracción
+
+Precio (13 oct 2026)BásicoEstándarPremium
+MX (HTML estático de /precios/)$299 MXN$549 MXN$999 MXN
+EE.UU. (render desde IP de Ashburn, VA)$27 USD$46 USD$83 USD
+CO / BRno verificablesin IP local
+El precio se elige por IP: la API pública api.avena.io/_ah/api/app/v1/info devolvió country: US, planes CAV-B-27-US, CAV-S-46-US, CAV-P-83-US y cupón INTRO100.
+
+Alva Health (EE.UU.)Dato
+URLhttps://alvahealth.io/
+Precio$99/mes, un plan, prueba 7 días sin tarjeta
+PropuestaElegibilidad de seguros, SOAP con IA, claims CPT 97802, copago al reservar, HIPAA con BAA
+Estado"Request early access"; dirección 535 Mission St, San Francisco
+LecturaNo traduce Avena: es otro producto para RDs con seguros
+Tráfico web por país: Similarweb no se pudo consultar (403 desde el box; la página pública de IA no muestra datos). Dato de prensa 2023: 90% de consultas en México, 5% EE.UU., 5% resto (Fortuna). El directorio es una foto de 2023.
+## Anexo. Fuentes y datos
+### HATE
+- https://www.trustpilot.com/review/avena.io
+- https://apps.apple.com/mx/app/avena-health/id1161252999?see-all=reviews
+- https://apps.apple.com/us/app/avena-health/id1161252999?see-all=reviews
+- https://play.google.com/store/apps/details?id=com.avena.avenafit&hl=es_MX
+- https://softwaredenutricion.org/
+- https://vidanutritiva.com/comparativa-software-nutriologos
+- https://mx.realreviews.io/reviews/avena.io
+### Stripe y cobros
+- https://payments.avena.io/js/avena-payments.js
+- https://avena.io/precios/
+- https://panel.avena.io
+- https://avena.io/retos/
+- https://avena.io/terminos-y-condiciones/
+- https://avena.io/es-mx/terms-and-conditions
+- https://www.youtube.com/watch?v=9Jv_y6pC1h4
+### Adquisición
+- https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=MX&q=avena.io&search_type=keyword_unordered
+- https://avena.io/blog/post-sitemap.xml
+- https://www.instagram.com/avena.io/
+- https://www.facebook.com/avenaapp/
+- https://www.tiktok.com/@avena.io
+- https://www.youtube.com/@softwareparanutriologos-av215
+- https://www.linkedin.com/company/avena-mexico
+- https://avena.io/embajadoras/
+- https://avena.io/universidades/
+- https://avena.io/estudiantes/
+- https://weekend.avena.io/
+- https://pages.avena.io/avenaweekend25/
+- https://avena.io/robots.txt
+- https://hypestat.com/info/avena.io
+### Geografía
+- https://itunes.apple.com/lookup?id=1161252999&country=mx
+- https://avena.io/especialista/sitemap.xml
+- https://api.avena.io/_ah/api/app/v1/info?lang=es-mx
+- https://alvahealth.io/
+- https://techfundingnews.com/avena-targets-u-s-market-with-scaled-digital-health-infrastructure/
+- https://revistafortuna.com.mx/2023/06/23/medicos-usan-ia-para-generar-planes-de-nutricion/
+Datos crudos en /workspace/avena/ronda2/data: appstore_reviews_all_countries.json, appstore_ratings_by_country.json, trustpilot_all.json, hate_tagged.json, blog_posts.json, directorio_por_pais.json, adlib_by_country.json, adlib_MX_full.txt, avena-payments.live.js, panel_cobros_es_pt_en.tsv, yt_videos.json, pg_*.txt (landings y T&C).

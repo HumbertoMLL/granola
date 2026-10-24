@@ -1,0 +1,6 @@
+{
+  "name": "@granola/config",
+  "version": "0.0.0",
+  "private": true,
+  "files": ["typescript", "eslint"]
+}
