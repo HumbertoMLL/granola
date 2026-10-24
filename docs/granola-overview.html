@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Granola — PRD · RFC · ADR</title>
+<style>
+  :root{--bg:#FBF7F0;--card:#fff;--fg:#2B2118;--muted:#7A6E63;--line:#E8E0D2;--green:#4A7A2B;--green-soft:#E9F2E0;--honey:#E8A93B;--honey-soft:#FBEFD6;--coral:#D9644E;--coral-soft:#FBE6E1;--ink:#1B1711}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 -apple-system,"Plus Jakarta Sans",Inter,system-ui,sans-serif}
+  main{max-width:1040px;margin:0 auto;padding:40px 20px 80px}
+  h1{font-size:44px;margin:0 0 4px;letter-spacing:-.02em}
+  h2{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:56px 0 16px;display:flex;align-items:center;gap:12px}
+  h2 .n{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--ink);color:#fff;font-size:13px}
+  h3{font-size:18px;margin:0 0 6px}
+  p{margin:0}
+  .sub{color:var(--muted);font-size:15px}
+  .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px}
+  .card.big{grid-column:1/-1}
+  .tag{display:inline-block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:999px;font-weight:700}
+  .ok{background:var(--green-soft);color:var(--green)}
+  .wip{background:var(--honey-soft);color:#8a5f10}
+  .todo{background:var(--coral-soft);color:var(--coral)}
+  .beto{background:#EEE9FF;color:#5B46C9}
+  .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:15px}
+  .kv b{color:var(--muted);font-weight:600}
+  ul{margin:8px 0 0;padding-left:18px}
+  li{margin:3px 0}
+  .big-num{font-size:40px;font-weight:800;letter-spacing:-.03em;line-height:1}
+  .flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .flow .step{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:14px;font-weight:600}
+  .flow .arrow{color:var(--muted)}
+  .tree{font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--ink);color:#F3EDE2;border-radius:16px;padding:18px;overflow:auto;white-space:pre}
+  .tree .c{color:#A2A6B0}
+  .stack{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+  .stack div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+  .stack b{display:block;font-size:15px}
+  .stack span{font-size:12px;color:var(--muted)}
+  svg text{font-family:inherit}
+  .adr{border-left:5px solid var(--green)}
+  .adr .why{font-size:14px;color:var(--muted);margin-top:8px}
+  .status{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  td,th{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+  code{font:13px ui-monospace,Menlo,monospace;background:#F3EDE2;padding:1px 6px;border-radius:6px}
+  footer{margin-top:60px;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<main>
+
+<h1>🌾 Granola</h1>
+<p class="sub">Clon de Avena para nutriólogos · estado al <b>24 oct 2026</b> · repo <code>~/Desktop/granola</code></p>
+
+<div class="grid" style="margin-top:22px">
+  <div class="card"><div class="big-num">F0 ✓</div><p class="sub">Fundamentos</p></div>
+  <div class="card"><div class="big-num">F1 ✓</div><p class="sub">Negocio: página + agenda + WhatsApp + cobros</p></div>
+  <div class="card"><div class="big-num">130</div><p class="sub">tests en verde</p></div>
+  <div class="card"><div class="big-num">0</div><p class="sub">datos reales aún — falta Neon</p></div>
+</div>
+
+<!-- ============ PRD ============ -->
+<h2><span class="n">1</span> PRD · qué construimos y por qué</h2>
+
+<div class="grid">
+  <div class="card big">
+    <h3>Tesis</h3>
+    <p style="font-size:22px;font-weight:700;letter-spacing:-.01em">"La app que tus pacientes sí usan, y la agenda que te llena la consulta."</p>
+    <p class="sub" style="margin-top:6px">Avena gana en contenido (30K recetas). Pierde en app rígida, 10% de comisión, solo tarjeta, WhatsApp solo en Premium. Entramos por el <b>negocio del nutri</b>; lo clínico después.</p>
+  </div>
+  <div class="card">
+    <h3>Para quién</h3>
+    <p class="sub">Nutriólogas jóvenes, consulta online, viven en IG/TikTok. México primero; LATAM después.</p>
+  </div>
+  <div class="card">
+    <h3>Diferenciadores</h3>
+    <ul class="sub">
+      <li><b>0%</b> comisión (Avena 10%)</li>
+      <li><b>SPEI y OXXO</b> al paciente</li>
+      <li><b>WhatsApp</b> en todos los planes</li>
+      <li>Reseñas verificadas, precio claro, sin contador falso</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Precio tentativo</h3>
+    <div class="kv"><b>Starter</b><span>$249 MXN</span><b>Pro</b><span>$499</span><b>Clínica</b><span>$999</span></div>
+    <p class="sub" style="margin-top:8px">14 días gratis, sin tarjeta.</p>
+  </div>
+  <div class="card">
+    <h3>No hacemos (aún)</h3>
+    <p class="sub">IA generativa de planes, retos, marketplace, suplementos, directorio SEO.</p>
+  </div>
+</div>
+
+<h3 style="margin-top:24px">Fases</h3>
+<table>
+  <tr><th>Fase</th><th>Entregable</th><th>Estado</th></tr>
+  <tr><td><b>F0</b></td><td>Monorepo, DB, auth, design system, shell del panel</td><td><span class="tag ok">hecho</span></td></tr>
+  <tr><td><b>F1</b></td><td>Link-tree público, agenda + reservas, WhatsApp, cobros</td><td><span class="tag ok">hecho</span> <span class="tag wip">cerrando huecos</span></td></tr>
+  <tr><td><b>F2</b></td><td>Pacientes, expediente, antropometría, notas IA, labs PDF</td><td><span class="tag todo">pendiente</span></td></tr>
+  <tr><td><b>F3</b></td><td>Motor de planes SMAE, recetas, PDF con marca</td><td><span class="tag todo">pendiente</span></td></tr>
+  <tr><td><b>F4</b></td><td>PWA paciente offline, plan por WhatsApp, lista del súper</td><td><span class="tag todo">pendiente</span></td></tr>
+  <tr><td><b>F5</b></td><td>CFDI, paquetes, Expo (iOS/Android)</td><td><span class="tag todo">pendiente</span></td></tr>
+</table>
+
+<!-- ============ RFC ============ -->
+<h2><span class="n">2</span> RFC · cómo está construido</h2>
+
+<div class="card big" style="margin-bottom:14px">
+  <h3>Arquitectura</h3>
+  <svg viewBox="0 0 1000 330" width="100%" style="margin-top:10px">
+    <defs><marker id="a" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8z" fill="#7A6E63"/></marker></defs>
+    <g font-size="14" font-weight="600" fill="#2B2118">
+      <!-- clientes -->
+      <rect x="20" y="40" width="150" height="56" rx="12" fill="#FBEFD6" stroke="#E8A93B"/><text x="95" y="63" text-anchor="middle">Paciente</text><text x="95" y="82" text-anchor="middle" font-size="12" font-weight="400" fill="#7A6E63">web · WhatsApp</text>
+      <rect x="20" y="130" width="150" height="56" rx="12" fill="#E9F2E0" stroke="#4A7A2B"/><text x="95" y="153" text-anchor="middle">Nutrióloga</text><text x="95" y="172" text-anchor="middle" font-size="12" font-weight="400" fill="#7A6E63">panel /app</text>
+      <rect x="20" y="220" width="150" height="56" rx="12" fill="#F3EDE2" stroke="#E8E0D2" stroke-dasharray="4"/><text x="95" y="243" text-anchor="middle">App móvil</text><text x="95" y="262" text-anchor="middle" font-size="12" font-weight="400" fill="#7A6E63">Expo · F5</text>
+      <!-- next -->
+      <rect x="290" y="30" width="260" height="250" rx="18" fill="#fff" stroke="#2B2118" stroke-width="2"/>
+      <text x="420" y="60" text-anchor="middle" font-size="16">Next.js 16 · Vercel</text>
+      <text x="420" y="82" text-anchor="middle" font-size="12" font-weight="400" fill="#7A6E63">apps/web</text>
+      <rect x="310" y="100" width="220" height="34" rx="8" fill="#F3EDE2"/><text x="420" y="122" text-anchor="middle" font-size="13">/[slug] · /agendar · /cita</text>
+      <rect x="310" y="142" width="220" height="34" rx="8" fill="#F3EDE2"/><text x="420" y="164" text-anchor="middle" font-size="13">/app/* (server actions)</text>
+      <rect x="310" y="184" width="220" height="34" rx="8" fill="#F3EDE2"/><text x="420" y="206" text-anchor="middle" font-size="13">/api/webhooks · /api/inngest</text>
+      <rect x="310" y="226" width="220" height="34" rx="8" fill="#E9F2E0"/><text x="420" y="248" text-anchor="middle" font-size="13">packages/core (lógica pura)</text>
+      <!-- servicios -->
+      <rect x="680" y="20" width="150" height="50" rx="12" fill="#fff" stroke="#E8E0D2"/><text x="755" y="42" text-anchor="middle">Neon Postgres</text><text x="755" y="59" text-anchor="middle" font-size="12" font-weight="400" fill="#7A6E63">Drizzle · Better Auth</text>
+      <rect x="680" y="85" width="150" height="50" rx="12" fill="#fff" stroke="#E8E0D2"/><text x="755" y="107" text-anchor="middle">Inngest</text><text x="755" y="124" text-anchor="middle" font-size="12" font-weight="400" fill="#7A6E63">recordatorios · jobs</text>
+      <rect x="680" y="150" width="150" height="50" rx="12" fill="#fff" stroke="#E8E0D2"/><text x="755" y="172" text-anchor="middle">WhatsApp Cloud API</text><text x="755" y="189" text-anchor="middle" font-size="12" font-weight="400" fill="#7A6E63">Meta · plantillas</text>
+      <rect x="680" y="215" width="150" height="50" rx="12" fill="#fff" stroke="#E8E0D2"/><text x="755" y="237" text-anchor="middle">Stripe · Mercado Pago</text><text x="755" y="254" text-anchor="middle" font-size="12" font-weight="400" fill="#7A6E63">tarjeta · SPEI · OXXO</text>
+      <rect x="680" y="280" width="150" height="40" rx="12" fill="#fff" stroke="#E8E0D2"/><text x="755" y="305" text-anchor="middle">R2 (archivos)</text>
+    </g>
+    <g stroke="#7A6E63" stroke-width="1.5" fill="none" marker-end="url(#a)">
+      <path d="M170,68 L290,68"/><path d="M170,158 L290,158"/><path d="M170,248 L290,248" stroke-dasharray="4"/>
+      <path d="M550,120 L680,45"/><path d="M550,150 L680,110"/><path d="M550,170 L680,175"/><path d="M550,200 L680,240"/><path d="M550,230 L680,300"/>
+    </g>
+    <text x="615" y="320" font-size="12" fill="#7A6E63" text-anchor="middle">Regla: datos de salud nunca salen al cliente sin pasar por la API</text>
+  </svg>
+</div>
+
+<h3>Stack</h3>
+<div class="stack" style="margin-top:10px">
+  <div><b>Next.js 16</b><span>App Router · Vercel</span></div>
+  <div><b>Tailwind v4</b><span>design system propio</span></div>
+  <div><b>Neon</b><span>Postgres serverless</span></div>
+  <div><b>Drizzle</b><span>ORM + migraciones</span></div>
+  <div><b>Better Auth</b><span>magic link · Google</span></div>
+  <div><b>Inngest</b><span>jobs durables</span></div>
+  <div><b>WhatsApp Cloud API</b><span>Meta directo</span></div>
+  <div><b>Stripe Connect</b><span>Express · 0% fee</span></div>
+  <div><b>Mercado Pago</b><span>SPEI · OXXO</span></div>
+  <div><b>Cloudflare R2</b><span>avatares · PDFs</span></div>
+  <div><b>Turborepo + pnpm</b><span>monorepo</span></div>
+  <div><b>Vitest</b><span>130 tests</span></div>
+</div>
+
+<h3 style="margin-top:24px">Monorepo</h3>
+<div class="tree">granola/
+├── apps/web/            <span class="c">Next.js: panel + páginas públicas + API</span>
+├── apps/mobile/         <span class="c">Expo (F5, vacío)</span>
+├── packages/
+│   ├── db/              <span class="c">schema Drizzle (14 tablas) + migraciones</span>
+│   ├── auth/            <span class="c">Better Auth</span>
+│   ├── core/            <span class="c">lógica pura: scheduling (hecho) · smae · nutrition</span>
+│   ├── whatsapp/        <span class="c">cliente Meta + 8 plantillas + webhooks</span>
+│   ├── payments/        <span class="c">Stripe Connect + Mercado Pago</span>
+│   ├── jobs/            <span class="c">funciones Inngest (recordatorios, expiración)</span>
+│   └── ui/              <span class="c">design system (16 componentes)</span>
+├── docs/
+│   ├── research/        <span class="c">3 investigaciones de Avena</span>
+│   ├── adr/             <span class="c">decisiones (abajo)</span>
+│   └── whatsapp-plantillas.md
+├── PLAN.md              <span class="c">plan maestro completo</span>
+├── CLAUDE.md · AGENTS.md <span class="c">reglas para agentes (Claude / Codex)</span>
+└── .env.example</div>
+
+<h3 style="margin-top:24px">Flujo estrella: alguien agenda → le llega el WhatsApp</h3>
+<div class="flow" style="margin-top:10px">
+  <span class="step">Paciente abre granola.app/@karla</span><span class="arrow">→</span>
+  <span class="step">Elige servicio y horario</span><span class="arrow">→</span>
+  <span class="step">Nombre + WhatsApp + consentimiento</span><span class="arrow">→</span>
+  <span class="step">Paga (tarjeta / SPEI / OXXO) o paga en consulta</span><span class="arrow">→</span>
+  <span class="step">Cita confirmada</span><span class="arrow">→</span>
+  <span class="step">WA: confirmación</span><span class="arrow">→</span>
+  <span class="step">WA: 24h antes</span><span class="arrow">→</span>
+  <span class="step">WA: 2h antes</span><span class="arrow">→</span>
+  <span class="step">WA: ¿nos dejas reseña?</span>
+</div>
+
+<h3 style="margin-top:24px">Modelo de datos (F1)</h3>
+<div class="grid" style="margin-top:10px">
+  <div class="card"><b>nutritionists</b><p class="sub">slug, bio, links, theme, timezone, stripe/mp, buffer, aviso mínimo</p></div>
+  <div class="card"><b>services</b><p class="sub">duración, precio, modalidad, paymentMode</p></div>
+  <div class="card"><b>availability_rules / overrides</b><p class="sub">ventanas semanales, bloqueos</p></div>
+  <div class="card"><b>patients</b><p class="sub">nombre, WhatsApp, consentimiento LFPDPPP</p></div>
+  <div class="card"><b>appointments</b><p class="sub">status, cancelToken, meetUrl, zona del paciente</p></div>
+  <div class="card"><b>payments</b><p class="sub">provider, método, status, provider_data</p></div>
+  <div class="card"><b>wa_messages</b><p class="sub">bitácora de cada envío/recepción</p></div>
+  <div class="card"><b>reviews · audit_log</b><p class="sub">reseñas verificadas · trazabilidad</p></div>
+</div>
+
+<!-- ============ ADR ============ -->
+<h2><span class="n">3</span> ADR · decisiones tomadas</h2>
+
+<div class="grid">
+  <div class="card adr">
+    <span class="tag ok">0001 · aceptado</span>
+    <h3 style="margin-top:8px">Neon + Better Auth, no Supabase</h3>
+    <p class="why">RLS desde cliente causó 16K bases expuestas; 152 incidentes en 2026; HIPAA desde $599. Postgres puro = salida con <code>pg_dump</code>. Autorización en la API, nunca en el cliente.</p>
+  </div>
+  <div class="card adr">
+    <span class="tag ok">0002 · aceptado</span>
+    <h3 style="margin-top:8px">WhatsApp Cloud API directo, número de Granola</h3>
+    <p class="why">Sin Twilio. MVP: un número envía plantillas en nombre de la nutri. F2: cada nutri conecta el suyo (Embedded Signup).</p>
+  </div>
+  <div class="card adr">
+    <span class="tag ok">0003 · aceptado</span>
+    <h3 style="margin-top:8px">Design system propio, cálido y claro</h3>
+    <p class="why">Crema #FBF7F0 · café #2B2118 · verde #4A7A2B · miel #E8A93B. Plus Jakarta Sans + Instrument Serif. Mobile-first. Nada del dark de IA Sin Bullshit.</p>
+  </div>
+  <div class="card adr">
+    <span class="tag ok">0004 · implementado</span>
+    <h3 style="margin-top:8px">Stripe destination charges + MP pago directo</h3>
+    <p class="why">Un solo webhook, 0% application fee, la nutri es merchant of record. MP con <code>/v1/payments</code> para tener la CLABE en nuestra página. Split de MP al nutri = F1.5.</p>
+  </div>
+  <div class="card adr">
+    <span class="tag ok">0005 · implementado</span>
+    <h3 style="margin-top:8px">Scheduling puro, sin librería de fechas</h3>
+    <p class="why"><code>Intl.DateTimeFormat</code> maneja DST; corre igual en Node y navegador. Paso 30 min, aviso 2h, horizonte 28 días. 40 tests.</p>
+  </div>
+  <div class="card adr">
+    <span class="tag ok">0006 · implementado</span>
+    <h3 style="margin-top:8px">Inngest para recordatorios</h3>
+    <p class="why"><code>sleepUntil</code> + <code>cancelOn</code> por cita: si reagendan, el run viejo muere solo. Portable, self-host posible.</p>
+  </div>
+</div>
+
+<!-- ============ ESTADO ============ -->
+<h2><span class="n">4</span> Estado y siguiente paso</h2>
+
+<div class="status">
+  <div class="card">
+    <span class="tag ok">hecho</span>
+    <ul class="sub">
+      <li>Landing + login/registro</li>
+      <li>Panel: agenda, servicios, disponibilidad</li>
+      <li>Editor link-tree con 5 temas + preview</li>
+      <li>Booking público + cancelar/reagendar</li>
+      <li>8 plantillas WA + jobs de recordatorio</li>
+      <li>Stripe Connect + MP + panel de cobros</li>
+      <li>Aviso de privacidad LFPDPPP</li>
+    </ul>
+  </div>
+  <div class="card">
+    <span class="tag wip">en curso (agentes)</span>
+    <ul class="sub">
+      <li>Migración 0001 (columnas faltantes + constraint anti doble reserva)</li>
+      <li>Pago real en booking (pending_payment)</li>
+      <li>Rutas /resena y detalle de cita</li>
+      <li>Seed con pacientes y citas demo</li>
+    </ul>
+  </div>
+  <div class="card">
+    <span class="tag beto">solo Beto</span>
+    <ul class="sub">
+      <li><b>Neon</b>: crear proyecto → <code>DATABASE_URL</code></li>
+      <li><b>Meta</b>: Business + número WA + 8 plantillas</li>
+      <li><b>Stripe</b>: activar Connect Express MX + webhook</li>
+      <li><b>Mercado Pago</b>: app + token + webhook</li>
+      <li>Google OAuth (opcional)</li>
+      <li>Dominio</li>
+    </ul>
+  </div>
+</div>
+
+<div class="card big" style="margin-top:14px">
+  <h3>Para arrancar en local</h3>
+  <div class="tree">cp .env.example apps/web/.env.local   <span class="c"># pega DATABASE_URL y BETTER_AUTH_SECRET</span>
+pnpm install
+pnpm db:migrate && pnpm db:seed            <span class="c"># Karla Demo, slug "karla"</span>
+pnpm --filter @granola/web exec next dev -p 3100
+npx inngest-cli@latest dev -u http://localhost:3100/api/inngest   <span class="c"># opcional, para ver los jobs</span></div>
+</div>
+
+<footer>Fuentes: <code>PLAN.md</code> · <code>docs/adr/</code> · <code>docs/research/</code> · <code>packages/*/README.md</code>. Generado el 24 oct 2026.</footer>
+</main>
+</body>
+</html>
