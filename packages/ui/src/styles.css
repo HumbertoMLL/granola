@@ -1,0 +1,223 @@
+/*
+ * Granola — design tokens.
+ * Se importa desde apps/web/src/app/globals.css DESPUÉS de `@import "tailwindcss"`.
+ * Paleta cálida y clara: base avena, tinta café, verde hoja como primario,
+ * miel como acento, coral suave para errores.
+ */
+
+:root {
+  /* Superficies */
+  --background: #fbf7f0; /* avena */
+  --foreground: #2b2118; /* café oscuro */
+  --card: #ffffff;
+  --card-foreground: #2b2118;
+  --popover: #ffffff;
+  --popover-foreground: #2b2118;
+
+  /* Marca */
+  --primary: #4a7a2b; /* verde hoja */
+  --primary-hover: #3e6723;
+  --primary-foreground: #ffffff;
+  --primary-soft: #e9f2e0; /* fondo suave para badges/iconos */
+
+  --accent: #e8a93b; /* miel */
+  --accent-foreground: #2b2118;
+  --accent-soft: #fbefd6;
+
+  /* Neutros cálidos */
+  --secondary: #f3ede2;
+  --secondary-foreground: #2b2118;
+  --muted: #f3ede2;
+  --muted-foreground: #7a6e63;
+  --border: #e8e0d2;
+  --input: #e8e0d2;
+  --ring: #4a7a2b;
+
+  /* Estados */
+  --destructive: #d9644e; /* coral */
+  --destructive-foreground: #ffffff;
+  --destructive-soft: #fbe6e1;
+  --success: #4a7a2b;
+  --warning: #e8a93b;
+
+  /* Forma */
+  --radius: 1rem;
+
+  /* Sombras ligeras */
+  --shadow-soft: 0 1px 2px rgb(43 33 24 / 0.04), 0 4px 16px rgb(43 33 24 / 0.05);
+  --shadow-float: 0 2px 4px rgb(43 33 24 / 0.05), 0 12px 32px rgb(43 33 24 / 0.08);
+}
+
+/* Modo oscuro opcional (no prioritario). Se activa con <html data-theme="dark">. */
+[data-theme="dark"] {
+  --background: #1b1711;
+  --foreground: #f3ede2;
+  --card: #241f18;
+  --card-foreground: #f3ede2;
+  --popover: #241f18;
+  --popover-foreground: #f3ede2;
+
+  --primary: #7fb35c;
+  --primary-hover: #91c26e;
+  --primary-foreground: #14200c;
+  --primary-soft: #263620;
+
+  --accent: #e8a93b;
+  --accent-foreground: #2b2118;
+  --accent-soft: #3a2e18;
+
+  --secondary: #2e2821;
+  --secondary-foreground: #f3ede2;
+  --muted: #2e2821;
+  --muted-foreground: #a99d90;
+  --border: #3a322a;
+  --input: #3a322a;
+  --ring: #7fb35c;
+
+  --destructive: #e0745f;
+  --destructive-foreground: #ffffff;
+  --destructive-soft: #3d241f;
+
+  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 16px rgb(0 0 0 / 0.3);
+  --shadow-float: 0 2px 4px rgb(0 0 0 / 0.35), 0 12px 32px rgb(0 0 0 / 0.4);
+}
+
+@theme inline {
+  /* Colores semánticos (bg-background, text-foreground, border-border, etc.) */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-soft: var(--accent-soft);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-soft: var(--destructive-soft);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+
+  /* Radios generosos */
+  --radius-sm: calc(var(--radius) - 0.5rem); /* 8px */
+  --radius-md: calc(var(--radius) - 0.25rem); /* 12px */
+  --radius-lg: var(--radius); /* 16px */
+  --radius-xl: calc(var(--radius) + 0.25rem); /* 20px */
+  --radius-2xl: calc(var(--radius) + 0.5rem); /* 24px */
+  --radius-3xl: calc(var(--radius) + 1rem); /* 32px */
+
+  /* Sombras */
+  --shadow-soft: var(--shadow-soft);
+  --shadow-float: var(--shadow-float);
+
+  /* Fuentes: las variables --font-sans-var / --font-display-var las define next/font en layout.tsx */
+  --font-sans: var(--font-sans-var), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-display-var), Georgia, "Times New Roman", serif;
+
+  /* Animaciones */
+  --animate-fade-up: fade-up 0.5s ease-out both;
+  --animate-fade-in: fade-in 0.2s ease-out both;
+  --animate-slide-in-right: slide-in-right 0.25s cubic-bezier(0.32, 0.72, 0, 1) both;
+  --animate-slide-in-left: slide-in-left 0.25s cubic-bezier(0.32, 0.72, 0, 1) both;
+  --animate-slide-in-top: slide-in-top 0.25s cubic-bezier(0.32, 0.72, 0, 1) both;
+  --animate-slide-in-bottom: slide-in-bottom 0.25s cubic-bezier(0.32, 0.72, 0, 1) both;
+
+  @keyframes slide-in-right {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+  @keyframes slide-in-left {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+  @keyframes slide-in-top {
+    from {
+      transform: translateY(-100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+  @keyframes slide-in-bottom {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  ::selection {
+    background-color: var(--accent-soft);
+    color: var(--foreground);
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  /* Las animaciones de entrada son un extra: sin movimiento, el contenido se ve de inmediato. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}

@@ -3,11 +3,31 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "exports": { ".": "./src/index.ts", "./client": "./src/client.ts" },
-  "scripts": { "typecheck": "tsc --noEmit" },
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client.ts",
+    "./cookies": "./src/cookies.ts",
+    "./next": "./src/next.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
   "dependencies": {
     "@granola/db": "workspace:*",
-    "better-auth": "^1.4.0"
+    "better-auth": "^1.4.0",
+    "zod": "^4.1.0"
   },
-  "devDependencies": { "@granola/config": "workspace:*", "typescript": "^5.9.0" }
+  "devDependencies": {
+    "@granola/config": "workspace:*",
+    "typescript": "^5.9.0",
+    "@types/node": "^20"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  }
 }
