@@ -1,4 +1,5 @@
-import { appointments, db, eq } from "@granola/db";
+import { z } from "zod";
+import { and, appointments, db, eq } from "@granola/db";
 
 /**
  * Snapshot de la cita con paciente, nutri y servicio. Fechas como ISO string
@@ -20,18 +21,19 @@ export type AppointmentContext = {
     /** Zona IANA del paciente detectada al agendar; null → usar la del nutri. */
     patientTimezone: string | null;
   };
-  patient: { id: string; name: string; phoneWa: string | null };
-  nutritionist: { id: string; displayName: string; slug: string; phoneWa: string | null; timezone: string };
+  patient: { id: string; name: string; phoneWa: string | null; email: string | null };
+  nutritionist: { id: string; displayName: string; slug: string; phoneWa: string | null; timezone: string; email: string };
   service: { id: string; name: string; location: string | null; priceCents: number; currency: string; paymentMode: "prepaid" | "at_visit" | "optional" };
 };
 
 /** Relee la cita de la DB. Null si ya no existe. */
-export async function loadAppointment(appointmentId: string): Promise<AppointmentContext | null> {
+export async function loadAppointment(appointmentId: string, nutritionistId: string): Promise<AppointmentContext | null> {
+  z.object({ appointmentId: z.uuid(), nutritionistId: z.uuid() }).parse({ appointmentId, nutritionistId });
   const row = await db.query.appointments.findFirst({
-    where: eq(appointments.id, appointmentId),
-    with: { patient: true, nutritionist: true, service: true },
+    where: and(eq(appointments.id, appointmentId), eq(appointments.nutritionistId, nutritionistId)),
+    with: { patient: true, nutritionist: { with: { user: { columns: { email: true } } } }, service: true },
   });
-  if (!row) return null;
+  if (!row || row.patient.nutritionistId !== nutritionistId || row.service.nutritionistId !== nutritionistId) return null;
   return {
     appointment: {
       id: row.id,
@@ -47,13 +49,14 @@ export async function loadAppointment(appointmentId: string): Promise<Appointmen
       reminder2hSentAt: row.reminder2hSentAt?.toISOString() ?? null,
       patientTimezone: row.patientTimezone ?? null,
     },
-    patient: { id: row.patient.id, name: row.patient.name, phoneWa: row.patient.phoneWa },
+    patient: { id: row.patient.id, name: row.patient.name, phoneWa: row.patient.phoneWa, email: row.patient.email },
     nutritionist: {
       id: row.nutritionist.id,
       displayName: row.nutritionist.displayName,
       slug: row.nutritionist.slug,
       phoneWa: row.nutritionist.phoneWa,
       timezone: row.nutritionist.timezone,
+      email: row.nutritionist.user.email,
     },
     service: {
       id: row.service.id,

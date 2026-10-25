@@ -13,7 +13,7 @@ export const onAppointmentRescheduled = inngest.createFunction(
   { event: "appointment/rescheduled" },
   async ({ event, step }) => {
     const { appointmentId, nutritionistId, previousStartsAt } = event.data;
-    const ctx = await step.run("cargar-cita", () => loadAppointment(appointmentId));
+    const ctx = await step.run("cargar-cita", () => loadAppointment(appointmentId, event.data.nutritionistId));
     if (!ctx) return { skipped: "cita no existe" };
     if (ctx.appointment.status !== "confirmed") return { skipped: `status ${ctx.appointment.status}` };
 
