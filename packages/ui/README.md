@@ -81,7 +81,7 @@ Una **sección** es `SectionHeader` y contenido sobre el fondo, con separación 
 
 | Primitivo                                 | Disciplina visual                                                                                                                                                       |
 | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Button                                    | 40 px en panel desktop, 48 px en móvil/público; radios de 6. `size="sm"` es compacto en desktop. Una acción primaria por vista, sin icono junto al texto salvo flechas. |
+| Button                                    | 40 px en panel desktop, 48 px en móvil/público; radios de 6. `size="sm"` conserva los 40 px con texto de 13 px y menos padding. Una acción primaria por vista, sin icono junto al texto salvo flechas. |
 | Input, Textarea, Label, FormField, Select | Labels 13/500; input 44 móvil/40 desktop, borde de 1 px, foco de 2 px al 40%. Ayuda y error 13 px vinculados al control.                                                |
 | Badge                                     | `confirmed`, `pending`, `done`, `cancelled` representan estados. El texto siempre expresa el estado además del color.                                                   |
 | Tabs                                      | Subrayado, texto de 15 px, selección y teclado Radix. Sin pill ni sombra.                                                                                               |

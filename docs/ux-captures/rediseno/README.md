@@ -1,6 +1,6 @@
 # Comparativas del rediseño visual
 
-36 capturas iniciales y 36 comparativas finales: 18 estados a 390 y 1280 px. Se añaden ocho capturas del catálogo, shell, edición de configuración y confirmación final. Todas usan datos ficticios del seed, sin servicios externos activos.
+36 capturas iniciales y 36 comparativas finales: 18 estados a 390 y 1280 px. Se añaden diez capturas del catálogo, primera revisión y versión final del shell, edición de configuración y confirmación final. Todas usan datos ficticios del seed, sin servicios externos activos.
 
 El antes corresponde a `main` en `4c38c0c`. La ficha se volvió a capturar contra una referencia temporal limpia de ese commit para comprobar que fuera el expediente real. El manifiesto guarda las rutas locales de la sesión de captura.
 
@@ -66,6 +66,7 @@ La regresión funcional se verifica con `pnpm e2e`; incluye axe en perfil, los c
 | Estado | Móvil | Escritorio |
 | --- | --- | --- |
 | Catálogo de primitivos | [Ver](despues/sistema-390.png) | [Ver](despues/sistema-1280.png) |
-| Shell del panel | [Ver](despues/shell-390.png) | [Ver](despues/shell-1280.png) |
+| Shell · primera revisión | [Ver](despues/shell-390.png) | [Ver](despues/shell-1280.png) |
 | Edición en Sheet | [Ver](despues/configuracion-editar-390.png) | [Ver](despues/configuracion-editar-1280.png) |
 | Reserva confirmada | [Ver](despues/listo-390.png) | [Ver](despues/listo-1280.png) |
+| Shell · versión final | [Ver](despues/shell-final-390.png) | [Ver](despues/shell-final-1280.png) |
