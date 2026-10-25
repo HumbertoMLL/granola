@@ -1,12 +1,17 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { CalendarSync } from "lucide-react";
 import { authClient } from "@granola/auth/client";
-import { Button, Card } from "@granola/ui";
+import { Badge, Button, SectionHeader } from "@granola/ui";
 import { disconnectGoogleCalendar } from "./calendar-actions";
 
-export function GoogleCalendarCard({ connected, configured }: { connected: boolean; configured: boolean }) {
+export function GoogleCalendarCard({
+  connected,
+  configured,
+}: {
+  connected: boolean;
+  configured: boolean;
+}) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   function act() {
@@ -15,10 +20,17 @@ export function GoogleCalendarCard({ connected, configured }: { connected: boole
       try {
         if (connected) await disconnectGoogleCalendar();
         else {
-          const result = await authClient.linkSocial({ provider: "google", callbackURL: "/app/configuracion", errorCallbackURL: "/app/configuracion", scopes: [
-            "https://www.googleapis.com/auth/calendar.events", "https://www.googleapis.com/auth/calendar.freebusy",
-          ] });
-          if (result.error) setError("No pudimos conectar Google Calendar. Intenta de nuevo.");
+          const result = await authClient.linkSocial({
+            provider: "google",
+            callbackURL: "/app/configuracion",
+            errorCallbackURL: "/app/configuracion",
+            scopes: [
+              "https://www.googleapis.com/auth/calendar.events",
+              "https://www.googleapis.com/auth/calendar.freebusy",
+            ],
+          });
+          if (result.error)
+            setError("No pudimos conectar Google Calendar. Intenta de nuevo.");
         }
       } catch {
         setError("No pudimos actualizar la conexión. Intenta de nuevo.");
@@ -26,14 +38,42 @@ export function GoogleCalendarCard({ connected, configured }: { connected: boole
     });
   }
   return (
-    <Card>
-      <div className="flex items-center gap-3"><CalendarSync aria-hidden="true" /><h2 className="font-semibold">Google Calendar</h2></div>
-      <p className="text-sm text-muted-foreground">{connected ? "Conectado. Tus citas se sincronizan y respetamos tus horarios ocupados." : "Conecta tu cuenta para sincronizar citas, crear links de Meet y respetar tus horarios ocupados."}</p>
-      {!configured && !connected ? <p className="text-sm text-muted-foreground">La conexión con Google Calendar aún no está disponible.</p> : null}
-      <Button className="self-start" variant={connected ? "outline" : "primary"} disabled={pending || (!configured && !connected)} onClick={act}>
-        {pending ? "Actualizando…" : connected ? "Desconectar" : "Conectar Google Calendar"}
-      </Button>
-      {error ? <p role="alert" className="text-sm text-destructive">{error}</p> : null}
-    </Card>
+    <section className="grid gap-3">
+      <SectionHeader title="Conexiones" />
+      <div className="flex flex-wrap items-center justify-between gap-3 border-y border-border py-4">
+        <div className="min-w-0 flex-1 basis-48">
+          <h3 className="font-medium">Google Calendar</h3>
+          <p className="text-sm text-muted-foreground">
+            {connected
+              ? "Citas y horarios ocupados sincronizados."
+              : "Sincroniza tus citas y enlaces de Meet."}
+          </p>
+        </div>
+        <Badge variant={connected ? "confirmed" : "done"}>
+          {connected
+            ? "Conectado"
+            : configured
+              ? "Sin conectar"
+              : "No disponible"}
+        </Badge>
+        <Button
+          className="w-full self-start sm:w-auto"
+          variant="outline"
+          disabled={pending || (!configured && !connected)}
+          onClick={act}
+        >
+          {pending
+            ? "Actualizando…"
+            : connected
+              ? "Desconectar"
+              : "Conectar Google Calendar"}
+        </Button>
+      </div>
+      {error ? (
+        <p role="alert" className="text-sm text-destructive-ink">
+          {error}
+        </p>
+      ) : null}
+    </section>
   );
 }
