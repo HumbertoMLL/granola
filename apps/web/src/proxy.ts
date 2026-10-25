@@ -11,7 +11,11 @@ export function proxy(request: NextRequest) {
     loginUrl.searchParams.set("next", request.nextUrl.pathname);
     return NextResponse.redirect(loginUrl);
   }
-  return NextResponse.next();
+  // Los layouts no reciben el pathname: lo pasamos como header del request para el
+  // gate de onboarding (lib/onboarding-gate.ts). `set` pisa cualquier valor del cliente.
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-granola-pathname", request.nextUrl.pathname);
+  return NextResponse.next({ request: { headers: requestHeaders } });
 }
 
 export const config = {

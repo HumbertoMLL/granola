@@ -3,11 +3,11 @@ import { Suspense } from "react";
 
 import { Skeleton } from "@granola/ui";
 
-import { OnboardingGate } from "@/components/configuracion/onboarding-gate";
 import { BottomNav } from "@/components/panel/bottom-nav";
 import { MobileHeader } from "@/components/panel/mobile-header";
 import { initialsOf, type PanelUser } from "@/components/panel/nav";
 import { Sidebar } from "@/components/panel/sidebar";
+import { enforceOnboarding } from "@/lib/onboarding-gate";
 import { requireNutritionist } from "@/lib/session";
 
 export const metadata: Metadata = {
@@ -26,6 +26,12 @@ export default function PanelLayout({ children }: LayoutProps<"/app">) {
 
 async function PanelShell({ children }: { children: React.ReactNode }) {
   const { nutritionist } = await requireNutritionist();
+  // Gate server-side: redirige al wizard mientras onboarding_step < 4.
+  const { onOnboardingRoute } = await enforceOnboarding(nutritionist.onboardingStep);
+  if (onOnboardingRoute) {
+    // El wizard va sin sidebar ni tab bar: sin enlaces que esquiven el gate.
+    return <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 md:px-8 md:py-10">{children}</main>;
+  }
   const user: PanelUser = {
     name: nutritionist.displayName,
     slug: nutritionist.slug,
@@ -34,8 +40,7 @@ async function PanelShell({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <OnboardingGate step={nutritionist.onboardingStep}>
-      <div className="flex min-h-full flex-1">
+    <div className="flex min-h-full flex-1">
         <Sidebar user={user} />
         <div className="flex min-w-0 flex-1 flex-col">
           <MobileHeader user={user} />
@@ -45,8 +50,7 @@ async function PanelShell({ children }: { children: React.ReactNode }) {
           </main>
         </div>
         <BottomNav />
-      </div>
-    </OnboardingGate>
+    </div>
   );
 }
 

@@ -23,6 +23,8 @@ export function OnboardingWizard(props: { step: number; displayName: string; slu
       try {
         const result = await work();
         if (!result.ok) { toast.error(result.error ?? "Revisa los campos"); return; }
+        // replace + refresh: refresh vuelve a pedir el árbol completo (layout incluido),
+        // así el panel aparece con sidebar y tab bar al salir del wizard.
         if (finish) router.replace("/app");
         router.refresh();
       } catch { toast.error("No se pudo guardar. Intenta de nuevo."); }
