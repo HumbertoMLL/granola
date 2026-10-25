@@ -1,11 +1,11 @@
-import { measurements } from "./measurements";
-import { clinicalNotes } from "./clinical_notes";
 import { relations } from "drizzle-orm";
 import { date, index, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { nutritionists } from "./nutritionists";
 import { appointments } from "./appointments";
 import { reviews } from "./reviews";
 import { waMessages } from "./wa_messages";
+import { measurements } from "./measurements";
+import { clinicalNotes } from "./clinical_notes";
 
 export const sexEnum = pgEnum("sex", ["f", "m", "otro"]);
 export const patientSourceEnum = pgEnum("patient_source", ["booking", "manual", "import"]);

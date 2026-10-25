@@ -1,5 +1,3 @@
-import { measurements } from "./measurements";
-import { clinicalNotes } from "./clinical_notes";
 import { relations } from "drizzle-orm";
 import { boolean, index, integer, jsonb, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { users } from "./auth";
@@ -8,6 +6,8 @@ import { availabilityOverrides, availabilityRules } from "./availability";
 import { patients } from "./patients";
 import { appointments } from "./appointments";
 import { reviews } from "./reviews";
+import { measurements } from "./measurements";
+import { clinicalNotes } from "./clinical_notes";
 
 export const planEnum = pgEnum("plan", ["trial", "starter", "pro", "clinica"]);
 

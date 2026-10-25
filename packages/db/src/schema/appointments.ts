@@ -1,4 +1,3 @@
-import { clinicalNotes } from "./clinical_notes";
 import { relations } from "drizzle-orm";
 import { index, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { nutritionists } from "./nutritionists";
@@ -6,6 +5,7 @@ import { patients } from "./patients";
 import { services } from "./services";
 import { payments } from "./payments";
 import { reviews } from "./reviews";
+import { clinicalNotes } from "./clinical_notes";
 
 /** Una cita concreta es online o presencial; "ambas" solo aplica al servicio. */
 export const appointmentModalityEnum = pgEnum("appointment_modality", ["online", "presencial"]);
