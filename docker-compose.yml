@@ -1,0 +1,72 @@
+# Stack local completo. Producción remota: usar el target runner y servicios administrados.
+x-database-env: &database-env
+  DATABASE_URL: postgres://${POSTGRES_USER:-granola}:${POSTGRES_PASSWORD:-granola}@postgres:5432/${POSTGRES_DB:-granola}
+  NEON_LOCAL_PROXY: http://neon-proxy:4444/sql
+  NEON_LOCAL_PG_HOST: postgres:5432
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-granola}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-granola}
+      POSTGRES_DB: ${POSTGRES_DB:-granola}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - granola_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 3s
+      retries: 20
+  neon-proxy:
+    image: ghcr.io/timowilhelm/local-neon-http-proxy:main
+    environment:
+      PG_CONNECTION_STRING: postgres://${POSTGRES_USER:-granola}:${POSTGRES_PASSWORD:-granola}@postgres:5432/${POSTGRES_DB:-granola}
+    ports:
+      - "${NEON_PROXY_PORT:-4444}:4444"
+    depends_on:
+      postgres:
+        condition: service_healthy
+  migrate:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      target: migrate
+    environment:
+      <<: *database-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      neon-proxy:
+        condition: service_started
+    restart: "no"
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      target: runner
+      args:
+        NEXT_PUBLIC_APP_URL: http://localhost:3100
+    environment:
+      <<: *database-env
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-local-docker-only-change-before-deploying-2026}
+      BETTER_AUTH_URL: http://localhost:3100
+      NEXT_PUBLIC_APP_URL: http://localhost:3100
+      INNGEST_DEV: "1"
+      INNGEST_BASE_URL: http://inngest:8288
+    ports:
+      - "3100:3100"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+  inngest:
+    image: inngest/inngest
+    command: ["inngest", "dev", "-u", "http://web:3100/api/inngest"]
+    ports:
+      - "8288:8288"
+    depends_on:
+      web:
+        condition: service_healthy
+volumes:
+  granola_pg:

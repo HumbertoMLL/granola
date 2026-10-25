@@ -12,3 +12,5 @@ coverage
 .env*
 .neon
 .claude/worktrees
+
+!.env.docker.example
