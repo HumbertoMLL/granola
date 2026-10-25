@@ -2,49 +2,57 @@ import "server-only";
 
 import { cache } from "react";
 import Link from "next/link";
-import { ArrowUpRight, Copy } from "lucide-react";
-import {
-  Badge,
-  EmptyState,
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@granola/ui";
-import {
-  formatTimeInTz,
-  formatYmdLong,
-  ymdInTz,
-} from "@granola/core/scheduling";
+import { ArrowUpRight, CalendarDays } from "lucide-react";
+import { Badge, Button, EmptyState, KPI, SectionHeader } from "@granola/ui";
+import { formatTimeInTz } from "@granola/core/scheduling";
 import { PageHeader } from "@/components/panel/page-header";
+import { CopyButton } from "@/components/cobros/copy-button";
 import {
   STATUS_BADGE_VARIANT,
   STATUS_LABEL,
+  formatCalendarDate,
 } from "@/components/booking/format";
 import {
   getDashboardIncome,
   getDashboardNewPatients,
   getDashboardNoShows,
+  getDashboardPreviousMonth,
   hasDashboardAvailability,
   listDashboardAppointments,
 } from "@/lib/dashboard";
 import { requireNutritionist } from "@/lib/session";
 import { formatDashboardMoney, groupAppointments } from "./aggregation";
 
-// Compartir sesión y reloj solo durante este render, sin cachear datos entre nutris.
 const context = cache(async () => {
   const { nutritionist } = await requireNutritionist();
   return { nutritionist, now: new Date() };
 });
+const comparison = cache(async () => {
+  const { nutritionist, now } = await context();
+  return getDashboardPreviousMonth(nutritionist.id, now, nutritionist.timezone);
+});
+const number = (value: number) =>
+  new Intl.NumberFormat("es-MX", {
+    maximumFractionDigits: 1,
+    signDisplay: "exceptZero",
+  }).format(value);
+const delta = (current: number, previous: number) =>
+  previous === 0
+    ? current === 0
+      ? "Sin cambios vs mes anterior"
+      : `${number(current)} vs mes anterior`
+    : `${number(((current - previous) / previous) * 100)}% vs mes anterior`;
 
 export async function DashboardHeader() {
-  const { nutritionist } = await context();
+  const { nutritionist, now } = await context();
   return (
     <PageHeader
+      className="hidden md:flex"
       title={`Hola, ${nutritionist.displayName.split(" ")[0]}`}
-      description="Esto es lo que tienes hoy."
+      description={new Intl.DateTimeFormat("es-MX", {
+        month: "long",
+        timeZone: nutritionist.timezone,
+      }).format(now)}
     >
       <Button asChild variant="outline" size="sm">
         <Link href={`/${nutritionist.slug}`} target="_blank" rel="noreferrer">
@@ -54,26 +62,22 @@ export async function DashboardHeader() {
     </PageHeader>
   );
 }
-
 export async function BioLink() {
   const { nutritionist } = await context();
   return (
-    <Card className="flex-row items-center justify-between gap-4 bg-primary-soft/60 p-4 sm:p-5">
-      <div className="min-w-0">
-        <p className="text-xs font-semibold tracking-wide text-primary">
-          Tu link para la bio
-        </p>
-        <p className="truncate font-semibold">
-          granola.app/@{nutritionist.slug}
-        </p>
-      </div>
-      <Button size="sm" variant="outline" className="shrink-0" disabled>
-        <Copy /> Copiar
-      </Button>
-    </Card>
+    <div className="flex min-w-0 items-center justify-between gap-3 border-b border-border pb-4 text-sm">
+      <a
+        href={`/${nutritionist.slug}`}
+        className="min-w-0 truncate text-muted-foreground hover:text-primary"
+      >
+        granola.app/@{nutritionist.slug}
+      </a>
+      <CopyButton
+        value={`${process.env.NEXT_PUBLIC_APP_URL ?? "https://granola.app"}/${nutritionist.slug}`}
+      />
+    </div>
   );
 }
-
 export async function AvailabilityNotice() {
   const { nutritionist, now } = await context();
   if (
@@ -81,18 +85,17 @@ export async function AvailabilityNotice() {
   )
     return null;
   return (
-    <Card className="gap-2 border-accent p-4" role="status">
-      <p className="font-semibold">Configura tu disponibilidad</p>
-      <p className="text-sm text-muted-foreground">
-        Agrega tus horarios para empezar a recibir reservas.
-      </p>
-      <Button asChild variant="outline" size="sm" className="self-start">
+    <div
+      className="flex flex-wrap items-center justify-between gap-3 border-l-[3px] border-status-pending bg-secondary p-4"
+      role="status"
+    >
+      <p className="text-sm">Configura tus horarios para recibir reservas.</p>
+      <Button asChild variant="outline" size="sm">
         <Link href="/app/agenda?tab=disponibilidad">Configurar horarios</Link>
       </Button>
-    </Card>
+    </div>
   );
 }
-
 export async function AppointmentSection({
   period,
 }: {
@@ -107,228 +110,152 @@ export async function AppointmentSection({
   );
   const groups = groupAppointments(rows, nutritionist.timezone);
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
-          {period === "today" ? "Citas de hoy" : "Próximos 7 días"}{" "}
-          <Badge variant="secondary">{rows.length}</Badge>
-        </CardTitle>
-        <CardDescription>
-          {period === "today"
-            ? formatYmdLong(ymdInTz(now, nutritionist.timezone))
-            : "Desde mañana · citas confirmadas y pendientes de pago"}{" "}
-          · {nutritionist.timezone}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-5">
-        {groups.length === 0 ? (
-          <EmptyState
-            title={
-              period === "today"
-                ? "Sin citas hoy"
-                : "Sin citas en los próximos 7 días"
-            }
-            description="Comparte tu página o revisa tu disponibilidad para recibir reservas."
-            action={
-              <Button variant="outline" asChild>
-                <Link href="/app/agenda">Ver agenda</Link>
-              </Button>
-            }
-          />
-        ) : (
-          groups.map((group) => (
-            <section key={group.date} className="flex flex-col gap-2">
-              {period === "week" ? (
-                <h3 className="text-sm font-semibold">
-                  {formatYmdLong(group.date)}
-                </h3>
-              ) : null}
-              <ul className="divide-y divide-border">
-                {group.appointments.map((row) => (
-                  <li key={row.id} className="py-3 first:pt-0">
-                    <Link
-                      href={`/app/agenda/${row.id}`}
-                      className="flex flex-col gap-2 rounded-lg focus-visible:outline-2 focus-visible:outline-primary sm:flex-row sm:items-start sm:justify-between"
-                    >
-                      <div className="min-w-0">
-                        <p className="font-semibold">
-                          <time dateTime={row.startsAt.toISOString()}>
-                            {formatTimeInTz(
-                              row.startsAt,
-                              nutritionist.timezone,
-                            )}
-                          </time>{" "}
-                          · {row.patientName}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {row.serviceName}
-                        </p>
-                      </div>
-                      <Badge
-                        className="self-start shrink-0"
-                        variant={STATUS_BADGE_VARIANT[row.status]}
-                      >
-                        {STATUS_LABEL[row.status]}
-                      </Badge>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))
-        )}
-      </CardContent>
-    </Card>
+    <section className="space-y-4">
+      <SectionHeader
+        title={
+          <>
+            {period === "today" ? "Hoy" : "Esta semana"}{" "}
+            <span className="ml-2 text-sm font-normal text-muted-foreground">
+              {rows.length}
+            </span>
+          </>
+        }
+        actions={
+          <Link
+            href="/app/agenda"
+            className="text-sm text-primary hover:underline"
+          >
+            Ver agenda
+          </Link>
+        }
+      />
+      {groups.length === 0 ? (
+        <EmptyState
+          icon={<CalendarDays />}
+          title={period === "today" ? "Sin citas hoy" : "Sin citas esta semana"}
+          action={
+            <Link
+              href="/app/agenda?tab=disponibilidad"
+              className="text-sm text-primary hover:underline"
+            >
+              Revisar horarios
+            </Link>
+          }
+        />
+      ) : (
+        groups.map((group) => (
+          <div key={group.date}>
+            {period === "week" ? (
+              <h3 className="mb-2 text-sm text-muted-foreground">
+                {formatCalendarDate(group.date)}
+              </h3>
+            ) : null}
+            <ul className="divide-y divide-border border-y border-border">
+              {group.appointments.map((row) => (
+                <li key={row.id}>
+                  <Link
+                    href={`/app/agenda/${row.id}`}
+                    className="flex min-h-16 items-center justify-between gap-3 py-3 focus-visible:outline-2 focus-visible:outline-primary"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate text-base font-semibold">
+                        {row.patientName}
+                      </p>
+                      <p className="truncate text-sm text-muted-foreground">
+                        <time dateTime={row.startsAt.toISOString()}>
+                          {formatTimeInTz(row.startsAt, nutritionist.timezone)}
+                        </time>{" "}
+                        · {row.serviceName}
+                      </p>
+                    </div>
+                    <Badge variant={STATUS_BADGE_VARIANT[row.status]}>
+                      {STATUS_LABEL[row.status]}
+                    </Badge>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      )}
+    </section>
   );
 }
-
-const METHOD_LABEL = {
-  card: "Tarjeta",
-  spei: "SPEI",
-  oxxo: "OXXO",
-  cash: "Efectivo",
-} as const;
-
 export async function IncomeSection() {
   const { nutritionist, now } = await context();
-  const income = await getDashboardIncome(
-    nutritionist.id,
-    now,
-    nutritionist.timezone,
-  );
+  const [income, previous] = await Promise.all([
+    getDashboardIncome(nutritionist.id, now, nutritionist.timezone),
+    comparison(),
+  ]);
+  const currencies = income.length
+    ? income
+    : [{ currency: "MXN", totalCents: 0 }];
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Ingresos del mes</CardTitle>
-        <CardDescription>Pagos acreditados en tu zona horaria</CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        {income.length === 0 ? (
-          <EmptyState
-            title="Sin ingresos este mes"
-            description="Aún no hay pagos acreditados este mes."
-            action={
-              <Button variant="outline" asChild>
-                <Link href="/app/cobros">Ver cobros</Link>
-              </Button>
-            }
-          />
-        ) : (
-          income.map((summary) => (
-            <div key={summary.currency}>
-              <p className="text-3xl font-extrabold tabular-nums">
-                {formatDashboardMoney(summary.totalCents, summary.currency)}{" "}
-                <span className="text-sm font-normal">{summary.currency}</span>
-              </p>
-              <dl className="mt-3 grid grid-cols-2 gap-2 text-sm">
-                {(
-                  Object.keys(METHOD_LABEL) as (keyof typeof METHOD_LABEL)[]
-                ).map((method) => (
-                  <div key={method}>
-                    <dt className="text-muted-foreground">
-                      {METHOD_LABEL[method]}
-                    </dt>
-                    <dd className="font-semibold tabular-nums">
-                      {formatDashboardMoney(
-                        summary.methods[method],
-                        summary.currency,
-                      )}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-          ))
-        )}
-        {income.length > 0 && (
-          <Link
-            href="/app/cobros"
-            className="text-sm font-semibold text-primary underline"
-          >
-            Ver cobros
-          </Link>
-        )}
-      </CardContent>
-    </Card>
+    <div className="col-span-2 space-y-4 sm:col-span-1">
+      {currencies.map((summary) => (
+        <KPI
+          key={summary.currency}
+          label={`Ingresos · ${summary.currency}`}
+          value={formatDashboardMoney(summary.totalCents, summary.currency)}
+          delta={`${formatDashboardMoney(summary.totalCents - (previous.income.find((row) => row.currency === summary.currency)?.totalCents ?? 0), summary.currency)} vs mes anterior`}
+        />
+      ))}
+    </div>
   );
 }
-
 export async function NewPatientsSection() {
   const { nutritionist, now } = await context();
-  const total = await getDashboardNewPatients(
-    nutritionist.id,
-    now,
-    nutritionist.timezone,
-  );
+  const [total, previous] = await Promise.all([
+    getDashboardNewPatients(nutritionist.id, now, nutritionist.timezone),
+    comparison(),
+  ]);
   return (
-    <Card>
-      <CardHeader>
-        <CardDescription>Pacientes nuevos del mes</CardDescription>
-        <CardTitle className="text-3xl font-extrabold tabular-nums">
-          {total}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="text-sm text-muted-foreground">
-        Registrados este mes en tu zona horaria.
-      </CardContent>
-    </Card>
+    <KPI
+      label="Pacientes nuevos"
+      value={total}
+      delta={delta(total, previous.newPatients)}
+    />
   );
 }
-
 export async function NoShowSection() {
   const { nutritionist, now } = await context();
-  const rate = await getDashboardNoShows(
-    nutritionist.id,
-    now,
-    nutritionist.timezone,
-  );
+  const [rate, previous] = await Promise.all([
+    getDashboardNoShows(nutritionist.id, now, nutritionist.timezone),
+    comparison(),
+  ]);
   return (
-    <Card>
-      <CardHeader>
-        <CardDescription>Tasa de no-show del mes</CardDescription>
-        <CardTitle className="text-3xl font-extrabold tabular-nums">
-          {rate.percent === null
-            ? "—"
-            : `${new Intl.NumberFormat("es-MX", { maximumFractionDigits: 1 }).format(rate.percent)}%`}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="text-sm text-muted-foreground">
-        {rate.total === 0
-          ? "Sin citas con asistencia registrada este mes."
-          : `${rate.noShows} ${rate.noShows === 1 ? "ausencia" : "ausencias"} de ${rate.total} ${rate.total === 1 ? "cita" : "citas"} con asistencia registrada.`}{" "}
-        Se calcula sobre citas completadas y ausencias; excluye canceladas y
-        pendientes.
-      </CardContent>
-    </Card>
+    <KPI
+      label="Ausencias"
+      value={
+        rate.percent === null
+          ? "—"
+          : `${new Intl.NumberFormat("es-MX", { maximumFractionDigits: 1 }).format(rate.percent)}%`
+      }
+      delta={
+        rate.percent === null || previous.noShows.percent === null
+          ? "Sin referencia anterior"
+          : `${number(rate.percent - previous.noShows.percent)} pp vs mes anterior`
+      }
+    />
   );
 }
-
 export async function ConnectionSection() {
   const { nutritionist } = await context();
   const connected = Boolean(nutritionist.stripeAccountId);
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Conexión de cobros</CardTitle>
-        <CardDescription>Stripe</CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col items-start gap-3">
-        <Badge variant={connected ? "default" : "secondary"}>
-          {connected ? "Stripe conectado" : "Stripe sin conectar"}
-        </Badge>
-        <p className="text-sm text-muted-foreground">
-          {connected
-            ? nutritionist.stripeChargesEnabled
-              ? "Tu cuenta está habilitada para recibir pagos."
-              : "Tu cuenta está vinculada. Revisa los requisitos para habilitar cobros."
-            : "Conecta tu cuenta para recibir pagos con tarjeta."}
-        </p>
-        <Button asChild variant="outline" size="sm">
-          <Link href="/app/cobros">
-            {connected ? "Revisar cobros" : "Conectar Stripe"}
-          </Link>
-        </Button>
-      </CardContent>
-    </Card>
+    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
+      <p className="text-sm text-muted-foreground">
+        {connected
+          ? nutritionist.stripeChargesEnabled
+            ? "Cobros con tarjeta activos"
+            : "Stripe · Requisitos pendientes"
+          : "Stripe sin conectar"}
+      </p>
+      <Button asChild variant="ghost" size="sm">
+        <Link href="/app/cobros">
+          {connected ? "Revisar cobros" : "Conectar Stripe"}
+        </Link>
+      </Button>
+    </div>
   );
 }

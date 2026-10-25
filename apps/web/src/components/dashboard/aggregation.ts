@@ -79,7 +79,7 @@ export function formatDashboardMoney(cents: number, currency = "MXN") {
   return new Intl.NumberFormat("es-MX", {
     style: "currency",
     currency,
-    minimumFractionDigits: 2,
+    minimumFractionDigits: cents % 100 === 0 ? 0 : 2,
     maximumFractionDigits: 2,
   }).format(cents / 100);
 }

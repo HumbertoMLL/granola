@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { seedAppointment, seedNutritionist, seedPatient } from "@granola/db/testing";
+import {
+  seedAppointment,
+  seedNutritionist,
+  seedPatient,
+} from "@granola/db/testing";
 
 import { db, eq, patients, payments } from "@/lib/db";
 
@@ -8,6 +12,7 @@ import {
   getDashboardIncome,
   getDashboardNewPatients,
   getDashboardNoShows,
+  getDashboardPreviousMonth,
   listDashboardAppointments,
 } from "./dashboard";
 
@@ -32,7 +37,10 @@ async function seedPayment(input: {
   await db.insert(payments).values({
     appointmentId: input.appointmentId,
     provider: method === "cash" ? "cash" : "stripe",
-    providerRef: method === "cash" ? null : `pi_test_dashboard_${paymentSeq}_${Date.now()}`,
+    providerRef:
+      method === "cash"
+        ? null
+        : `pi_test_dashboard_${paymentSeq}_${Date.now()}`,
     amountCents: input.amountCents,
     currency: "MXN",
     status: input.status,
@@ -43,12 +51,18 @@ async function seedPayment(input: {
 
 async function seedPatientCreatedAt(nutritionistId: string, createdAt: Date) {
   const patient = await seedPatient({ nutritionistId });
-  await db.update(patients).set({ createdAt }).where(eq(patients.id, patient.id));
+  await db
+    .update(patients)
+    .set({ createdAt })
+    .where(eq(patients.id, patient.id));
   return patient;
 }
 
 /** Datos de una nutrióloga en octubre: 1 cita hoy, 1 en la semana, pagos, no-show y paciente nuevo. */
-async function seedMonth({ nutritionist }: Seeded, amounts: { paid: number; pending: number }) {
+async function seedMonth(
+  { nutritionist }: Seeded,
+  amounts: { paid: number; pending: number },
+) {
   const nid = nutritionist.id;
   const today = await seedAppointment({
     nutritionistId: nid,
@@ -95,6 +109,40 @@ describe("Cuando una nutrióloga abre su dashboard", () => {
     b = await seedNutritionist({ slug: "nutri-b", timezone: TZ });
   });
 
+  it("compara con el mes local anterior y conserva el filtro por nutrióloga", async () => {
+    const date = new Date("2026-10-01T05:30:00Z"); // 30 sep, 23:30 CDMX
+    for (const [owner, amount] of [
+      [a, 12000],
+      [b, 99000],
+    ] as const) {
+      const appt = await seedAppointment({
+        nutritionistId: owner.nutritionist.id,
+        startsAt: date,
+        endsAt: new Date("2026-10-01T05:45:00Z"),
+        status: "completed",
+      });
+      await seedPayment({
+        appointmentId: appt.id,
+        amountCents: amount,
+        paidAt: date,
+        status: "paid",
+      });
+      await db
+        .update(patients)
+        .set({ createdAt: date })
+        .where(eq(patients.nutritionistId, owner.nutritionist.id));
+    }
+    const previous = await getDashboardPreviousMonth(
+      a.nutritionist.id,
+      NOW,
+      TZ,
+    );
+    expect(previous.income.map((row) => row.totalCents)).toEqual([12000]);
+    expect(previous.newPatients).toBe(1);
+    expect(previous.noShows).toEqual({ total: 1, noShows: 0, percent: 0 });
+    expect(await getDashboardIncome(a.nutritionist.id, NOW, TZ)).toEqual([]);
+  });
+
   describe("y otra nutrióloga también tiene citas y pagos", () => {
     let mineA: Awaited<ReturnType<typeof seedMonth>>;
     let mineB: Awaited<ReturnType<typeof seedMonth>>;
@@ -105,8 +153,18 @@ describe("Cuando una nutrióloga abre su dashboard", () => {
     });
 
     it("solo ve sus propias citas de hoy y de la semana", async () => {
-      const today = await listDashboardAppointments(a.nutritionist.id, NOW, TZ, "today");
-      const week = await listDashboardAppointments(a.nutritionist.id, NOW, TZ, "week");
+      const today = await listDashboardAppointments(
+        a.nutritionist.id,
+        NOW,
+        TZ,
+        "today",
+      );
+      const week = await listDashboardAppointments(
+        a.nutritionist.id,
+        NOW,
+        TZ,
+        "week",
+      );
 
       expect(today.map((r) => r.id)).toEqual([mineA.today.id]);
       expect(week.map((r) => r.id)).toEqual([mineA.thisWeek.id]);
@@ -119,7 +177,11 @@ describe("Cuando una nutrióloga abre su dashboard", () => {
       const income = await getDashboardIncome(a.nutritionist.id, NOW, TZ);
 
       expect(income).toEqual([
-        { currency: "MXN", totalCents: 50_000, methods: { card: 50_000, spei: 0, oxxo: 0, cash: 0 } },
+        {
+          currency: "MXN",
+          totalCents: 50_000,
+          methods: { card: 50_000, spei: 0, oxxo: 0, cash: 0 },
+        },
       ]);
     });
 
@@ -129,7 +191,10 @@ describe("Cuando una nutrióloga abre su dashboard", () => {
         .update(patients)
         .set({ createdAt: new Date("2026-09-15T18:00:00Z") })
         .where(eq(patients.nutritionistId, a.nutritionist.id));
-      await seedPatientCreatedAt(a.nutritionist.id, new Date("2026-10-12T18:00:00Z"));
+      await seedPatientCreatedAt(
+        a.nutritionist.id,
+        new Date("2026-10-12T18:00:00Z"),
+      );
 
       expect(await getDashboardNewPatients(a.nutritionist.id, NOW, TZ)).toBe(1);
     });
@@ -152,18 +217,54 @@ describe("Cuando una nutrióloga abre su dashboard", () => {
         status: "completed",
       });
       const paidAt = new Date("2026-10-08T17:00:00Z");
-      await seedPayment({ appointmentId: appt.id, amountCents: 40_000, status: "paid", paidAt, method: "card" });
-      await seedPayment({ appointmentId: appt.id, amountCents: 25_000, status: "paid", paidAt, method: "cash" });
-      await seedPayment({ appointmentId: appt.id, amountCents: 11_100, status: "pending", paidAt: null });
-      await seedPayment({ appointmentId: appt.id, amountCents: 22_200, status: "failed", paidAt: null });
-      await seedPayment({ appointmentId: appt.id, amountCents: 33_300, status: "expired", paidAt: null });
+      await seedPayment({
+        appointmentId: appt.id,
+        amountCents: 40_000,
+        status: "paid",
+        paidAt,
+        method: "card",
+      });
+      await seedPayment({
+        appointmentId: appt.id,
+        amountCents: 25_000,
+        status: "paid",
+        paidAt,
+        method: "cash",
+      });
+      await seedPayment({
+        appointmentId: appt.id,
+        amountCents: 11_100,
+        status: "pending",
+        paidAt: null,
+      });
+      await seedPayment({
+        appointmentId: appt.id,
+        amountCents: 22_200,
+        status: "failed",
+        paidAt: null,
+      });
+      await seedPayment({
+        appointmentId: appt.id,
+        amountCents: 33_300,
+        status: "expired",
+        paidAt: null,
+      });
       // Un reembolso conserva paid_at pero ya no es ingreso.
-      await seedPayment({ appointmentId: appt.id, amountCents: 44_400, status: "refunded", paidAt });
+      await seedPayment({
+        appointmentId: appt.id,
+        amountCents: 44_400,
+        status: "refunded",
+        paidAt,
+      });
 
       const income = await getDashboardIncome(nid, NOW, TZ);
 
       expect(income).toEqual([
-        { currency: "MXN", totalCents: 65_000, methods: { card: 40_000, spei: 0, oxxo: 0, cash: 25_000 } },
+        {
+          currency: "MXN",
+          totalCents: 65_000,
+          methods: { card: 40_000, spei: 0, oxxo: 0, cash: 25_000 },
+        },
       ]);
     });
   });
@@ -180,7 +281,12 @@ describe("Cuando una nutrióloga abre su dashboard", () => {
         endsAt,
         status: "no_show",
       });
-      await seedPayment({ appointmentId: appt.id, amountCents: 30_000, status: "paid", paidAt: lateOct31 });
+      await seedPayment({
+        appointmentId: appt.id,
+        amountCents: 30_000,
+        status: "paid",
+        paidAt: lateOct31,
+      });
       await db
         .update(patients)
         .set({ createdAt: lateOct31 })
@@ -191,7 +297,11 @@ describe("Cuando una nutrióloga abre su dashboard", () => {
       const now = new Date("2026-11-01T05:55:00Z");
 
       expect(await getDashboardIncome(a.nutritionist.id, now, TZ)).toEqual([
-        { currency: "MXN", totalCents: 30_000, methods: { card: 30_000, spei: 0, oxxo: 0, cash: 0 } },
+        {
+          currency: "MXN",
+          totalCents: 30_000,
+          methods: { card: 30_000, spei: 0, oxxo: 0, cash: 0 },
+        },
       ]);
       expect(await getDashboardNewPatients(a.nutritionist.id, now, TZ)).toBe(1);
       expect(await getDashboardNoShows(a.nutritionist.id, now, TZ)).toEqual({
