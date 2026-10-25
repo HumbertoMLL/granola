@@ -119,7 +119,12 @@ async function AgendaContent() {
         title="Agenda"
         description="Tus citas, servicios y disponibilidad."
       >
-        <Button size="sm" variant="outline" asChild>
+        <Button
+          size="sm"
+          variant="outline"
+          className="hidden sm:inline-flex"
+          asChild
+        >
           <a
             href={`/${nutritionist.slug}/agendar`}
             target="_blank"

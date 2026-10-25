@@ -24,6 +24,8 @@ Referencia: las 12 reglas de `docs/ux-decisions.md`. Se revisaron las páginas d
 
 Login y registro ya usan labels visibles y un submit. Reseña ya usa radios nativos y consentimiento real. Pago, privacidad y confirmación de reserva no introducen selección ni nuevos formularios. Los demás estados asíncronos del panel ya usan Suspense/Skeleton.
 
+- `components/cobros/month-filter.tsx`: label visible y vinculado al selector de mes.
+
 ## Evidencia y reproducción
 
 Los specs `e2e/agenda.spec.ts` y `e2e/booking.spec.ts` cubren semilla → perfil → wizard → cita persistida → agenda → cancelación, más historial del navegador y filtros. Las capturas de `docs/ux-captures/` usan ancho 390 px: perfil, reserva, agenda Día y Semana con Sheet.

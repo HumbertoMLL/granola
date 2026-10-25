@@ -52,7 +52,9 @@ test("Karla consulta Día, cambia a Semana y abre una cita en la hoja inferior",
   await expect(
     page.getByRole("region", { name: "Agenda del día" }),
   ).toBeVisible();
-  await expect(page.getByRole("button", { name: /Luis Pérez/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Luis Pérez/ })).toBeInViewport(
+    { ratio: 0.8 },
+  );
   await mobileCapture(page, "03-agenda-dia-390.png");
   await page
     .getByRole("radio", { name: "Semana", exact: true })

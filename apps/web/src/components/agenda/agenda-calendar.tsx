@@ -202,7 +202,7 @@ export function AgendaCalendar({ data }: { data: AgendaData }) {
   }
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-3">
       <SegmentedControl
         label="Vista de agenda"
         value={view}
@@ -274,10 +274,14 @@ export function AgendaCalendar({ data }: { data: AgendaData }) {
           </button>
         ))}
       </div>
-      <div className="flex flex-wrap gap-2" aria-label="Filtrar citas">
+      <div
+        className="flex gap-2 overflow-x-auto py-1"
+        aria-label="Filtrar citas"
+      >
         {FILTERS.map((filter) => (
           <FilterChip
             key={filter.id}
+            className="shrink-0 whitespace-nowrap"
             pressed={filters.includes(filter.id)}
             onPressedChange={(pressed) => toggle(filter.id, pressed)}
           >
@@ -320,7 +324,7 @@ export function AgendaCalendar({ data }: { data: AgendaData }) {
       {view === "day" ? (
         <div
           ref={timelineViewport}
-          className="max-h-[60dvh] overflow-y-auto overscroll-contain rounded-xl border border-border bg-card px-2 py-4"
+          className="max-h-[35dvh] overflow-y-auto overscroll-contain rounded-xl border border-border bg-card px-2 py-4 sm:max-h-[60dvh]"
         >
           <Timeline
             label="Agenda del día"
