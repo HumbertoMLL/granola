@@ -1,0 +1,81 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`plantillas de correo > bienvenida conserva el texto aprobado y usa la paleta sin imágenes 1`] = `
+"Te damos la bienvenida a Granola
+
+Hola, Karla.
+
+Tu cuenta está lista. Configura tu perfil y disponibilidad para empezar a recibir citas.
+
+Ir a mi panel: https://granola.app/app
+
+Granola · Tu consulta, más simple."
+`;
+
+exports[`plantillas de correo > citaCancelada conserva el texto aprobado y usa la paleta sin imágenes 1`] = `
+"Tu cita fue cancelada
+
+Hola, Ana López. Tu cita con Karla Demo fue cancelada.
+
+Servicio: Seguimiento
+
+Fecha: sábado, 24 de octubre de 2026, 10:00 a.m. (America/Mexico_City)
+
+Modalidad: En línea
+
+Puedes consultar la disponibilidad para reservar otra cita.
+
+Agendar otra cita: https://granola.app/karla/agendar
+
+Granola · Tu consulta, más simple."
+`;
+
+exports[`plantillas de correo > citaConfirmadaPaciente conserva el texto aprobado y usa la paleta sin imágenes 1`] = `
+"Tu cita está confirmada
+
+Hola, Ana López. Tu cita con Karla Demo está confirmada.
+
+Servicio: Seguimiento
+
+Fecha: sábado, 24 de octubre de 2026, 10:00 a.m. (America/Mexico_City)
+
+Modalidad: En línea
+
+Videollamada: https://meet.google.com/demo
+
+Si necesitas cambiar o cancelar tu cita, usa el siguiente enlace.
+
+Administrar mi cita: https://granola.app/cita/token-de-prueba
+
+Granola · Tu consulta, más simple."
+`;
+
+exports[`plantillas de correo > magicLink conserva el texto aprobado y usa la paleta sin imágenes 1`] = `
+"Tu enlace para entrar a Granola
+
+Usa este enlace para entrar a tu cuenta. Es válido durante 15 minutos y solo se puede usar una vez.
+
+Si no solicitaste este correo, puedes ignorarlo.
+
+Entrar a Granola: https://granola.app/api/auth/magic-link/verify?token=demo
+
+Granola · Tu consulta, más simple."
+`;
+
+exports[`plantillas de correo > nuevaCitaNutri conserva el texto aprobado y usa la paleta sin imágenes 1`] = `
+"Tienes una nueva cita en Granola
+
+Hola, Karla Demo. Ana López tiene una cita confirmada contigo.
+
+Servicio: Seguimiento
+
+Fecha: sábado, 24 de octubre de 2026, 10:00 a.m. (America/Mexico_City)
+
+Modalidad: En línea
+
+Videollamada: https://meet.google.com/demo
+
+Ver cita en mi agenda: https://granola.app/app/agenda/id-demo
+
+Granola · Tu consulta, más simple."
+`;
