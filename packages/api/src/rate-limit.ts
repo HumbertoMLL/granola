@@ -1,117 +1,59 @@
-/**
- * Limitador en memoria con ventana deslizante (sliding log): por cada llave se
- * guardan los timestamps de los hits dentro de la ventana.
- *
- * Sin dependencias de Hono ni de Next: lo usan el middleware de `/api/v1` y las
- * server actions anónimas de apps/web (`@granola/api/rate-limit`).
- *
- * OJO multi-instancia: el estado vive en la memoria del proceso. En Vercel cada
- * instancia serverless tiene su propio contador, así que el límite real es
- * `limit × instancias calientes`. Sirve como freno contra abuso tonto (scripts,
- * dobles clics, bots baratos), no como garantía. Para un límite global hay que
- * pasar el store a KV/Upstash Redis (`@upstash/ratelimit` tiene el mismo
- * algoritmo de ventana deslizante) detrás de esta misma interfaz.
- */
+/** Rate limit async compartido por Hono y server actions. Ver ADR 0011. */
+import { z } from "zod";
+import { getRateLimitStore, MemoryStore, RateLimitTimeoutError, type RateLimitStore } from "./store";
 
-export type RateLimitOptions = {
-  /** Hits permitidos dentro de la ventana. */
-  limit: number;
-  /** Tamaño de la ventana deslizante en ms. */
-  windowMs: number;
-};
-
+export type RateLimitOptions = { limit: number; windowMs: number };
 export type RateLimitResult = {
   ok: boolean;
   limit: number;
-  /** Hits restantes en la ventana actual (0 si se bloqueó). */
   remaining: number;
-  /** Epoch ms en que se libera el siguiente hit. */
+  /** Epoch ms del fin de la ventana fija actual. */
   resetAt: number;
-  /** ms a esperar antes de reintentar (0 si ok). */
   retryAfterMs: number;
 };
-
 export type RateLimiter = {
-  check(key: string, options: RateLimitOptions): RateLimitResult;
-  /** Borra una llave o todo el store (tests). */
-  reset(key?: string): void;
-  /** Número de llaves vivas (tests / diagnóstico). */
-  size(): number;
+  check(key: string, options: RateLimitOptions): Promise<RateLimitResult>;
 };
 
-/** Cada cuántas llamadas se barren llaves sin hits recientes. */
-const SWEEP_EVERY = 500;
+const optionsSchema = z.object({
+  limit: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
+  windowMs: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
+});
 
-export function createRateLimiter(opts: { now?: () => number } = {}): RateLimiter {
+export function createRateLimiter(opts: { now?: () => number; store?: RateLimitStore } = {}) {
   const now = opts.now ?? Date.now;
-  const hits = new Map<string, number[]>();
-  /** Ventana más grande vista por llave, para saber cuándo se puede borrar. */
-  const windows = new Map<string, number>();
-  let calls = 0;
-
-  function sweep(t: number) {
-    for (const [key, list] of hits) {
-      const w = windows.get(key) ?? 0;
-      const last = list[list.length - 1];
-      if (last === undefined || last <= t - w) {
-        hits.delete(key);
-        windows.delete(key);
-      }
-    }
-  }
-
+  const store = opts.store ?? new MemoryStore(now);
   return {
-    check(key, { limit, windowMs }) {
-      if (!Number.isFinite(limit) || limit < 1) throw new Error("rate limit: `limit` debe ser >= 1");
-      if (!Number.isFinite(windowMs) || windowMs <= 0) throw new Error("rate limit: `windowMs` debe ser > 0");
-
-      const t = now();
-      if (++calls % SWEEP_EVERY === 0) sweep(t);
-
-      const cutoff = t - windowMs;
-      const list = (hits.get(key) ?? []).filter((ts) => ts > cutoff);
-      windows.set(key, Math.max(windows.get(key) ?? 0, windowMs));
-
-      if (list.length >= limit) {
-        hits.set(key, list);
-        const oldest = list[0] ?? t;
-        const resetAt = oldest + windowMs;
-        return { ok: false, limit, remaining: 0, resetAt, retryAfterMs: Math.max(0, resetAt - t) };
-      }
-
-      list.push(t);
-      hits.set(key, list);
-      const oldest = list[0] ?? t;
-      return { ok: true, limit, remaining: limit - list.length, resetAt: oldest + windowMs, retryAfterMs: 0 };
-    },
-    reset(key) {
-      if (key === undefined) {
-        hits.clear();
-        windows.clear();
-      } else {
-        hits.delete(key);
-        windows.delete(key);
+    async check(key: string, options: RateLimitOptions): Promise<RateLimitResult> {
+      // Errores de programación no deben convertirse en fail-open.
+      const { limit, windowMs } = optionsSchema.parse(options);
+      try {
+        const { count, resetAt } = await store.incr(key, windowMs);
+        const ok = count <= limit;
+        return { ok, limit, remaining: Math.max(0, limit - count), resetAt, retryAfterMs: ok ? 0 : Math.max(0, resetAt - now()) };
+      } catch (error) {
+        // No registrar llaves/IPs, tokens, URL ni el error crudo del proveedor.
+        console.warn("[rate-limit] store no disponible; fail-open", { reason: error instanceof RateLimitTimeoutError ? "timeout" : "store_error" });
+        return { ok: true, limit, remaining: limit, resetAt: now(), retryAfterMs: 0 };
       }
     },
-    size() {
-      return hits.size;
+    /** Compatibilidad de tests: limpieza solo para el adaptador de memoria. */
+    reset(key?: string): void {
+      if (!(store instanceof MemoryStore)) throw new Error("reset solo está disponible en memoria");
+      store.reset(key);
+    },
+    size(): number {
+      if (!(store instanceof MemoryStore)) throw new Error("size solo está disponible en memoria");
+      return store.size();
     },
   };
 }
 
-// Un solo store por proceso. Se cuelga de globalThis porque Next/Turbopack puede
-// evaluar este módulo más de una vez (route handler vs server actions, HMR en dev).
-const GLOBAL_KEY = Symbol.for("granola.api.rateLimiter");
-type GlobalWithLimiter = typeof globalThis & { [GLOBAL_KEY]?: RateLimiter };
-
-export function getDefaultRateLimiter(): RateLimiter {
-  const g = globalThis as GlobalWithLimiter;
-  g[GLOBAL_KEY] ??= createRateLimiter();
-  return g[GLOBAL_KEY];
+export function getDefaultRateLimiter() {
+  return createRateLimiter({ store: getRateLimitStore() });
 }
 
-/** Registra un hit para `key` en el store compartido del proceso. */
-export function checkRateLimit(key: string, options: RateLimitOptions): RateLimitResult {
+export async function checkRateLimit(key: string, options: RateLimitOptions): Promise<RateLimitResult> {
   return getDefaultRateLimiter().check(key, options);
 }
 

@@ -44,6 +44,8 @@ const SERVICE = {
 const get = (path: string, headers?: Record<string, string>) => app.request(`/api/v1${path}`, { headers });
 
 beforeEach(() => {
+  vi.stubEnv("UPSTASH_REDIS_REST_URL", "");
+  vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "");
   getDefaultRateLimiter().reset();
   vi.clearAllMocks();
   getSession.mockResolvedValue(null);
@@ -55,6 +57,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.useRealTimers();
+  vi.unstubAllEnvs();
 });
 
 describe("GET /health", () => {

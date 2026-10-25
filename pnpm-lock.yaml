@@ -18,6 +18,9 @@ importers:
       '@granola/db':
         specifier: workspace:*
         version: link:packages/db
+      '@types/node':
+        specifier: ^20.19.43
+        version: 20.19.43
       better-auth:
         specifier: 1.7.12
         version: 1.7.12(@opentelemetry/api@1.10.0)(drizzle-kit@0.31.11)(next@16.4.3(@babel/core@7.29.7(supports-color@7.2.0))(@opentelemetry/api@1.10.0)(@playwright/test@1.56.1)(@types/node@20.19.43)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.23.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vitest@3.2.7(@types/debug@4.1.13)(@types/node@20.19.43)(jiti@2.7.0)(lightningcss@1.32.0)(supports-color@7.2.0)(tsx@4.23.15)(yaml@2.9.1))
@@ -33,6 +36,9 @@ importers:
       typescript:
         specifier: ^5.9.0
         version: 5.9.3
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
 
   apps/web:
     dependencies:
@@ -54,6 +60,9 @@ importers:
       '@granola/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@granola/google-calendar':
+        specifier: workspace:*
+        version: link:../../packages/google-calendar
       '@granola/jobs':
         specifier: workspace:*
         version: link:../../packages/jobs
@@ -94,6 +103,9 @@ importers:
         specifier: ^4.1.0
         version: 4.6.7
     devDependencies:
+      '@granola/email':
+        specifier: workspace:*
+        version: link:../../packages/email
       '@playwright/test':
         specifier: 1.56.1
         version: 1.56.1
@@ -142,6 +154,9 @@ importers:
       '@granola/db':
         specifier: workspace:*
         version: link:../db
+      '@granola/google-calendar':
+        specifier: workspace:*
+        version: link:../google-calendar
       '@hono/zod-validator':
         specifier: ^0.9.1
         version: 0.9.1(hono@4.13.13)(zod@4.6.7)
@@ -170,6 +185,12 @@ importers:
       '@granola/db':
         specifier: workspace:*
         version: link:../db
+      '@granola/email':
+        specifier: workspace:*
+        version: link:../email
+      '@granola/google-calendar':
+        specifier: workspace:*
+        version: link:../google-calendar
       better-auth:
         specifier: ^1.4.0
         version: 1.7.12(@opentelemetry/api@1.10.0)(drizzle-kit@0.31.11)(next@16.4.3(@babel/core@7.29.7(supports-color@7.2.0))(@opentelemetry/api@1.10.0)(@playwright/test@1.56.1)(@types/node@20.19.43)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.23.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vitest@3.2.7(@types/debug@4.1.13)(@types/node@20.19.43)(jiti@2.7.0)(lightningcss@1.32.0)(supports-color@7.2.0)(tsx@4.23.15)(yaml@2.9.1))
@@ -189,6 +210,9 @@ importers:
       typescript:
         specifier: ^5.9.0
         version: 5.9.3
+      vitest:
+        specifier: ^3.2.7
+        version: 3.2.7(@types/debug@4.1.13)(@types/node@20.19.43)(jiti@2.7.0)(lightningcss@1.32.0)(supports-color@7.2.0)(tsx@4.23.15)(yaml@2.9.1)
 
   packages/config: {}
 
@@ -239,11 +263,55 @@ importers:
         specifier: ^5.9.0
         version: 5.9.3
 
+  packages/email:
+    dependencies:
+      zod:
+        specifier: ^4.1.0
+        version: 4.6.7
+    devDependencies:
+      '@granola/config':
+        specifier: workspace:*
+        version: link:../config
+      '@types/node':
+        specifier: ^20
+        version: 20.19.43
+      typescript:
+        specifier: ^5.9.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.2.7
+        version: 3.2.7(@types/debug@4.1.13)(@types/node@20.19.43)(jiti@2.7.0)(lightningcss@1.32.0)(supports-color@7.2.0)(tsx@4.23.15)(yaml@2.9.1)
+
+  packages/google-calendar:
+    dependencies:
+      zod:
+        specifier: ^4.1.0
+        version: 4.6.7
+    devDependencies:
+      '@granola/config':
+        specifier: workspace:*
+        version: link:../config
+      '@types/node':
+        specifier: ^20
+        version: 20.19.43
+      typescript:
+        specifier: ^5.9.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.2.0
+        version: 3.2.7(@types/debug@4.1.13)(@types/node@20.19.43)(jiti@2.7.0)(lightningcss@1.32.0)(supports-color@7.2.0)(tsx@4.23.15)(yaml@2.9.1)
+
   packages/jobs:
     dependencies:
       '@granola/db':
         specifier: workspace:*
         version: link:../db
+      '@granola/email':
+        specifier: workspace:*
+        version: link:../email
+      '@granola/google-calendar':
+        specifier: workspace:*
+        version: link:../google-calendar
       '@granola/payments':
         specifier: workspace:*
         version: link:../payments

@@ -10,17 +10,21 @@
     "./next": "./src/next.ts"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@granola/db": "workspace:*",
     "better-auth": "^1.4.0",
-    "zod": "^4.1.0"
+    "zod": "^4.1.0",
+    "@granola/google-calendar": "workspace:*",
+    "@granola/email": "workspace:*"
   },
   "devDependencies": {
     "@granola/config": "workspace:*",
     "typescript": "^5.9.0",
-    "@types/node": "^20"
+    "@types/node": "^20",
+    "vitest": "^3.2.7"
   },
   "peerDependencies": {
     "react": "^19.0.0"

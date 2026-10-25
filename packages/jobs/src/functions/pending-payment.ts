@@ -23,7 +23,7 @@ export const onPendingPayment = inngest.createFunction(
   { event: "appointment/pending_payment" },
   async ({ event, step }) => {
     const { appointmentId, nutritionistId, expiresAt } = event.data;
-    const ctx = await step.run("cargar-cita", () => loadAppointment(appointmentId));
+    const ctx = await step.run("cargar-cita", () => loadAppointment(appointmentId, event.data.nutritionistId));
     if (!ctx) return { skipped: "cita no existe" };
     if (ctx.appointment.status !== "pending_payment") return { skipped: `status ${ctx.appointment.status}` };
 

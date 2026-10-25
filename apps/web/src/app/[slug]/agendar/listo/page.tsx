@@ -48,6 +48,7 @@ async function ListoContent({ params, searchParams }: Props) {
       endsAt: true,
       status: true,
       modality: true,
+      meetUrl: true,
       nutritionistId: true,
       patientTimezone: true,
     },
@@ -114,7 +115,9 @@ async function ListoContent({ params, searchParams }: Props) {
           <p className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
             {appt.modality === "online" ? (
               <>
-                <Video className="size-4" /> En línea · el link te llega antes de la cita
+                <Video className="size-4" /> {appt.meetUrl ? (
+                  <a href={appt.meetUrl} className="underline" target="_blank" rel="noreferrer">Entrar a la videollamada</a>
+                ) : "En línea · el link te llega antes de la cita"}
               </>
             ) : (
               <>
