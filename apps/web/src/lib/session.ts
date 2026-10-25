@@ -50,9 +50,13 @@ async function createNutritionistFor(user: SessionUser): Promise<Nutritionist> {
         displayName: user.name || base,
         avatarUrl: user.image ?? null,
       })
-      .onConflictDoNothing({ target: nutritionists.slug })
+      // Sin target: también absorbe el unique de user_id cuando layout y página
+      // crean el perfil en paralelo en la primera visita (antes tiraba 23505).
+      .onConflictDoNothing()
       .returning();
     if (row) return row;
+    const created = await db.query.nutritionists.findFirst({ where: eq(nutritionists.userId, user.id) });
+    if (created) return created;
   }
 
   // Carrera improbable: otro request ya lo creó entre el findFirst y el insert.
