@@ -6,22 +6,26 @@
     "dev": "turbo dev",
     "build": "turbo build",
     "lint": "turbo lint",
-    "typecheck": "turbo typecheck",
-    "test": "turbo test",
+    "typecheck": "tsc -p scripts/tsconfig.json && turbo typecheck",
+    "test": "pnpm test:scripts && turbo test",
     "test:integration": "pnpm --filter @granola/web test:integration",
     "e2e": "pnpm --filter @granola/web e2e",
     "db:generate": "pnpm --filter @granola/db generate",
     "db:migrate": "pnpm --filter @granola/db migrate",
     "db:studio": "pnpm --filter @granola/db studio",
-    "db:seed": "tsx scripts/seed.ts"
+    "db:seed": "tsx scripts/seed.ts",
+    "check:migrations": "tsx scripts/check-migrations.ts",
+    "test:scripts": "tsx --test scripts/*.test.ts"
   },
   "devDependencies": {
     "@granola/db": "workspace:*",
+    "@types/node": "^20.19.43",
     "better-auth": "1.7.12",
     "dotenv": "^17.0.0",
     "tsx": "^4.20.0",
     "turbo": "^2.5.0",
-    "typescript": "^5.9.0"
+    "typescript": "^5.9.0",
+    "zod": "^4.6.7"
   },
   "dependencies": {
     "@neon/config": "^1.9.3",

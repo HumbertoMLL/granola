@@ -15,17 +15,16 @@ export type RateLimitMiddlewareOptions = RateLimitOptions & {
   prefix?: string;
   /** Llave custom (p. ej. por usuario en vez de IP). Default: IP del cliente. */
   key?: (c: Context) => string;
-  /** Store a usar (tests). Default: el compartido del proceso. */
+  /** Store a usar (tests). Default: el seleccionado por env vars. */
   limiter?: RateLimiter;
 };
 
 /**
- * Rate limit por IP + ruta con ventana deslizante. Pone los headers
+ * Rate limit por IP + ruta con ventana fija. Pone los headers
  * `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset` (segundos) y, al
  * bloquear, `Retry-After` + 429 `{ error: { code: "rate_limited" } }`.
  *
- * En memoria: ver la nota de multi-instancia en `../rate-limit.ts` (hay que
- * pasarlo a KV/Upstash cuando corra en más de una instancia).
+ * Fail-open si el store falla; Upstash tiene un presupuesto de 500 ms.
  */
 export function rateLimit(options: RateLimitMiddlewareOptions) {
   const { limit, windowMs, prefix, key, limiter } = options;
@@ -33,7 +32,7 @@ export function rateLimit(options: RateLimitMiddlewareOptions) {
     const store = limiter ?? getDefaultRateLimiter();
     const who = key ? key(c) : clientIpFromHeaders(c.req.raw.headers);
     const scope = prefix ?? c.req.routePath;
-    const result = store.check(`${scope}:${who}`, { limit, windowMs });
+    const result = await store.check(`${scope}:${who}`, { limit, windowMs });
 
     const resetSec = Math.max(0, Math.ceil((result.resetAt - Date.now()) / 1000));
     c.header("RateLimit-Limit", String(result.limit));

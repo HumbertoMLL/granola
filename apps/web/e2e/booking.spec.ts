@@ -66,3 +66,20 @@ test("una paciente agenda Seguimiento, la nutri la ve en su agenda y la paciente
     .toBe("cancelled");
   await patientAgain.close();
 });
+
+test("el link Meet persistido aparece en la confirmación y en el detalle de la cita", async ({ page }) => {
+  const { db, eq, nutritionists, appointments } = await import("@granola/db");
+  const { seedAppointment } = await import("@granola/db/testing");
+  const nutri = await db.query.nutritionists.findFirst({ where: eq(nutritionists.slug, "karla") });
+  expect(nutri).toBeTruthy();
+  const startsAt = new Date(Date.now() + 5 * 86_400_000);
+  const appt = await seedAppointment({ nutritionistId: nutri!.id, status: "confirmed", modality: "online", startsAt, endsAt: new Date(startsAt.getTime() + 30 * 60_000) });
+  // Google está mockeado en integración. Aquí se prueba la salida persistida del job,
+  // sin conectar una cuenta Google real ni depender de los sleeps de Inngest.
+  const meet = "https://meet.google.com/abc-defg-hij";
+  await db.update(appointments).set({ meetUrl: meet, googleEventId: "e2e-google-event" }).where(eq(appointments.id, appt.id));
+  await page.goto(`/karla/agendar/listo?cita=${encodeURIComponent(appt.cancelToken)}`);
+  await expect(page.getByRole("link", { name: "Entrar a la videollamada" })).toHaveAttribute("href", meet);
+  await page.goto(`/cita/${encodeURIComponent(appt.cancelToken)}`);
+  await expect(page.getByRole("link", { name: "Entrar a la videollamada" })).toHaveAttribute("href", meet);
+});

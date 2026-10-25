@@ -11,7 +11,7 @@ Better Auth sobre nuestro Postgres (ADR 0001). Login de nutriólogas: email + pa
 
 ## Plugins
 
-- `magicLink` — hoy imprime el link en la consola del server (falta Resend).
+- `magicLink` — envía el link mediante `@granola/email` (Resend); sin API key hace dry run sin registrar el token en logs.
 - `bearer` — permite autenticarse con `Authorization: Bearer <token>` en vez de cookie. Pensado para la app Expo y para `curl` contra la API v1 (`/api/v1/*`, ver ADR 0007).
 
 ## Sesión por bearer token (Expo, scripts)
@@ -42,3 +42,11 @@ Notas:
 - Dura lo mismo que la sesión (30 días, se renueva cada 24 h de uso).
 - En el servidor no hay que hacer nada especial: `auth.api.getSession({ headers })` acepta cookie o bearer indistintamente. El middleware `requireSession` de `@granola/api` se apoya en eso.
 - Alternativa más integrada para Expo: el plugin `@better-auth/expo` (guarda la cookie en SecureStore). Se evalúa cuando exista `apps/mobile`; el bearer sirve para ambos casos.
+
+## Correo transaccional
+
+`RESEND_API_KEY` y `EMAIL_FROM` habilitan el envío real. La bienvenida se envía en
+`databaseHooks.user.create.after`; su fallo se loguea sin PII y no rompe el registro.
+El magic link conserva expiración de 15 minutos y token hashed. La verificación de
+email no está habilitada; este cambio no la exige ni la activa. Ver `packages/email/README.md`
+y [ADR 0010](../../docs/adr/0010-email-resend.md).

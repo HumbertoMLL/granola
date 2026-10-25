@@ -12,6 +12,7 @@
     "@granola/auth": "workspace:*",
     "@granola/core": "workspace:*",
     "@granola/db": "workspace:*",
+    "@granola/google-calendar": "workspace:*",
     "@hono/zod-validator": "^0.9.1",
     "hono": "^4.13.9",
     "zod": "^4.1.0"

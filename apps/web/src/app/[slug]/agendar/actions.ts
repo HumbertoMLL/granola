@@ -59,9 +59,9 @@ export type BookingResult = { ok: false; error: string; fieldErrors?: Record<str
  * instrucciones de SPEI/OXXO. La decisión vive en `decideBookingOutcome()`.
  */
 export async function createBooking(input: BookingInput): Promise<BookingResult> {
-  // Freno anti-abuso por IP (en memoria por instancia; ver @granola/api/rate-limit).
+  // Freno anti-abuso por IP (store por entorno; ver @granola/api/rate-limit).
   const ip = await getClientIp();
-  if (!checkRateLimit(`booking:create:${ip}`, ANON_ACTION_LIMIT).ok) {
+  if (!(await checkRateLimit(`booking:create:${ip}`, ANON_ACTION_LIMIT)).ok) {
     return { ok: false, error: RATE_LIMIT_MESSAGE };
   }
 
