@@ -62,7 +62,7 @@ se indica en pantalla; no se inventa una fecha de medición a partir del PDF.
 
 ## Migración y release expand/contract
 
-0005_documents fue generada con `pnpm db:generate --name documents`; journal 0..5.
+0006_documents fue generada con `pnpm db:generate --name documents` (renumerada al integrar tras 0005_notify_new_booking); journal 0..6.
 Solo agrega enums/tablas/índices y FKs, sin borrar ni renombrar datos existentes.
 La expansión se debe aplicar **antes de activar el código** que usa documentos:
 

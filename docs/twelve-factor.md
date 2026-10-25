@@ -5,7 +5,7 @@ Guía de construcción adoptada el 25 oct 2026: https://github.com/twelve-factor
 | # | Factor | Estado | Evidencia / hueco |
 |---|---|---|---|
 | I | Codebase | ✅ | Un repo (`HumbertoMLL/granola`), monorepo pnpm; mismo código → Vercel, Docker local, worktrees por feature |
-| II | Dependencies | ✅ | `pnpm-lock.yaml` + `--frozen-lockfile` en CI y Docker; corepack fija pnpm. ⚠️ menor: `npx neon@latest` / `npx vercel` en docs no están fijados |
+| II | Dependencies | ✅ | `pnpm-lock.yaml` + `--frozen-lockfile` en CI y Docker; `packageManager` fija pnpm; CLIs en docs y scripts fijadas a `npx neon@8` y `npx vercel@65` |
 | III | Config | ✅ | Todo por env vars (`.env.example` documenta cada una, sin valores); nada hardcodeado por entorno; `NEON_LOCAL_*` solo cambian la URL, no el código. Inherente a Next: `NEXT_PUBLIC_*` se hornea en build |
 | IV | Backing services | ✅ | Postgres (Neon ↔ Docker) se cambia por URL; R2 es S3-compatible; Email/WhatsApp/Stripe/MP/Inngest se desactivan quitando la var (dry run) sin tocar código |
 | V | Build, release, run | ✅ | `Deploy` migra Neon tras CI verde de main, serializa `migrate-prod` y emite `granola/migrate-production`. Previews por PR + guard schema/migración en CI. Regla expand/contract en CLAUDE.md/AGENTS.md. Activación operativa: cargar secrets y exigir el check en Vercel (o dejar producción staged); [guía](../.github/workflows/README.md). Docker F1.5 se coordina por separado |
@@ -25,7 +25,7 @@ Guía de construcción adoptada el 25 oct 2026: https://github.com/twelve-factor
 2. **V implementado** — cargar `DATABASE_URL`, `NEON_API_KEY`, `NEON_PROJECT_ID` en GitHub y configurar el Deployment Check de Vercel (o staged/manual). Validación en Neon real pendiente de keys; el YAML no cambia esa configuración externa. ADR [0012](adr/0012-migraciones-en-deploy.md).
 3. **XI** — `packages/logger` con pino (JSON a stdout, `requestId`, sin PII de pacientes), Sentry para errores, drain de Vercel a donde se decida.
 4. **X** — hacer que `drizzle-kit migrate` funcione en local (driver `pg` solo para drizzle-kit) para no tener dos caminos de migración.
-5. **II** — fijar versiones de CLIs en docs y scripts (`npx neon@8`, `vercel@65`).
+5. **II** — ✅ Comandos de CLIs fijados a `npx neon@8` y `npx vercel@65` en docs y scripts; el flujo de previews usa la API REST de Neon sin una CLI flotante.
 
 ## Reglas que ya aplican a todo agente
 

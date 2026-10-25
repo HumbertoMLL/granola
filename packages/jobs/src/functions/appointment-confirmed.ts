@@ -44,7 +44,20 @@ export const onAppointmentConfirmed = inngest.createFunction(
   async ({ event, step }) => {
     const { appointmentId, isReschedule } = event.data;
 
-    const ctx = await step.run("cargar-cita", () => loadAppointment(appointmentId, event.data.nutritionistId));
+    const initial = await step.run("cargar-cita", () => loadAppointment(appointmentId, event.data.nutritionistId));
+    if (!initial) return { skipped: "cita no existe" };
+    if (initial.appointment.status !== "confirmed") return { skipped: `status ${initial.appointment.status}` };
+
+    let calendar = await step.run("calendar-confirmed", () => syncAppointmentCalendar(appointmentId, event.data.nutritionistId, "confirmed"));
+    // Meet es asíncrono: resolverlo antes de confirmar al paciente, en pasos
+    // durables y acotados. Si Google falla, la confirmación y el plan continúan.
+    for (let attempt = 1; calendar.pendingMeet && attempt <= 3; attempt++) {
+      await step.sleep(`esperar-meet-${attempt}`, "10s");
+      calendar = await step.run(`calendar-meet-${attempt}`, () => syncAppointmentCalendar(appointmentId, event.data.nutritionistId, "confirmed"));
+    }
+
+    // El primer snapshot todavía no tenía el Meet que Calendar acaba de guardar.
+    const ctx = await step.run("recargar-confirmacion", () => loadAppointment(appointmentId, event.data.nutritionistId));
     if (!ctx) return { skipped: "cita no existe" };
     if (ctx.appointment.status !== "confirmed") return { skipped: `status ${ctx.appointment.status}` };
 
@@ -64,20 +77,25 @@ export const onAppointmentConfirmed = inngest.createFunction(
 
     if (!isReschedule) {
       await step.run("wa-cita-confirmada", () => sendToPatient(ctx, buildCitaConfirmada(common)));
-      await step.run("wa-nueva-cita-nutri", () =>
-        sendToNutritionist(
-          ctx,
+      await step.run("wa-nueva-cita-nutri", async () => {
+        // Releer también la preferencia al reintentar este envío.
+        const fresh = await loadAppointment(appointmentId, event.data.nutritionistId);
+        if (!fresh || fresh.appointment.status !== "confirmed" || !fresh.nutritionist.notifyNewBooking) {
+          return { sent: false };
+        }
+        return sendToNutritionist(
+          fresh,
           buildNuevaCitaNutri({
             appointmentId,
-            patientName: ctx.patient.name,
-            serviceName: ctx.service.name,
-            startsAt: common.startsAt,
-            timeZone: ctx.nutritionist.timezone,
-            modality: ctx.appointment.modality,
-            paymentLabel: paymentLabel(ctx),
+            patientName: fresh.patient.name,
+            serviceName: fresh.service.name,
+            startsAt: new Date(fresh.appointment.startsAt),
+            timeZone: fresh.nutritionist.timezone,
+            modality: fresh.appointment.modality,
+            paymentLabel: paymentLabel(fresh),
           }),
-        ),
-      );
+        );
+      });
 
       const origin = process.env.NEXT_PUBLIC_APP_URL ?? process.env.BETTER_AUTH_URL ?? "http://localhost:3000";
       const fields = appointmentEmailFields(ctx);
@@ -98,14 +116,6 @@ export const onAppointmentConfirmed = inngest.createFunction(
         tags: [{ name: "template", value: "nueva_cita_nutri" }],
         idempotencyKey: `confirmed-${event.id ?? appointmentId}-nutritionist`,
       }));
-    }
-
-    let calendar = await step.run("calendar-confirmed", () => syncAppointmentCalendar(appointmentId, event.data.nutritionistId, "confirmed"));
-    // Meet es asíncrono: resolverlo en pasos durables, sin repetir WhatsApp ni
-    // crear otro evento. Un fallo posterior deja continuar los recordatorios.
-    for (let attempt = 1; calendar.pendingMeet && attempt <= 3; attempt++) {
-      await step.sleep(`esperar-meet-${attempt}`, "10s");
-      calendar = await step.run(`calendar-meet-${attempt}`, () => syncAppointmentCalendar(appointmentId, event.data.nutritionistId, "confirmed"));
     }
 
     const plan = await step.run("plan", () => planFor(ctx));

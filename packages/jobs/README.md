@@ -4,7 +4,7 @@ Funciones Inngest del flujo estrella (PLAN.md §5). Contrato de eventos en `src/
 
 | Función | Evento | Qué hace |
 |---|---|---|
-| `onAppointmentConfirmed` | `appointment/confirmed` | `cita_confirmada` + `nueva_cita_nutri` + correos en steps separados (paciente si tiene email y nutri siempre) → sleep → `recordatorio_24h` → sleep → `recordatorio_2h` → sleep (ends_at+2h) → `completed` + emite `appointment/completed`. `cancelOn` cancelled/rescheduled. Con `isReschedule: true` solo rearma recordatorios. |
+| `onAppointmentConfirmed` | `appointment/confirmed` | Calendar + reintentos de Meet → recargar cita → `cita_confirmada` + `nueva_cita_nutri` (si `notify_new_booking`) + correos en steps separados (paciente si tiene email y nutri siempre) → sleep → `recordatorio_24h` → sleep → `recordatorio_2h` → sleep (ends_at+2h) → `completed` + emite `appointment/completed`. `cancelOn` cancelled/rescheduled. Con `isReschedule: true` solo rearma recordatorios. |
 | `onAppointmentCancelled` | `appointment/cancelled` | `cita_cancelada` + correo al paciente si tiene email |
 | `onAppointmentRescheduled` | `appointment/rescheduled` | `cita_reagendada` + re-emite `appointment/confirmed { isReschedule: true }` |
 | `onPendingPayment` | `appointment/pending_payment` | `pago_pendiente_oxxo` → sleepUntil(expiresAt) → si sigue pendiente cancela `by: "system"`. `cancelOn` confirmed/cancelled |
@@ -21,3 +21,15 @@ correo de la nutri desde su usuario. Los correos pasan por `@granola/email`;
 no se persisten en F1 (solo logs de metadatos sin PII). Cada destinatario tiene
 su step e Idempotency-Key para reintentos. El webhook de Resend queda pendiente.
 Ver [ADR 0010](../../docs/adr/0010-email-resend.md).
+
+Antes de confirmar por WhatsApp/correo, `calendar-confirmed` y hasta tres pasos
+`calendar-meet-N` intentan recuperar Meet, con esperas durables de 10 segundos.
+`recargar-confirmacion` consulta de nuevo la cita para incluir el enlace persistido;
+si se canceló mientras Google respondía, omite las confirmaciones. Un fallo o Meet
+que sigue pendiente no impide enviar ni programar recordatorios. Los IDs de los
+steps de envío y las claves de idempotencia de correo se conservan.
+
+`nutritionists.notify_new_booking` nace en `true`; Configuración → Notificaciones
+permite apagar solo `nueva_cita_nutri` por WhatsApp. El step relee la preferencia
+antes de enviarlo, también en reintentos. No afecta los avisos al paciente ni el
+correo de la nutri. Ver [ADR 0016](../../docs/adr/0016-confirmacion-y-notificaciones.md).

@@ -48,7 +48,7 @@ async function context() {
   const c = await requireNutritionist();
   if (!(await documentsReady()))
     throw new DocumentError(
-      "Documentos estará disponible al aplicar la migración 0005_documents.",
+      "Documentos estará disponible al aplicar la migración 0006_documents.",
     );
   const ip = z.union([z.ipv4(), z.ipv6()]).safeParse(await getClientIp());
   return { ...c, ip: ip.success ? ip.data : null };

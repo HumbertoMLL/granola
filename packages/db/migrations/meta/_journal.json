@@ -40,8 +40,15 @@
     {
       "idx": 5,
       "version": "7",
-      "when": 1792907879762,
-      "tag": "0005_documents",
+      "when": 1792907975725,
+      "tag": "0005_notify_new_booking",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792945390982,
+      "tag": "0006_documents",
       "breakpoints": true
     }
   ]

@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+export const notificationsSchema = z.object({ notifyNewBooking: z.boolean() });
+
 export const accountSchema = z.object({ name: z.string().trim().min(2, "Escribe al menos 2 caracteres").max(60) });
 export const passwordSchema = z.object({
   currentPassword: z.string().min(1, "Escribe tu contraseña actual"),
