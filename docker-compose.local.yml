@@ -4,6 +4,7 @@
 #   DATABASE_URL=postgres://granola:granola@localhost:5433/granola
 #   NEON_LOCAL_PROXY=http://localhost:4444/sql
 #   NEON_LOCAL_PG_HOST=postgres:5432
+# Tests (integración/E2E) usan granola_test vía neon-proxy-test en :4445 (apps/web/.env.test).
 services:
   postgres:
     image: postgres:17-alpine
@@ -26,6 +27,17 @@ services:
       PG_CONNECTION_STRING: "postgres://granola:granola@postgres:5432/granola"
     ports:
       - "4444:4444"
+    depends_on:
+      postgres:
+        condition: service_healthy
+  # Igual que neon-proxy pero contra la base de tests (granola_test). La base la crea
+  # `ensureTestDb()` de @granola/db/testing; ver apps/web/.env.test.
+  neon-proxy-test:
+    image: ghcr.io/timowilhelm/local-neon-http-proxy:main
+    environment:
+      PG_CONNECTION_STRING: "postgres://granola:granola@postgres:5432/granola_test"
+    ports:
+      - "4445:4444"
     depends_on:
       postgres:
         condition: service_healthy
