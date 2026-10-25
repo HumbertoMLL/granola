@@ -1,3 +1,4 @@
+import { syncAppointmentCalendar } from "../lib/calendar";
 import { buildCitaCancelada } from "@granola/whatsapp";
 import { inngest } from "../client";
 import { firstName, loadAppointment } from "../lib/appointment";
@@ -26,6 +27,8 @@ export const onAppointmentCancelled = inngest.createFunction(
         }),
       ),
     );
+    await step.run("calendar-cancelled", () => syncAppointmentCalendar(appointmentId, event.data.nutritionistId, "cancelled"));
+
     return out;
   },
 );

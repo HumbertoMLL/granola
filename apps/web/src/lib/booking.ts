@@ -1,4 +1,5 @@
 import "server-only";
+import { getCalendarBusy } from "@granola/google-calendar";
 
 import { randomBytes } from "node:crypto";
 import { headers } from "next/headers";
@@ -182,7 +183,17 @@ export async function loadSchedulingContext(
       .where(and(...busyWhere)),
   ]);
 
-  return { rules, overrides, busy };
+  const profile = await db.query.nutritionists.findFirst({
+    where: eq(nutritionists.id, nutritionistId), columns: { googleRefreshTokenEnc: true },
+  });
+  const excluded = excludeAppointmentId ? await db.query.appointments.findFirst({
+    where: and(eq(appointments.id, excludeAppointmentId), eq(appointments.nutritionistId, nutritionistId)),
+    columns: { googleEventId: true },
+  }) : undefined;
+  const calendarBusy = await getCalendarBusy({
+    nutritionistId, encryptedRefreshToken: profile?.googleRefreshTokenEnc ?? null, from, to, excludeEventId: excluded?.googleEventId ?? undefined,
+  });
+  return { rules, overrides, busy: [...busy, ...calendarBusy] };
 }
 
 export type AvailableSlotsInput = {

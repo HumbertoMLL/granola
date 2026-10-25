@@ -1,3 +1,4 @@
+import { syncAppointmentCalendar } from "../lib/calendar";
 import { and, appointments, db, eq } from "@granola/db";
 import { buildCitaConfirmada, buildNuevaCitaNutri, buildRecordatorio24h, buildRecordatorio2h } from "@granola/whatsapp";
 import { inngest } from "../client";
@@ -76,6 +77,8 @@ export const onAppointmentConfirmed = inngest.createFunction(
         ),
       );
     }
+
+    await step.run("calendar-confirmed", () => syncAppointmentCalendar(appointmentId, event.data.nutritionistId, "confirmed"));
 
     const plan = await step.run("plan", () => planFor(ctx));
 

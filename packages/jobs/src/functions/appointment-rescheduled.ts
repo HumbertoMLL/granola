@@ -1,3 +1,4 @@
+import { syncAppointmentCalendar } from "../lib/calendar";
 import { buildCitaReagendada } from "@granola/whatsapp";
 import { inngest } from "../client";
 import { firstName, loadAppointment } from "../lib/appointment";
@@ -33,6 +34,8 @@ export const onAppointmentRescheduled = inngest.createFunction(
         }),
       ),
     );
+
+    await step.run("calendar-rescheduled", () => syncAppointmentCalendar(appointmentId, event.data.nutritionistId, "rescheduled"));
 
     await step.sendEvent("rearmar-recordatorios", {
       name: "appointment/confirmed",
