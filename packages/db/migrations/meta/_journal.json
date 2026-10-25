@@ -15,6 +15,13 @@
       "when": 1792868090463,
       "tag": "0001_f1_gaps",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792898775040,
+      "tag": "0004_account_soft_delete",
+      "breakpoints": true
     }
   ]
 }

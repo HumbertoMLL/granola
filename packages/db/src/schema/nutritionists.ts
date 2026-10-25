@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import { boolean, index, integer, jsonb, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { users } from "./auth";
 import { services } from "./services";
@@ -87,10 +87,25 @@ export const nutritionists = pgTable(
     /** Cada cuántos minutos se ofrece un horario de inicio. */
     slotStepMin: integer("slot_step_min").notNull().default(30),
     onboardingStep: integer("onboarding_step").notNull().default(0),
+    /**
+     * Borrado lógico (ADR 0015). Con valor, la cuenta está en gracia: la página
+     * pública y la API dan 404 y el panel solo muestra "Cancelar eliminación".
+     */
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+    /** deleted_at + 30 días: a partir de aquí el job account/purge anonimiza. */
+    deletionScheduledFor: timestamp("deletion_scheduled_for", { withTimezone: true }),
+    /** Cuándo corrió el purge (anonimización). Evita re-procesar la cuenta. */
+    purgedAt: timestamp("purged_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index("nutritionists_slug_idx").on(t.slug)],
+  (t) => [
+    index("nutritionists_slug_idx").on(t.slug),
+    // Lo que escanea el cron account/purge: solo cuentas en gracia aún sin purgar.
+    index("nutritionists_deletion_due_idx")
+      .on(t.deletionScheduledFor)
+      .where(sql`${t.deletedAt} IS NOT NULL AND ${t.purgedAt} IS NULL`),
+  ],
 );
 
 export const nutritionistsRelations = relations(nutritionists, ({ one, many }) => ({
