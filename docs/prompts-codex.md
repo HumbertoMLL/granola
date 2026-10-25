@@ -184,3 +184,98 @@ Terminado significa: pnpm typecheck && pnpm lint && pnpm test && pnpm test:integ
 | Después | `logs` | solo, al final: toca todos los paquetes |
 
 Siguiente fase tras esto: F3 (motor de planes SMAE + recetas + PDF con marca) — prompts por escribir.
+
+---
+
+## 9. `diseno` — Rediseño visual de clase mundial (anti "AI look") · PENDIENTE
+
+> Va después de que entren inbody / importador / post-integración (toca toda la UI). Prompt completo abajo; el texto canónico es este archivo.
+
+```
+Tarea: Rediseño visual de Granola para que se vea como una plataforma de clase mundial, no como una app generada por IA. Es un trabajo de DISEÑO ejecutado en código: sistema visual, jerarquía, ritmo, densidad y detalle. No cambias funcionalidad, server actions, schema ni rutas.
+
+Trabaja en un worktree aislado de Granola, en una rama nueva feature/diseno desde main. Antes de tocar nada lee, en este orden: AGENTS.md, CLAUDE.md, docs/ux-decisions.md (las estructuras por pantalla y las 12 reglas de patrones YA están decididas: no las cambies, mejóralas visualmente), docs/ux-audit.md, packages/ui/src/styles.css y packages/ui/src/*.tsx (el design system actual), docs/adr/0003 y 0014, y recorre la app con el seed (login karla@granola.demo / granola-demo-2026, DB local: docker-compose -f docker-compose.local.yml up -d; next dev -p 3100): /, /login, /karla, /karla/agendar (los 4 pasos), /app, /app/agenda (Día y Semana), /app/pacientes y una ficha, /app/cobros, /app/mi-pagina, /app/configuracion, /cita/<token>, /resena/<token>. Toma capturas móviles (390 px) y desktop (1280 px) de TODAS antes de empezar: son el "antes" del PR.
+
+DIAGNÓSTICO (lo que hoy delata "hecho por IA"; confírmalo tú con las capturas y corrígelo en todas partes):
+1. Todo es una tarjeta. Cada bloque va en una card blanca con el mismo radio y la misma sombra, flotando sobre crema, sin jerarquía: el dashboard son seis cajas del mismo peso. Las plataformas serias usan superficies para AGRUPAR y separadores/espacio para el resto.
+2. Subtítulos de relleno bajo cada título ("Esto es lo que tienes hoy", "Tu consulta, paciente por paciente", "Tus citas, servicios y disponibilidad"). No informan; ocupan la línea más valiosa de la pantalla.
+3. Microcopy explicativo debajo de cada número ("Se calcula sobre citas completadas y ausencias; excluye canceladas y pendientes", "Registrados este mes en tu zona horaria", "Pagos acreditados en tu zona horaria"). Un dashboard de verdad muestra el número y el delta; la explicación va en un tooltip o no va.
+4. Datos crudos del sistema expuestos al usuario: "America/Mexico_City", "(GMT-6)" repetido, fechas en formato largo con año ("lunes, 26 de octubre de 2026 09:00"). Se humaniza: "Ciudad de México", "mañana 9:00".
+5. Demasiadas filas de control antes del contenido: en Agenda hay tabs + segmented Día/Semana + navegación de fecha + tira de días + chips de filtro + contadores = 5 bandas antes de la primera cita. Hay que fusionar y jerarquizar (una barra de herramientas compacta, filtros en un popover).
+6. Pastillas y radios enormes en todo (tabs de 999px, cards de 24px, botones de 999px, inputs de 16px) mezclados sin regla. Un sistema tiene 2–3 radios y cada uno significa algo.
+7. Un solo verde para todo: botón primario, íconos, badges, links, estado activo de nav, avatar. El acento pierde significado. El color de estado (confirmada, pendiente de pago, completada, cancelada) debe ser semántico y consistente en toda la app.
+8. Aire sin intención: pantallas con 60% de vacío en móvil (wizard paso 1, agenda vacía) y a la vez cards apretadas. El espacio debe seguir una escala y una razón.
+9. Estados vacíos como cajas centradas con un botón; skeletons que son rectángulos gigantes. Faltan ilustración mínima/ícono, texto corto y la acción correcta.
+10. Tipografía sin escala: títulos de 28–32 px, cuerpo 16, labels 12, y entre medio nada; números sin tabular-nums; pesos solo 400/700. Falta contraste tipográfico real (display vs texto vs dato).
+11. Íconos decorativos dentro de botones de texto ("📅 Agendar consulta", relojes y pins en cada línea) que agregan ruido, no información.
+12. Header del panel igual en todas las páginas (logo + avatar) sin contexto de dónde estás; en desktop el sidebar y el contenido no comparten grilla ni alineación.
+
+REFERENCIAS (estúdialas de verdad: abre las URLs, mira capturas, extrae reglas concretas; no copies marca, copia DISCIPLINA):
+- Linear (linear.app): densidad, jerarquía tipográfica, una sola sombra, bordes de 1px a 6–8% de opacidad, radios de 6–8 px, color de acento usado con avaricia, toolbars compactas, estados vacíos con un ícono y una frase.
+- Stripe Dashboard (dashboard.stripe.com; capturas públicas): KPIs como número grande + delta + sparkline, tablas con tabular-nums, secciones separadas por títulos y reglas, no por cards; paleta neutra con un acento.
+- Cal.com (app.cal.com/<usuario> y su booking): referencia directa para /karla y el wizard: calendario mensual limpio, lista de horas en columna, resumen fijo a la izquierda en desktop, zona horaria como selector discreto, formulario corto.
+- Notion Calendar (calendar.notion.so): vista de día/semana con bloques proporcionales, línea de "ahora", tipografía pequeña y legible, navegación de fecha mínima. Referencia para /app/agenda.
+- Doctoralia (doctoralia.com.mx) y Zocdoc (zocdoc.com): cómo se presenta una profesional de salud (foto real grande, credenciales, reseñas verificadas con fecha, disponibilidad visible). Referencia de jerarquía para /karla, sin su saturación.
+- Airbnb app de anfitrión y Mercado Pago app (México): patrones móviles que las nutriólogas ya conocen (bottom tab bar, hojas inferiores, listas con avatar + dos líneas + trailing).
+- Headspace / Oura: calidez sin cursilería: tipografía serif de display en momentos clave, color de fondo cálido, ilustración mínima, mucho menos "card".
+- Apple Human Interface Guidelines (developer.apple.com/design/human-interface-guidelines): tamaños táctiles 44 pt, tipografía dinámica, jerarquía de botones, hojas.
+- Refactoring UI (Adam Wathan & Steve Schoger): las reglas de "no empieces por el color", "jerarquía por peso y tamaño, no por color", "usa menos bordes, más espacio", "labels secundarios en gris, no más pequeños", "alinea números a la derecha con tabular-nums".
+- Dieter Rams / principios: "menos pero mejor". Cada elemento tiene que justificar su presencia.
+
+SISTEMA VISUAL (impleméntalo en packages/ui/src/styles.css y en los componentes; es la única fuente de verdad):
+- Grilla de 4 px. Escala de espacio: 4, 8, 12, 16, 24, 32, 48, 64. Nada fuera de la escala.
+- Contenedores: móvil gutter 16; panel desktop contenido max 1120 con sidebar 240 y gutter 32; páginas públicas max 480 centradas (booking) y 560 (perfil) con gutter 20.
+- Tipografía: Plus Jakarta Sans para UI (pesos 400/500/600), Instrument Serif SOLO para display de marketing y para el nombre de la nutri en su página pública (un uso, no decoración). Escala: 11 (caption, mono para labels de sistema), 13 (secundario), 15 (cuerpo), 17 (título de card/sección), 22 (título de página móvil), 28 (título de página desktop), 36–44 (display/KPI). Line-heights 1.2 display, 1.4 UI, 1.5 cuerpo. Números siempre con font-variant-numeric: tabular-nums.
+- Radios: 6 px (inputs, botones, chips, badges), 12 px (cards, hojas, popovers), 999 px SOLO para avatares y el CTA primario de la página pública. Nada más.
+- Bordes: 1 px color café al 8% (#2B2118 @ 8%) como separador principal. Sombra: una sola (0 1px 2px rgba(43,33,24,.06), 0 4px 12px rgba(43,33,24,.04)) y solo para elementos elevados (hojas, popovers, dropdown). Las cards en reposo NO llevan sombra.
+- Superficies: fondo crema #FBF7F0; superficie principal blanca; superficie secundaria #F5F0E6 para agrupar; nunca más de dos niveles anidados. Regla: una sección = título + contenido sobre el fondo, separada por espacio (24–32) o por una regla de 1 px; una card solo cuando el bloque es una unidad accionable (una cita, un paciente, un servicio) o un KPI.
+- Color: verde #4A7A2B exclusivamente para la acción primaria, links y el estado activo de navegación; miel #E8A93B para "requiere atención/pendiente de pago"; coral #D9644E para errores/destructivo; verde-estado #2F855A para confirmado/pagado; gris cálido #7A6E63 para completado/neutral. Define tokens semánticos --status-confirmed, --status-pending, --status-done, --status-cancelled y úsalos en Badge, Timeline y Semana. Los íconos van en el color del texto, no en verde.
+- Iconografía: lucide a 16 px en UI densa y 20 px en nav; stroke 1.75; nunca ícono + texto dentro de un botón primario salvo flechas de dirección; nunca emoji.
+- Botones: primario (verde sólido, texto blanco, 40 px alto en panel, 48 px en público/móvil), secundario (borde 1 px, fondo transparente), ghost (solo texto), destructivo. Un primario por vista. Tamaños táctiles ≥ 44 px en móvil.
+- Formularios: label 13 px/500 arriba, input 40–44 px alto, radio 6, borde 1 px, focus ring de 2 px verde al 40%; error 13 px coral debajo; ayuda 13 px gris. Agrupar campos relacionados en una fila en desktop.
+- Movimiento: 150–200 ms ease-out para hover/abrir; hojas 250 ms; respeta prefers-reduced-motion; nada de fade-up en cascada en cada elemento.
+- Densidad: el panel es una herramienta de trabajo: filas de lista 56–64 px en móvil, 48 px en desktop; tablas con 12 px de padding vertical; sin cards de 24 px de padding para un dato de una línea.
+
+ANATOMÍA POR PANTALLA (aplica el sistema; mantén la estructura decidida en ux-decisions.md):
+- Shell del panel: desktop = sidebar 240 (logo arriba, nav con ícono 20 + label 15, ítem activo con fondo secundario y texto verde, usuario abajo con menú), contenido con un PageHeader único: título 28/600 + acciones a la derecha, SIN subtítulo salvo que diga algo útil (un dato, no un eslogan). Móvil = header 56 px con título de la sección (no el logo en todas las páginas) y acción contextual; tab bar 5 ítems, ícono 20 + label 11, activo en verde sin fondo pill.
+- /app (dashboard): fila de 3–4 KPIs como número grande (36/600 tabular) + label 13 + delta vs mes anterior; nada de explicaciones debajo. Debajo, dos columnas en desktop (Hoy | Esta semana) como LISTAS con título de sección, no cards anidadas. El bloque "tu link" es una sola línea con botón copiar, no una card. Estado vacío: una línea + acción.
+- /app/agenda: una toolbar de una sola fila: [‹ Hoy ›] [fecha corta] … [Día|Semana] [Filtros ⌄]. La tira de días va integrada debajo de la toolbar en móvil solo en vista Día. Timeline con horas a la izquierda en 11 px mono, bloques con borde izquierdo de 3 px en color de estado, nombre 15/600 y servicio 13 gris; huecos "Libre" como zona punteada discreta, no botones. Semana: grilla con líneas de 1 px al 8%, bloques sin texto largo, hoy resaltado en la cabecera.
+- /app/pacientes: buscador + botón primario en la misma fila; filtros en chips pequeños (28 px) y aplicados en una línea; lista de filas (avatar iniciales 36, nombre 15/600, segunda línea 13 gris con última cita, trailing chevron). Ficha: cabecera con avatar 56, nombre 22, chips de datos, tabs 15, y contenido en secciones separadas por reglas.
+- /app/cobros, /app/mi-pagina, /app/configuracion: misma anatomía de secciones; configuración como lista de filas (label + valor + chevron / switch), no formularios gigantes abiertos.
+- /karla (público): hero compacto: avatar 96 (foto real cuando exista; iniciales con fondo secundario, no verde sólido), nombre en Instrument Serif 32, una línea de credencial 13 gris (cédula · ciudad), prueba social como una línea con estrellas pequeñas; CTA primario 52 px; "Próximo horario: mañana 9:00" en 13 debajo; servicios como lista de filas con precio alineado a la derecha en tabular; reseñas como citas con comillas tipográficas, nombre y fecha corta; links sociales como fila de íconos al final; footer de 11 px. El tema por nutri cambia acento y fondo, no la estructura.
+- /karla/agendar (wizard): header compacto con nombre y paso actual; stepper como línea de progreso fina + texto "Paso 2 de 4 · Fecha", no 4 círculos numerados grandes; quita la caja redundante "Elige tu consulta" encima del título; opciones de servicio como filas con radio a la izquierda, precio a la derecha, descripción 13; calendario mensual estilo Cal.com (días disponibles con peso 600, no disponibles al 35%, seleccionado relleno verde); horas en grilla de 3 columnas de 44 px; paso 4 formulario corto; barra inferior fija con Atrás (ghost) y Continuar (primario) y el resumen "Primera consulta · mar 27 · 10:30 · $800" en 13 encima. En desktop, dos columnas: resumen fijo a la izquierda (320) y el paso a la derecha.
+- /login, /registro, /cita/<token>, /resena/<token>: tarjeta única centrada max 400, logo pequeño, título 22, campos, primario; sin ilustración, sin relleno.
+
+COPY (aplica en toda la UI; español MX, directo):
+- Elimina subtítulos de relleno. Si un título necesita contexto, que sea un dato: "Agenda · 3 citas hoy".
+- Nada de explicar cómo se calcula un número en la UI; si hace falta, tooltip con ícono de info.
+- Fechas: "hoy 10:30", "mañana 9:00", "mar 27 oct", "27 oct 2026" solo cuando el año importa. Zonas: "Ciudad de México", nunca identificadores IANA; el selector de zona solo aparece donde el paciente puede cambiarla.
+- Dinero: "$800" (sin .00 cuando es entero), "MXN" solo una vez por vista o en tooltip.
+- Botones con verbo + objeto cuando el contexto no es obvio ("Confirmar cita"), solo verbo cuando lo es ("Guardar").
+
+ENTREGABLES
+1. packages/ui: tokens y componentes actualizados al sistema (Button, Input/FormField, Card, Badge con variantes de estado, Tabs, SegmentedControl compacto, FilterChip 28 px, Sheet, Dialog, EmptyState con ícono, Skeleton con formas realistas de fila/KPI, Avatar, PageHeader, Toolbar, SectionHeader, DataList/Row, KPI). Documenta cada token y cuándo usar card vs sección en packages/ui/README.md ("Sistema visual").
+2. Página /dev/ui (solo en desarrollo, bloqueada en producción) que renderiza todos los primitivos y tokens: es tu herramienta y la del equipo para ver consistencia de un vistazo.
+3. Las 12 pantallas listadas rediseñadas con el sistema, respetando docs/ux-decisions.md.
+4. Auditoría "AI smell" al final (lista en docs/ux-audit.md, sección nueva "Rediseño visual"): para cada pantalla, los 12 síntomas de arriba marcados como corregidos con el archivo tocado.
+5. Capturas "antes/después" móvil y desktop de las 12 pantallas en docs/ux-captures/rediseno/ y pegadas en el PR lado a lado.
+6. Tests: los primitivos nuevos/modificados con tests de render y ARIA; E2E existentes en verde (ajusta selectores si cambiaste markup, no el flujo). Agrega una prueba de contraste automática (axe en Playwright o similar) en /karla, /karla/agendar y /app: cero violaciones de contraste.
+7. docs/adr/<siguiente>-sistema-visual.md con las decisiones (radios, sombra única, card vs sección, paleta semántica de estados).
+
+CÓMO TRABAJAR
+- Primero tokens y primitivos; luego el shell del panel; luego pantalla por pantalla en este orden: /karla, wizard, dashboard, agenda, pacientes, resto. Un commit por pantalla con su captura.
+- Antes de dar por terminada cada pantalla, pásale esta lista: ¿hay más de un botón primario? ¿hay alguna card que podría ser una sección? ¿hay texto que explica en vez de mostrar? ¿hay un dato crudo del sistema? ¿todos los radios están en {6,12,999}? ¿los números son tabular? ¿se ve bien a 390 y a 1280? ¿se parece a Linear/Cal.com/Stripe en disciplina, no en marca?
+- No cambies server actions, schema, migraciones, rutas, nombres de eventos ni el contrato de los componentes que usan datos; si necesitas un dato nuevo para la UI (p. ej. delta mensual en KPIs), calcúlalo en la capa de lectura existente (lib/dashboard.ts) con cambio mínimo y test.
+
+Terminado significa: pnpm typecheck && pnpm lint && pnpm test && pnpm test:integration && pnpm e2e && pnpm --filter @granola/web exec next build en verde (docker-compose -f docker-compose.local.yml up -d antes), capturas antes/después en el PR, commits chicos en español, git push -u origin feature/diseno y gh pr create --fill con resumen, la auditoría y qué quedó fuera.
+```
+
+---
+
+## Orden (actualizado)
+
+| Tanda | Worktrees | Nota |
+|---|---|---|
+| Ahora | `inbody`, `importador`, `post-integracion` | en paralelo |
+| Después | `logs` | solo |
+| Al final | `diseno` | solo: toca toda la UI, va cuando no haya otros PRs de UI abiertos |
