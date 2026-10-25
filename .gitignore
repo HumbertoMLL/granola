@@ -16,3 +16,5 @@ coverage
 !.env.example
 !apps/web/.env.test
 !.env.docker.example
+
+.uploads/
