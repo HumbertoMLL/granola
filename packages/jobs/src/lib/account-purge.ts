@@ -81,7 +81,8 @@ export async function purgeAccount(nutritionistId: string, now: Date = new Date(
   const ready = await documentsReady();
   const reportRows = ready ? await db.query.reports.findMany({ where: eq(reports.nutritionistId, n.id) }) : [];
   // Un error al borrar archivos deja la cuenta pendiente para reintentar el purge.
-  await deleteClinicalFiles(n.id);
+  const hasDocuments = ready && await db.query.documents.findFirst({ columns: { id: true }, where: eq(documents.nutritionistId, n.id) });
+  await deleteClinicalFiles(n.id, !!hasDocuments);
   // Sin carrera con "Cancelar eliminación": cancelAccountDeletion se niega una vez
   // vencida deletion_scheduled_for, y aquí solo llegamos con la gracia vencida.
   await db.batch([

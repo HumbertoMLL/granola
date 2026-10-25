@@ -72,9 +72,10 @@ export function avatarPrefix(nutritionistId: string): string {
 }
 
 /** Archivos clínicos privados, incluidos PDFs versionados. Local solo existe en desarrollo. */
-export async function deleteClinicalFiles(nutritionistId: string) {
+export async function deleteClinicalFiles(nutritionistId: string, required = false) {
   if (!/^[a-f0-9-]{36}$/.test(nutritionistId))
     throw new Error("Tenant inválido");
+  if (required && !readConfig() && process.env.NODE_ENV === "production") throw new Error("Configura R2 antes de purgar los archivos clínicos pendientes");
   const bucket = process.env.R2_PRIVATE_BUCKET;
   if (readConfig() && (!bucket || bucket === process.env.R2_BUCKET))
     throw new Error(

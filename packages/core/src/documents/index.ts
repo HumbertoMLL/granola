@@ -229,7 +229,7 @@ export function parseInBody(text: string): ParsedDocument {
   const normalized = text
     .split(/\r?\n/)
     .map((line) => {
-      const lower = normalize(line);
+      const lower = normalize(line.trim());
       if (/masa magra segmental|segmental lean/.test(lower)) section = "lean";
       else if (/grasa segmental|segmental fat/.test(lower)) section = "fat";
       if (
