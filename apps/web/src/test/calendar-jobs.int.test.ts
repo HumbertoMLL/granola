@@ -28,6 +28,7 @@ let remove: MockInstance<GoogleCalendarClient["deleteEvent"]>;
 let steps: string[];
 
 beforeEach(() => {
+  vi.stubEnv("RESEND_API_KEY", ""); vi.stubEnv("WA_ACCESS_TOKEN", ""); vi.stubEnv("WA_PHONE_NUMBER_ID", "");
   vi.stubEnv("GOOGLE_TOKEN_ENC_KEY", Buffer.alloc(32, 7).toString("base64"));
   create = vi.spyOn(GoogleCalendarClient.prototype, "createEvent").mockResolvedValue({ id: "google-event", meetUrl: meet });
   move = vi.spyOn(GoogleCalendarClient.prototype, "updateEvent").mockResolvedValue({ id: "google-event", meetUrl: meet });
@@ -58,12 +59,14 @@ async function run(job: unknown, data: Data) {
 async function row(id: string) { return db.query.appointments.findFirst({ where: eq(appointments.id, id) }); }
 
 describe("Cuando Inngest recibe eventos de citas con Google Calendar", () => {
-  it("confirmed crea el evento después de WhatsApp y persiste id + Meet; el replay no duplica", async () => {
+  it("confirmed crea el evento antes de las confirmaciones y persiste id + Meet; el replay no duplica", async () => {
     const { appointment, data } = await fixture();
     await run(onAppointmentConfirmed, data);
     expect(create).toHaveBeenCalledWith(expect.objectContaining({ appointmentId: appointment.id, modality: "online" }));
     expect(await row(appointment.id)).toMatchObject({ googleEventId: "google-event", meetUrl: meet });
-    expect(steps.indexOf("calendar-confirmed")).toBeGreaterThan(steps.indexOf("wa-nueva-cita-nutri"));
+    expect(steps.indexOf("calendar-confirmed")).toBeLessThan(steps.indexOf("recargar-confirmacion"));
+    expect(steps.indexOf("recargar-confirmacion")).toBeLessThan(steps.indexOf("wa-cita-confirmada"));
+    expect(steps.indexOf("calendar-confirmed")).toBeLessThan(steps.indexOf("email-nueva-cita-nutri"));
     await run(onAppointmentConfirmed, data); expect(create).toHaveBeenCalledTimes(1);
   });
   it("si Meet sigue pending, lo recupera en un paso durable sin duplicar el evento", async () => {
@@ -73,6 +76,20 @@ describe("Cuando Inngest recibe eventos de citas con Google Calendar", () => {
     expect(create).toHaveBeenCalledTimes(1); expect(move).toHaveBeenCalledTimes(1);
     expect(steps).toContain("esperar-meet-1"); expect(steps).toContain("calendar-meet-1");
     expect((await row(appointment.id))?.meetUrl).toBe(meet);
+    expect(steps.indexOf("calendar-meet-1")).toBeLessThan(steps.indexOf("recargar-confirmacion"));
+    expect(steps.indexOf("recargar-confirmacion")).toBeLessThan(steps.indexOf("wa-cita-confirmada"));
+  });
+  it("limita a tres reintentos de Meet y continúa las confirmaciones si sigue pendiente", async () => {
+    const { data } = await fixture();
+    create.mockResolvedValue({ id: "google-event", meetUrl: null });
+    move.mockResolvedValue({ id: "google-event", meetUrl: null });
+    await run(onAppointmentConfirmed, data);
+    expect(create).toHaveBeenCalledOnce();
+    expect(move).toHaveBeenCalledTimes(3);
+    expect(steps.filter((name) => name.startsWith("esperar-meet-"))).toHaveLength(3);
+    expect(steps.indexOf("calendar-meet-3")).toBeLessThan(steps.indexOf("wa-cita-confirmada"));
+    expect(steps).toContain("email-nueva-cita-nutri");
+    expect(steps).toContain("plan");
   });
   it("cancelled borra el evento y limpia sus referencias", async () => {
     const { appointment, data } = await fixture();
@@ -115,6 +132,8 @@ describe("Cuando Inngest recibe eventos de citas con Google Calendar", () => {
     await run(onAppointmentConfirmed, data);
     expect(remove).toHaveBeenCalledWith("google-event");
     expect((await row(appointment.id))?.googleEventId).toBeNull();
+    expect(steps).not.toContain("wa-cita-confirmada");
+    expect(steps).not.toContain("email-nueva-cita-nutri");
   });
   it("si reagendan mientras Google crea el evento, reconcilia las fechas más recientes", async () => {
     const { appointment, data } = await fixture();
