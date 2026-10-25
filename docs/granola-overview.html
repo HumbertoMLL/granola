@@ -66,6 +66,12 @@
 <h2><span class="n">0</span> Acceso · cómo ver lo que hay</h2>
 
 <div class="grid">
+  <div class="card big">
+    <h3>🐳 Docker · sin Node ni pnpm</h3>
+    <p>Con Docker: <code>scripts/docker-up.sh</code> → <a href="http://localhost:3100">http://localhost:3100</a>.</p>
+    <p class="sub">Login: <code>karla@granola.demo</code> / <code>granola-demo-2026</code>. Incluye web standalone, Postgres, proxy Neon, migraciones + seed e Inngest dev en <a href="http://localhost:8288">localhost:8288</a>.</p>
+    <p class="sub" style="margin-top:8px">Requiere Docker, docker-compose y openssl. Genera <code>.env.docker</code> con secreto local; conserva datos al reiniciar. No levantar junto al compose local en los mismos puertos. Vercel sigue siendo el deploy principal; Docker también permite hospedar fuera de Vercel (ver ADR 0008).</p>
+  </div>
   <div class="card big" style="border:2px solid var(--green)">
     <h3>🌐 En línea (Vercel)</h3>
     <p style="font-size:20px;font-weight:700"><a href="https://granola-humbertomlls-projects.vercel.app" style="color:var(--green)">granola-humbertomlls-projects.vercel.app</a></p>

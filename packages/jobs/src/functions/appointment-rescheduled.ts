@@ -1,3 +1,4 @@
+import { syncAppointmentCalendar } from "../lib/calendar";
 import { buildCitaReagendada } from "@granola/whatsapp";
 import { inngest } from "../client";
 import { firstName, loadAppointment } from "../lib/appointment";
@@ -13,7 +14,7 @@ export const onAppointmentRescheduled = inngest.createFunction(
   { event: "appointment/rescheduled" },
   async ({ event, step }) => {
     const { appointmentId, nutritionistId, previousStartsAt } = event.data;
-    const ctx = await step.run("cargar-cita", () => loadAppointment(appointmentId));
+    const ctx = await step.run("cargar-cita", () => loadAppointment(appointmentId, event.data.nutritionistId));
     if (!ctx) return { skipped: "cita no existe" };
     if (ctx.appointment.status !== "confirmed") return { skipped: `status ${ctx.appointment.status}` };
 
@@ -33,6 +34,8 @@ export const onAppointmentRescheduled = inngest.createFunction(
         }),
       ),
     );
+
+    await step.run("calendar-rescheduled", () => syncAppointmentCalendar(appointmentId, event.data.nutritionistId, "rescheduled"));
 
     await step.sendEvent("rearmar-recordatorios", {
       name: "appointment/confirmed",

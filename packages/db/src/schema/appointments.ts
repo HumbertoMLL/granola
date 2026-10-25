@@ -5,6 +5,7 @@ import { patients } from "./patients";
 import { services } from "./services";
 import { payments } from "./payments";
 import { reviews } from "./reviews";
+import { clinicalNotes } from "./clinical_notes";
 
 /** Una cita concreta es online o presencial; "ambas" solo aplica al servicio. */
 export const appointmentModalityEnum = pgEnum("appointment_modality", ["online", "presencial"]);
@@ -63,4 +64,5 @@ export const appointmentsRelations = relations(appointments, ({ one, many }) => 
   service: one(services, { fields: [appointments.serviceId], references: [services.id] }),
   payments: many(payments),
   reviews: many(reviews),
+  clinicalNotes: many(clinicalNotes),
 }));

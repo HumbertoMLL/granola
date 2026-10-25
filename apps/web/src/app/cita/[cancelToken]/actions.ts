@@ -19,10 +19,10 @@ const PATIENT_CHANGE_MIN_HOURS = 2;
 /** Ver horarios para reagendar es lectura: límite más holgado que cancelar/reagendar. */
 const SLOTS_LIMIT: RateLimitOptions = { limit: 30, windowMs: 60_000 };
 
-/** true si la IP ya pasó el límite de esta acción (freno anti-abuso, en memoria por instancia). */
+/** true si la IP ya pasó el límite de esta acción (store seleccionado por entorno). */
 async function isRateLimited(action: string, options: RateLimitOptions = ANON_ACTION_LIMIT): Promise<boolean> {
   const ip = await getClientIp();
-  return !checkRateLimit(`cita:${action}:${ip}`, options).ok;
+  return !(await checkRateLimit(`cita:${action}:${ip}`, options)).ok;
 }
 
 async function loadByToken(token: string) {

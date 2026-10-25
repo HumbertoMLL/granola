@@ -29,6 +29,7 @@ Estructura elegida por pantalla y reglas de patrones de interfaz (checkbox vs ra
 - Sin `any`; zod en toda frontera.
 - UI en español MX; código en inglés.
 - **Todo feature nuevo llega con su test (integración si toca DB, E2E si toca el flujo de reserva). Nada se da por terminado con CI en rojo.**
+- **Migraciones expand/contract:** cada release funciona con el schema anterior y el expandido. Primero agrega columnas/tablas opcionales o con defaults compatibles y migra en un release previo al código que las necesita. Nunca renombres/borres en el mismo PR que deja de usarlas; backfill, retirada del uso y contract van en releases separados, conservando compatibilidad con deploys activos y rollback.
 
 ## Verificación antes de dar algo por terminado
 
@@ -84,5 +85,47 @@ curl -s "localhost:3100/api/v1/me/appointments?from=2026-10-01T00:00:00Z&to=2026
 ## Qué sigue (al 24 oct 2026)
 
 - Probar F1 contra Neon real (migrar + seed + flujo completo). Google Calendar sync aún no existe.
-- F1.5: todo el proyecto en Docker (`docker-compose up` = web + Postgres + proxy Neon + Inngest dev; `Dockerfile` standalone en apps/web). Ver `PLAN.md` sección 6.
 - F2: pacientes, expediente, antropometría, notas IA. Ver `PLAN.md` sección 6.
+- Hecho: F1.5 (Docker completo: `scripts/docker-up.sh`, ver sección Docker y ADR 0008). Pendiente decidir si el job `docker` de CI pasa a ser check requerido.
+
+## Docker
+
+Sin Node ni pnpm en el host (solo Docker, docker-compose y openssl):
+
+```bash
+scripts/docker-up.sh
+# http://localhost:3100 · karla@granola.demo / granola-demo-2026
+# http://localhost:8288 · Inngest dev
+```
+
+El script crea `.env.docker`, genera `BETTER_AUTH_SECRET` y ejecuta
+`docker-compose --env-file .env.docker up -d --build`. También se puede ejecutar
+`docker-compose up --build` directamente con los valores locales de desarrollo;
+para conservar el secreto generado usa siempre `--env-file .env.docker`.
+El job `migrate` aplica los SQL en orden con un ledger transaccional y después
+corre el seed idempotente. `web` espera a que termine; Inngest espera al healthcheck.
+No se necesitan credenciales cloud para explorar la demo.
+
+El compose usa su propio proyecto (`granola-docker`) y volumen (`granola_docker_pg`),
+así que no toca los contenedores ni datos de `docker-compose.local.yml`. Los puertos
+escuchan solo en 127.0.0.1 (`POSTGRES_PORT` 5433, `NEON_PROXY_PORT` 4444, `WEB_PORT`
+3100, `INNGEST_PORT` 8288, en `.env.docker`); 5433/4444 coinciden con el compose
+local: cámbialos en `.env.docker` si ambos van a estar arriba.
+Para aislar una prueba: `COMPOSE_PROJECT_NAME=granola-docker-test` + otros puertos en `.env.docker`.
+Si la base ya tiene tablas pero no `docker_migrations` (migrada a mano), el job
+registra como aplicadas las migraciones cuyos objetos ya existen y aplica las nuevas.
+`docker-compose --env-file .env.docker down` conserva los datos; `down -v` los borra.
+
+Imagen portable (contexto = raíz del monorepo):
+
+```bash
+docker build -f apps/web/Dockerfile --target runner --build-arg NEXT_PUBLIC_APP_URL=https://tu-dominio.example -t granola .
+docker run --env-file /ruta/a/env-produccion -p 3100:3100 granola
+```
+
+En hosting configura `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` y las
+integraciones reales. No uses el secreto de fallback, el seed demo ni Inngest dev
+para producción. `NEXT_PUBLIC_APP_URL` se fija también durante el build.
+La imagen final corre como UID 1001, solo incluye standalone/static/public y no
+necesita `DATABASE_URL` al compilar. Ver `docs/adr/0008-docker.md` para los límites.
+`docker-compose.local.yml` sigue disponible para trabajar con `next dev` en el host.

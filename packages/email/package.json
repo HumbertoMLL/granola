@@ -1,0 +1,10 @@
+{
+  "name": "@granola/email",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts", "./templates": "./src/templates/index.ts" },
+  "scripts": { "typecheck": "tsc --noEmit", "test": "vitest run" },
+  "dependencies": { "zod": "^4.1.0" },
+  "devDependencies": { "@granola/config": "workspace:*", "@types/node": "^20", "typescript": "^5.9.0", "vitest": "^3.2.7" }
+}

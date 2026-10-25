@@ -19,7 +19,21 @@
     {
       "idx": 2,
       "version": "7",
-      "when": 1792898775040,
+      "when": 1792894172568,
+      "tag": "0002_f2_expediente",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792898203211,
+      "tag": "0003_onboarding_backfill",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792902675749,
       "tag": "0004_account_soft_delete",
       "breakpoints": true
     }

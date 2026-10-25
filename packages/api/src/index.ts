@@ -15,3 +15,5 @@ export {
   type RateLimitOptions,
   type RateLimitResult,
 } from "./rate-limit";
+
+export { getRateLimitStore, MemoryStore, UpstashStore, type RateLimitStore, type RateLimitEntry } from "./store";
