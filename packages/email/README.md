@@ -78,3 +78,8 @@ Para probar recepción real:
    confirma aceptación por el proveedor, no recepción en bandeja de entrada.
 
 No es necesario verificar un dominio ni configurar API key para tests o build.
+
+F2 agrega `reporteListo({ patientName, nutritionistName, reportUrl })`: aviso con
+link privado que vence en 7 días, sin indicadores clínicos en el cuerpo. El editor
+registra el canal/fecha del intento en reports y dryRun en audit_log; no crea una
+bitácora nueva de correo ni representa aceptación como entrega final.

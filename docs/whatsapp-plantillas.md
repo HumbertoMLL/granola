@@ -263,3 +263,22 @@ Fuera de esa ventana Meta rechaza texto libre (error 131047); por eso todo lo in
 
 Sin `WA_ACCESS_TOKEN` el cliente corre en **dry run**: imprime el payload en el log y registra la fila en
 `wa_messages` con `status = queued` y `error_code = dry_run`, así el flujo completo se prueba sin Meta.
+
+## 9. `reporte_listo` (al paciente)
+
+Categoría **Utility**, idioma **es_MX**, sin encabezado; pie **Granola**.
+Registrar y aprobar en Meta antes de configurar envíos reales.
+
+```text
+Hola {{1}}, {{2}} preparó tu reporte personalizado.
+Puedes consultarlo con el botón de abajo. El enlace privado vence en 7 días; no lo compartas.
+```
+
+Parámetros del cuerpo: {{1}} nombre del paciente, {{2}} nombre de la nutrióloga.
+Botón 0 URL **"Ver mi reporte"** → `https://granola.app/api/documents/download/{{1}}`.
+El sufijo es el token HMAC del reporte, nunca una URL pública de R2 ni un identificador
+sin firma. Sustituir el dominio por NEXT_PUBLIC_APP_URL antes de registrar la plantilla.
+Builder: `buildReporteListo({ patientName, nutritionistName, token })`.
+Se manda desde el editor, después de generar el PDF revisado. Sin WA_ACCESS_TOKEN o
+WA_PHONE_NUMBER_ID solo registra queued/dry_run y report.sent_at/sent_via como intento
+simulado; audit_log incluye dryRun. No salen indicadores en el mensaje ni en stdout.
