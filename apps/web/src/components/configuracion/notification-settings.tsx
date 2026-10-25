@@ -9,16 +9,19 @@ export function NotificationSettings({ notifyNewBooking }: { notifyNewBooking: b
   const [pending, startTransition] = useTransition();
 
   function save(value: boolean) {
+    const previous = enabled;
+    setEnabled(value);
     startTransition(async () => {
       try {
         const result = await saveNotifications({ notifyNewBooking: value });
         if (!result.ok) {
+          setEnabled(previous);
           toast.error(result.error);
           return;
         }
-        setEnabled(value);
         toast.success("Preferencias de notificaciones guardadas");
       } catch {
+        setEnabled(previous);
         toast.error("No se pudo guardar. Intenta de nuevo.");
       }
     });
@@ -36,6 +39,7 @@ export function NotificationSettings({ notifyNewBooking }: { notifyNewBooking: b
           checked={enabled}
           onCheckedChange={save}
           disabled={pending}
+          aria-busy={pending}
           aria-describedby="notify-new-booking-help"
         />
       </div>
