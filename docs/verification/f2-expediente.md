@@ -89,3 +89,16 @@ notas editables/borrables y cambios en auth, pagos, WhatsApp o jobs.
 - [Harris-Benedict revisada, coeficientes documentados](https://pmc.ncbi.nlm.nih.gov/articles/PMC12743684/):
   88.362 + 13.397 × kg + 4.799 × cm − 5.677 × años (m);
   447.593 + 9.247 × kg + 3.098 × cm − 4.330 × años (f).
+
+## Resultado de la verificación local (24 oct 2026)
+
+- Cadena completa typecheck → lint → test → next build: verde (190 tests, 33 nuevos).
+- Navegador contra build de producción en 127.0.0.1:3106: lista, búsqueda por WhatsApp,
+  bloqueo sin consentimiento, alta manual con fecha/IP, Resumen de Ana con citas y pago,
+  CRUD de una medición ficticia, índices, gráficas y calculadora por objetivo: comprobados.
+- Enlace desde agenda: abre Historial con tipo Consulta y cita validada; nota guardada
+  y mostrada con el enlace a la cita. Consola del navegador sin errores al concluir.
+- Fixture de otro tenant: búsqueda sin coincidencias y ficha rechazada con
+  “Paciente no encontrado”. No se expusieron sus datos.
+- SQL confirmó auditorías de patient.create/read, measurement.create/update/delete
+  y clinical_note.create. Los fixtures solo existen en granola_expediente.
