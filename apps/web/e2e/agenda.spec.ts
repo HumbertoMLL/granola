@@ -12,7 +12,7 @@ async function mobileCapture(page: Page, name: string) {
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth),
   ).toBeLessThanOrEqual(390);
-  await page.screenshot({ path: capture(name) });
+  await page.screenshot({ path: capture(name), animations: "disabled" });
 }
 
 test("Karla consulta Día, cambia a Semana y abre una cita en la hoja inferior", async ({
