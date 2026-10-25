@@ -1,3 +1,5 @@
+import { citaConfirmadaPaciente, nuevaCitaNutri } from "@granola/email";
+import { appointmentEmailFields, sendJobEmail } from "../lib/email";
 import { and, appointments, db, eq } from "@granola/db";
 import { buildCitaConfirmada, buildNuevaCitaNutri, buildRecordatorio24h, buildRecordatorio2h } from "@granola/whatsapp";
 import { inngest } from "../client";
@@ -30,7 +32,7 @@ function planFor(ctx: AppointmentContext, now = Date.now()): Plan {
 export const onAppointmentConfirmed = inngest.createFunction(
   {
     id: "appointment-confirmed",
-    name: "Cita confirmada: WhatsApp + recordatorios",
+    name: "Cita confirmada: WhatsApp + correo + recordatorios",
     retries: 4,
     cancelOn: [
       { event: "appointment/cancelled", match: "data.appointmentId" },
@@ -41,7 +43,7 @@ export const onAppointmentConfirmed = inngest.createFunction(
   async ({ event, step }) => {
     const { appointmentId, isReschedule } = event.data;
 
-    const ctx = await step.run("cargar-cita", () => loadAppointment(appointmentId));
+    const ctx = await step.run("cargar-cita", () => loadAppointment(appointmentId, event.data.nutritionistId));
     if (!ctx) return { skipped: "cita no existe" };
     if (ctx.appointment.status !== "confirmed") return { skipped: `status ${ctx.appointment.status}` };
 
@@ -75,6 +77,26 @@ export const onAppointmentConfirmed = inngest.createFunction(
           }),
         ),
       );
+
+      const origin = process.env.NEXT_PUBLIC_APP_URL ?? process.env.BETTER_AUTH_URL ?? "http://localhost:3000";
+      const fields = appointmentEmailFields(ctx);
+      // Un step por destinatario: reintentar uno no repite el otro ni los WhatsApp.
+      const patientEmail = ctx.patient.email;
+      if (patientEmail) {
+        await step.run("email-cita-confirmada-paciente", () => sendJobEmail({
+          to: patientEmail,
+          ...citaConfirmadaPaciente({ ...fields, manageUrl: new URL(`/cita/${ctx.appointment.cancelToken}`, origin).toString() }),
+          tags: [{ name: "template", value: "cita_confirmada_paciente" }],
+          idempotencyKey: `confirmed-${event.id ?? appointmentId}-patient`,
+        }));
+      }
+      await step.run("email-nueva-cita-nutri", () => sendJobEmail({
+        to: ctx.nutritionist.email,
+        ...nuevaCitaNutri({ ...fields, timeZone: ctx.nutritionist.timezone,
+          manageUrl: new URL(`/app/agenda/${appointmentId}`, origin).toString() }),
+        tags: [{ name: "template", value: "nueva_cita_nutri" }],
+        idempotencyKey: `confirmed-${event.id ?? appointmentId}-nutritionist`,
+      }));
     }
 
     const plan = await step.run("plan", () => planFor(ctx));
@@ -82,11 +104,11 @@ export const onAppointmentConfirmed = inngest.createFunction(
     // ── Recordatorio 24h ──
     if (plan.remind24hAt) {
       await step.sleepUntil("esperar-24h", plan.remind24hAt);
-      const fresh = await step.run("recargar-24h", () => loadAppointment(appointmentId));
+      const fresh = await step.run("recargar-24h", () => loadAppointment(appointmentId, event.data.nutritionistId));
       if (fresh && fresh.appointment.status === "confirmed" && !fresh.appointment.reminder24hSentAt) {
         await step.run("wa-recordatorio-24h", async () => {
           const out = await sendToPatient(fresh, buildRecordatorio24h({ ...common, ...freshFields(fresh), appointmentId }));
-          if (out.sent) await db.update(appointments).set({ reminder24hSentAt: new Date(), updatedAt: new Date() }).where(eq(appointments.id, appointmentId));
+          if (out.sent) await db.update(appointments).set({ reminder24hSentAt: new Date(), updatedAt: new Date() }).where(and(eq(appointments.id, appointmentId), eq(appointments.nutritionistId, ctx.appointment.nutritionistId)));
           return out;
         });
       }
@@ -95,11 +117,11 @@ export const onAppointmentConfirmed = inngest.createFunction(
     // ── Recordatorio 2h ──
     if (plan.remind2hAt) {
       await step.sleepUntil("esperar-2h", plan.remind2hAt);
-      const fresh = await step.run("recargar-2h", () => loadAppointment(appointmentId));
+      const fresh = await step.run("recargar-2h", () => loadAppointment(appointmentId, event.data.nutritionistId));
       if (fresh && fresh.appointment.status === "confirmed" && !fresh.appointment.reminder2hSentAt) {
         await step.run("wa-recordatorio-2h", async () => {
           const out = await sendToPatient(fresh, buildRecordatorio2h({ ...common, ...freshFields(fresh) }));
-          if (out.sent) await db.update(appointments).set({ reminder2hSentAt: new Date(), updatedAt: new Date() }).where(eq(appointments.id, appointmentId));
+          if (out.sent) await db.update(appointments).set({ reminder2hSentAt: new Date(), updatedAt: new Date() }).where(and(eq(appointments.id, appointmentId), eq(appointments.nutritionistId, ctx.appointment.nutritionistId)));
           return out;
         });
       }
@@ -111,7 +133,7 @@ export const onAppointmentConfirmed = inngest.createFunction(
       const rows = await db
         .update(appointments)
         .set({ status: "completed", updatedAt: new Date() })
-        .where(and(eq(appointments.id, appointmentId), eq(appointments.status, "confirmed")))
+        .where(and(eq(appointments.id, appointmentId), eq(appointments.nutritionistId, ctx.appointment.nutritionistId), eq(appointments.status, "confirmed")))
         .returning({ id: appointments.id });
       // Solo si seguía confirmed; si la nutri la marcó no_show/cancelled, no se toca.
       return rows.length > 0;
