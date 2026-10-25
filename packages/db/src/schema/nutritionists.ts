@@ -1,3 +1,4 @@
+import { documents, reports } from "./documents";
 import { relations, sql } from "drizzle-orm";
 import { boolean, index, integer, jsonb, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { users } from "./auth";
@@ -120,4 +121,6 @@ export const nutritionistsRelations = relations(nutritionists, ({ one, many }) =
   reviews: many(reviews),
   clinicalNotes: many(clinicalNotes),
   measurements: many(measurements),
+  documents: many(documents),
+  reports: many(reports),
 }));

@@ -36,6 +36,13 @@
       "when": 1792902675749,
       "tag": "0004_account_soft_delete",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792907879762,
+      "tag": "0005_documents",
+      "breakpoints": true
     }
   ]
 }
