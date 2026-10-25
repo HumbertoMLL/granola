@@ -8,6 +8,10 @@ Empieza por aquí, en este orden:
 4. `docs/adr/` — decisiones tomadas y por qué. Si vas a cambiar una, escribe un ADR nuevo.
 5. `packages/*/README.md` y `docs/whatsapp-plantillas.md` — detalle por paquete.
 
+## Trabajo en paralelo
+
+Cada tarea va en su propio git worktree y rama (`scripts/wt.sh nueva <slug>`), se entrega por PR a `main` y CI decide. Guía y prompt-plantilla en `docs/worktrees.md`.
+
 ## Reglas resumidas
 
 - Datos de salud **nunca** llegan al cliente sin pasar por la API; toda query filtra por `nutritionist_id` de la sesión.
