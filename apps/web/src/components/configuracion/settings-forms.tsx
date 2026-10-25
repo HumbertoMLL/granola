@@ -4,19 +4,17 @@ import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@granola/auth/client";
-import { Button, Card, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Switch, toast, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@granola/ui";
-import { deleteAccount, exportAccount, saveAccount, saveNotifications } from "@/app/(panel)/app/configuracion/actions";
+import { Button, Card, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, toast } from "@granola/ui";
+import { exportAccount, saveAccount } from "@/app/(panel)/app/configuracion/actions";
 import { updateTimezone } from "@/app/(panel)/app/agenda/actions";
 import { LATAM_TIMEZONES } from "@/components/agenda/timezones";
-import { accountSchema, deleteAccountSchema, passwordSchema } from "./schemas";
+import { accountSchema, passwordSchema } from "./schemas";
 
-export function SettingsForms(props: { name: string; email: string; timezone: string; notifyNewBooking: boolean }) {
+export function SettingsForms(props: { name: string; email: string; timezone: string }) {
   const router = useRouter();
   const passwordForm = useRef<HTMLFormElement>(null);
   const [pending, startTransition] = useTransition();
-  const [notify, setNotify] = useState(props.notifyNewBooking);
   const [timezone, setTimezone] = useState(props.timezone);
-  const [confirmation, setConfirmation] = useState("");
   function run(work: () => Promise<void>) {
     startTransition(async () => { try { await work(); } catch { toast.error("No se pudo completar. Intenta de nuevo."); } });
   }
@@ -66,37 +64,15 @@ export function SettingsForms(props: { name: string; email: string; timezone: st
       <Label htmlFor="settings-language">Idioma</Label><Input id="settings-language" readOnly value="Español (México) · es-MX" />
     </Card>
     <Card>
-      <h2 className="text-lg font-semibold">Notificaciones</h2>
-      <div className="flex items-center justify-between gap-4"><Label htmlFor="notify-booking">Avisarme por WhatsApp cuando agenden</Label><Switch id="notify-booking" checked={notify} disabled={pending} onCheckedChange={(value) => run(async () => {
-        const result = await saveNotifications({ notifyNewBooking: value });
-        if (result.ok) { setNotify(value); toast.success("Preferencia guardada"); } else toast.error(result.error);
-      })} /></div>
-    </Card>
-    <Card>
       <h2 className="text-lg font-semibold">Datos y privacidad</h2>
       <Link className="text-primary underline" href="/privacidad">Leer aviso de privacidad</Link>
-      <p className="text-sm text-muted-foreground">Descarga tu perfil, servicios, pacientes y citas. Guarda el archivo en un lugar seguro.</p>
+      <p className="text-sm text-muted-foreground">Descarga en JSON tu perfil, servicios, disponibilidad, pacientes, citas y pagos. Incluye datos de salud de tus pacientes: guárdalo en un lugar seguro. Cada descarga queda registrada.</p>
       <Button variant="outline" disabled={pending} onClick={() => run(async () => {
         const json = await exportAccount();
         const url = URL.createObjectURL(new Blob([json], { type: "application/json" }));
         const link = document.createElement("a"); link.href = url; link.download = "granola-mis-datos.json"; link.click();
         setTimeout(() => URL.revokeObjectURL(url), 1000);
       })}>Exportar mis datos</Button>
-      <Dialog><DialogTrigger asChild><Button variant="destructive">Eliminar cuenta</Button></DialogTrigger>
-        <DialogContent><DialogHeader><DialogTitle>Eliminar tu cuenta definitivamente</DialogTitle><DialogDescription>Se borrarán tu perfil, servicios, disponibilidad, pacientes, citas y registros asociados. Esta acción no se puede deshacer. Escribe ELIMINAR para confirmar.</DialogDescription></DialogHeader>
-          <form className="grid gap-4" action={() => run(async () => {
-            const parsed = deleteAccountSchema.safeParse({ confirmation });
-            if (!parsed.success) { toast.error("Escribe ELIMINAR para confirmar"); return; }
-            const result = await deleteAccount(parsed.data);
-            if (!result.ok) { toast.error(result.error); return; }
-            // El servidor revoca todas las sesiones; signOut limpia también la cookie cacheada.
-            await authClient.signOut(); router.replace("/login"); router.refresh();
-          })}>
-            <Label htmlFor="delete-confirmation">Confirmación</Label><Input id="delete-confirmation" value={confirmation} onChange={(e) => setConfirmation(e.target.value)} autoComplete="off" />
-            <Button className="h-auto min-h-11 whitespace-normal py-2" type="submit" variant="destructive" disabled={pending || confirmation !== "ELIMINAR"}>Eliminar mi cuenta y mis datos</Button>
-          </form>
-        </DialogContent>
-      </Dialog>
     </Card>
   </div>;
 }

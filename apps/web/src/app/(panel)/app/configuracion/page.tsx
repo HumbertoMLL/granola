@@ -11,9 +11,8 @@ export default function ConfigurationPage() {
 }
 async function Content() {
   const { user, nutritionist } = await requireNutritionist();
-  const theme: Record<string, unknown> = { ...nutritionist.theme };
   return <div className="flex flex-col gap-6">
     <PageHeader title="Configuración" description="Tu cuenta, preferencias y datos." />
-    <SettingsForms name={nutritionist.displayName} email={user.email} timezone={nutritionist.timezone} notifyNewBooking={theme.notifyNewBooking !== false} />
+    <SettingsForms name={nutritionist.displayName} email={user.email} timezone={nutritionist.timezone} />
   </div>;
 }

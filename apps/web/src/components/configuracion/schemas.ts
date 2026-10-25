@@ -6,5 +6,3 @@ export const passwordSchema = z.object({
   newPassword: z.string().min(8, "Usa al menos 8 caracteres").max(128),
   confirmPassword: z.string(),
 }).refine((d) => d.newPassword === d.confirmPassword, { message: "Las contraseñas no coinciden", path: ["confirmPassword"] });
-export const deleteAccountSchema = z.object({ confirmation: z.literal("ELIMINAR", { error: "Escribe ELIMINAR para confirmar" }) });
-export const notificationSchema = z.object({ notifyNewBooking: z.boolean() });
