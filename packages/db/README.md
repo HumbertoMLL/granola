@@ -37,8 +37,55 @@ pnpm db:seed        # nutrióloga demo "Karla Demo" en /karla
 pnpm db:studio      # explorador visual (opcional)
 ```
 
-Para producción, pon el `DATABASE_URL` del branch `main` en Vercel y corre
-`pnpm db:migrate` apuntando a ese env (o un paso de CI).
+Para producción, configura `DATABASE_URL` tanto en Vercel (runtime) como en GitHub Secrets
+(migración, conexión directa sin `-pooler`). El workflow `Deploy` aplica las migraciones
+automáticamente después de que **CI completo** termine en verde para un push a `main`;
+no se ejecutan a mano como paso habitual de release.
+
+## Flujo de release y previews
+
+1. Cambia el schema con la regla **expand/contract** de CLAUDE.md: expansión compatible
+   primero, código consumidor en otro release; retirada del uso y eliminación después.
+   No combines renombrar/borrar columnas con el PR que deja de usarlas.
+2. Ejecuta `pnpm db:generate`, revisa SQL y commitea SQL + snapshot + journal. Nunca
+   edites una migración aplicada. No uses `drizzle-kit push` para este flujo.
+3. `pnpm check:migrations` verifica el schema contra el último snapshot sin DB y exige
+   una migración nueva si cambió `packages/db/src/schema` respecto a `origin/main`.
+   Incluye cambios locales sin commit y archivos nuevos. Para otra base:
+   `MIGRATIONS_BASE_REF=<sha-o-ref> pnpm check:migrations`.
+4. Al abrir/actualizar/reabrir un PR del mismo repo, `Deploy` crea o reutiliza `pr-<número>`
+   desde el branch Neon `production`, corre `pnpm --filter @granola/db migrate` y actualiza
+   un comentario con el enlace privado al branch. Al cerrar el PR, lo borra. Los forks
+   y Dependabot no reciben credenciales. Sin keys, el job lo indica en su resumen y omite
+   el preview. El comentario **nunca publica DATABASE_URL**.
+5. Tras merge y CI verde, el job `migrate` usa el **SHA exacto validado**, secret de producción
+   y concurrency `migrate-prod` sin cancelación. Rechaza runs de commits superados antes
+   de migrar. Una migración fallida deja el estado `granola/migrate-production` en rojo.
+6. En Vercel, exige ese estado como **Deployment Check de producción** para bloquear la
+   promoción hasta que la migración termine bien. Vercel sigue construyendo en cada push.
+   Sin configurar ese check, la integración Git de Vercel es independiente y podría
+   promover aunque GitHub falle. Configuración y alternativa staged/manual en
+   [el README de workflows](../../.github/workflows/README.md).
+
+`drizzle.config.ts` conserva prioridad de `process.env.DATABASE_URL` sobre `.env.local`
+(dotenv no usa override). Los runners de GitHub no tienen `.env.local` ni proxy local.
+Drizzle Kit detecta el driver instalado: en este repo usa `pg` (necesario para tests);
+si no estuviera instalado, detectaría `@neondatabase/serverless` con WebSocket. No existe
+un selector `driver: "neon-http"` en esta versión. Ambos caminos soportan Neon real;
+este workflow conserva el CLI oficial, usa la conexión directa de Neon y **no** el
+proxy HTTP local. La app sigue consultando con `neon-http`; este cambio no toca su driver.
+
+Los previews por REST aplican explícitamente TTL de 7 días (igual a la política de
+`neon.ts`, que no se evalúa al llamar la API REST). Un PR actualizado después de expirar
+recrea el branch. Reutilizar no resetea los datos ni el historial ya migrado; para revisar
+otra estrategia de migraciones, usa un branch nuevo. La copia incluye los datos del
+padre: acceso solo para colaboradores autorizados del proyecto Neon. La URL de preview
+no se inyecta automáticamente en Vercel; esta tarea valida las migraciones del PR.
+
+Las migraciones ya aplicadas con Drizzle Kit se detectan en `drizzle.__drizzle_migrations`.
+Una base montada antes con SQL manual necesita revisar su historial antes de habilitar
+el workflow: no marques SQL como aplicado sin comprobar el schema. No se modifican ni
+se inventan registros históricos desde este workflow.
 
 ## Cambiar el schema
 
