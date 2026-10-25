@@ -2,16 +2,16 @@
 
 Design system de Granola. Usar los tokens semánticos de `src/styles.css`; no definir otra paleta ni radios para estos patrones.
 
-| Componente | Cuándo usarlo |
-|---|---|
-| SegmentedControl | Una sola opción entre pocas: modalidad, pago, Día/Semana. Radios nativos dentro de radiogroup con nombre accesible; flechas y Tab nativos. |
-| FilterChip | Facetas opcionales combinables; toggle con aria-pressed. |
-| AppliedFilters | Siempre junto a filtros de listas: chips removibles, contador vivo y Limpiar todo. |
-| Stepper | Flujo con pantallas consecutivas. currentStep basado en cero, aria-current=step. |
-| Sheet + SheetContent side="bottom" | BottomSheet: reutilizamos la hoja existente (Radix Dialog), con foco atrapado/restaurado, Escape, overlay, título y descripción accesibles. No duplicar este primitivo. |
-| Timeline | Agenda del día: minutos civiles en la zona mostrada, bloques proporcionales, huecos reales de disponibilidad como botones y línea de ahora. El consumidor calcula la disponibilidad; no convertir todo espacio vacío en tiempo reservable. |
-| EmptyState | Lista sin datos: título, explicación y acción para continuar. Durante la carga usar Skeleton. |
-| Tabs | Citas / Servicios / Disponibilidad: navegación interna con tablist, paneles y teclado. |
+| Componente                         | Cuándo usarlo                                                                                                                                                                                                                              |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| SegmentedControl                   | Una sola opción entre pocas: modalidad, pago, Día/Semana. Radios nativos dentro de radiogroup con nombre accesible; flechas y Tab nativos.                                                                                                 |
+| FilterChip                         | Facetas opcionales combinables; toggle con aria-pressed.                                                                                                                                                                                   |
+| AppliedFilters                     | Siempre junto a filtros de listas: chips removibles, contador vivo y Limpiar todo.                                                                                                                                                         |
+| Stepper                            | Flujo con pantallas consecutivas. currentStep basado en cero, aria-current=step.                                                                                                                                                           |
+| Sheet + SheetContent side="bottom" | BottomSheet: reutilizamos la hoja existente (Radix Dialog), con foco atrapado/restaurado, Escape, overlay, título y descripción accesibles. No duplicar este primitivo.                                                                    |
+| Timeline                           | Agenda del día: minutos civiles en la zona mostrada, bloques proporcionales, huecos reales de disponibilidad como botones y línea de ahora. El consumidor calcula la disponibilidad; no convertir todo espacio vacío en tiempo reservable. |
+| EmptyState                         | Lista sin datos: título, explicación y acción para continuar. Durante la carga usar Skeleton.                                                                                                                                              |
+| Tabs                               | Citas / Servicios / Disponibilidad: navegación interna con tablist, paneles y teclado.                                                                                                                                                     |
 
 ## Reglas obligatorias (copia de docs/ux-decisions.md)
 
