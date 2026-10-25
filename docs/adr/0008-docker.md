@@ -8,8 +8,8 @@ Vercel sigue siendo el deploy principal. Docker permite desarrollar y explorar
 Granola sin instalar Node ni pnpm en el host, y hospedar la misma aplicación
 fuera de Vercel. No cambia auth, schema, migraciones ni server actions.
 
-`apps/web/Dockerfile` usa Node 25 Alpine (igual que CI), corepack@0.36.0 instalado
-explícitamente (Node 25 ya no lo incluye) y el pnpm fijado en el repo.
+`apps/web/Dockerfile` usa Node 25 Alpine (igual que CI), el mismo pnpm que fija
+`packageManager` instalado con npm (Node 25 ya no incluye corepack).
 `pnpm fetch` cachea el lockfile antes de copiar fuentes; la instalación offline
 filtra `@granola/web...`. Next compila con `output: "standalone"` y tracing desde
 la raíz del monorepo. La imagen final incluye únicamente el runtime Node y

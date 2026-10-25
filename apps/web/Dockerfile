@@ -3,8 +3,10 @@
 FROM node:25-alpine AS base
 ENV PNPM_HOME=/pnpm
 ENV PATH=$PNPM_HOME:$PATH
-# Node 25 ya no trae corepack: se instala fijo y respeta `packageManager` (pnpm@11) de package.json.
-RUN npm install -g corepack@0.36.0 && corepack enable
+# Node 25 ya no trae corepack (y corepack@0.36 no declara soporte para 25):
+# se instala el mismo pnpm que fija `packageManager` en package.json.
+ARG PNPM_VERSION=11.22.0
+RUN npm install -g pnpm@$PNPM_VERSION
 WORKDIR /app
 
 FROM base AS deps
