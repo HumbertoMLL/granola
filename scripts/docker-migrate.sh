@@ -2,19 +2,42 @@
 set -eu
 # Un ledger independiente evita volver a aplicar ALTER TABLE no idempotentes.
 # Cada archivo y su marca se confirman en la misma transacción.
-psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-CREATE TABLE IF NOT EXISTS public.docker_migrations (
+
+q() { psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 -c "$1"; }
+
+# Base previa migrada a mano (psql / drizzle-kit): tiene tablas pero no ledger.
+# En ese modo, una migración que falla solo porque sus objetos ya existen se
+# registra como aplicada (baseline) en vez de tumbar el job; las nuevas se aplican.
+legacy=0
+if [ "$(q "SELECT to_regclass('public.docker_migrations') IS NULL")" = t ] &&
+  [ "$(q "SELECT count(*) FROM pg_tables WHERE schemaname = 'public'")" != 0 ]; then
+  legacy=1
+  echo "[migrate] base con tablas y sin docker_migrations: registro como aplicadas las migraciones que ya existen"
+fi
+
+q "CREATE TABLE IF NOT EXISTS public.docker_migrations (
   name text PRIMARY KEY,
   applied_at timestamptz NOT NULL DEFAULT now()
-);
-SQL
+)" >/dev/null
+
 for migration in packages/db/migrations/*.sql; do
   name=$(basename "$migration")
-  applied=$(psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 -c "SELECT count(*) FROM public.docker_migrations WHERE name = '$name'")
-  if [ "$applied" = 0 ]; then
-    { printf 'BEGIN;\n'; cat "$migration"; printf "\nINSERT INTO public.docker_migrations (name) VALUES ('%s');\nCOMMIT;\n" "$name"; } | psql "$DATABASE_URL" -v ON_ERROR_STOP=1
+  if [ "$(q "SELECT count(*) FROM public.docker_migrations WHERE name = '$name'")" != 0 ]; then
+    continue
+  fi
+  if output=$({ printf 'BEGIN;\n'; cat "$migration"; printf "\nINSERT INTO public.docker_migrations (name) VALUES ('%s');\nCOMMIT;\n" "$name"; } | psql "$DATABASE_URL" -q -v ON_ERROR_STOP=1 2>&1); then
+    echo "[migrate] aplicada $name"
+  elif [ "$legacy" = 1 ] && printf '%s' "$output" | grep -q 'already exists'; then
+    # El BEGIN se revirtió al salir psql: nada quedó a medias.
+    q "INSERT INTO public.docker_migrations (name) VALUES ('$name')" >/dev/null
+    echo "[migrate] $name ya estaba aplicada: registrada en docker_migrations"
+  else
+    printf '%s\n' "$output" >&2
+    echo "[migrate] falló $name" >&2
+    exit 1
   fi
 done
+
 # Compose conoce el arranque del contenedor, no la disponibilidad HTTP del proxy.
 node --input-type=module <<'JS'
 for (let attempt = 0; ; attempt++) {
