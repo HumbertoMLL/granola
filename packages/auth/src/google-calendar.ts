@@ -23,13 +23,14 @@ export async function persistGoogleCalendarAccount(
   if (!GOOGLE_CALENDAR_SCOPES.every((scope) => scopes.has(scope))) return;
   const token = await symmetricDecrypt({ key: secret, data: account.refreshToken });
   const encrypted = encryptRefreshToken(token);
-  const user = await db.query.users.findFirst({ where: eq(users.id, account.userId), columns: { name: true } });
+  const user = await db.query.users.findFirst({ where: eq(users.id, account.userId), columns: { name: true, image: true } });
   if (!user) return;
   // En el primer login social aún no pasó por requireNutritionist().
   const [profile] = await db.insert(nutritionists).values({
     userId: account.userId,
     slug: `nutri-${randomUUID()}`,
     displayName: user.name,
+    avatarUrl: user.image,
     googleRefreshTokenEnc: encrypted,
   }).onConflictDoUpdate({
     target: nutritionists.userId,

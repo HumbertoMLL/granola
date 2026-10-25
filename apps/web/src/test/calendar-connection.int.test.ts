@@ -69,10 +69,11 @@ describe("Cuando una nutrióloga conecta Google Calendar", () => {
   });
 
   it("el hook crea el perfil del primer login social con refresh token cifrado", async () => {
-    const [user] = await db.insert(users).values({ name: "Nutri Google", email: "google@granola.test", emailVerified: true }).returning();
+    const [user] = await db.insert(users).values({ name: "Nutri Google", email: "google@granola.test", emailVerified: true, image: "https://example.com/avatar.png" }).returning();
     const token = await symmetricEncrypt({ key: secret, data: "google-refresh-secret" });
     await persistGoogleCalendarAccount({ providerId: "google", userId: user!.id, refreshToken: token, scope: GOOGLE_CALENDAR_SCOPES.join(" ") }, secret);
     const profile = await db.query.nutritionists.findFirst({ where: eq(nutritionists.userId, user!.id) });
+    expect(profile?.avatarUrl).toBe("https://example.com/avatar.png");
     expect(profile?.googleRefreshTokenEnc).not.toContain("google-refresh-secret");
     expect(decryptRefreshToken(profile!.googleRefreshTokenEnc!)).toBe("google-refresh-secret");
     await persistGoogleCalendarAccount({ providerId: "google", userId: user!.id, refreshToken: null }, secret);
