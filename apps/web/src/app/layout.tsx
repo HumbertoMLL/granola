@@ -8,6 +8,7 @@ const sans = Plus_Jakarta_Sans({
   variable: "--font-sans-var",
   subsets: ["latin", "latin-ext"],
   display: "swap",
+  weight: ["400", "500", "600"],
 });
 
 const display = Instrument_Serif({

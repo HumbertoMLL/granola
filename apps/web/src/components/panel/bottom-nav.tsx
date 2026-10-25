@@ -15,7 +15,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Panel"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 backdrop-blur-md md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card md:hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <ul className="grid h-16 grid-cols-5">
@@ -28,19 +28,18 @@ export function BottomNav() {
                 aria-current={active ? "page" : undefined}
                 className={cn(
                   "flex flex-1 flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors",
-                  active ? "font-bold text-primary" : "text-muted-foreground",
+                  active ? "font-semibold text-primary" : "text-muted-foreground",
                 )}
               >
                 <span
                   className={cn(
-                    "flex h-7 w-12 items-center justify-center rounded-full transition-colors",
-                    active && "bg-primary-soft",
+                    "flex size-6 items-center justify-center",
                   )}
                 >
                   <item.icon
                     aria-hidden
                     className="size-5"
-                    strokeWidth={active ? 2.25 : 2}
+                    strokeWidth={1.75}
                   />
                 </span>
                 {item.label}
