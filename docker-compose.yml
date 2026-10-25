@@ -1,4 +1,10 @@
 # Stack local completo. Producción remota: usar el target runner y servicios administrados.
+# Proyecto y volumen propios (granola-docker / granola_docker_pg) para no chocar con
+# docker-compose.local.yml (proyecto "granola"). Los puertos solo escuchan en 127.0.0.1;
+# los defaults coinciden con el compose local, así que no corras ambos a la vez sin
+# cambiar POSTGRES_PORT / NEON_PROXY_PORT en .env.docker.
+name: granola-docker
+
 x-database-env: &database-env
   DATABASE_URL: postgres://${POSTGRES_USER:-granola}:${POSTGRES_PASSWORD:-granola}@postgres:5432/${POSTGRES_DB:-granola}
   NEON_LOCAL_PROXY: http://neon-proxy:4444/sql
@@ -6,25 +12,26 @@ x-database-env: &database-env
 
 services:
   postgres:
-    image: postgres:17-alpine
+    image: postgres:17.11-alpine
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-granola}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-granola}
       POSTGRES_DB: ${POSTGRES_DB:-granola}
     ports:
-      - "${POSTGRES_PORT:-5433}:5432"
+      - "127.0.0.1:${POSTGRES_PORT:-5433}:5432"
     volumes:
-      - granola_pg:/var/lib/postgresql/data
+      - granola_docker_pg:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 3s
       retries: 20
   neon-proxy:
-    image: ghcr.io/timowilhelm/local-neon-http-proxy:main
+    # Sin releases con tag: se fija el digest del índice multi-arch de :main.
+    image: ghcr.io/timowilhelm/local-neon-http-proxy:main@sha256:cd2ae14edf2feafbc3330492de5c80506f77274c3bd013154cdef697bdeb768a
     environment:
       PG_CONNECTION_STRING: postgres://${POSTGRES_USER:-granola}:${POSTGRES_PASSWORD:-granola}@postgres:5432/${POSTGRES_DB:-granola}
     ports:
-      - "${NEON_PROXY_PORT:-4444}:4444"
+      - "127.0.0.1:${NEON_PROXY_PORT:-4444}:4444"
     depends_on:
       postgres:
         condition: service_healthy
@@ -56,17 +63,17 @@ services:
       INNGEST_DEV: "1"
       INNGEST_BASE_URL: http://inngest:8288
     ports:
-      - "3100:3100"
+      - "127.0.0.1:${WEB_PORT:-3100}:3100"
     depends_on:
       migrate:
         condition: service_completed_successfully
   inngest:
-    image: inngest/inngest
+    image: inngest/inngest:v1.49.0
     command: ["inngest", "dev", "-u", "http://web:3100/api/inngest"]
     ports:
-      - "8288:8288"
+      - "127.0.0.1:${INNGEST_PORT:-8288}:8288"
     depends_on:
       web:
         condition: service_healthy
 volumes:
-  granola_pg:
+  granola_docker_pg:
