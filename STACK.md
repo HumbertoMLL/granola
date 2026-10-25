@@ -25,7 +25,7 @@ Decisiones: [ADR 0001 — Neon + Better Auth, no Supabase](docs/adr/0001-postgre
 | **Sentry** | Errores | — (no hay código) | `SENTRY_DSN` | $0 | No verificado | **Pendiente** |
 | **App URL** | Origen público para links de WA, Stripe, MP, OG | `packages/payments/src/env.ts` y otros (`NEXT_PUBLIC_APP_URL`, 4 usos) | `NEXT_PUBLIC_APP_URL` | — | — | Activo |
 | **Docker local** | Postgres 17 + proxy HTTP compatible con `neon-http` para desarrollar sin Neon | `docker-compose.local.yml`, `packages/db/src/index.ts:55-66` | `DATABASE_URL=postgres://granola:granola@localhost:5433/granola`, `NEON_LOCAL_PROXY`, `NEON_LOCAL_PG_HOST` (las dos últimas **faltan en `.env.example`**) | $0 | $0 | Activo (solo DB). F1.5: `docker-compose up` con web + Inngest dev ([PLAN.md:175-177](PLAN.md)) |
-| **GitHub Actions (CI)** | lint / typecheck / test | `.github/` (vacío) | — | $0 | $0 | **Pendiente** |
+| **GitHub Actions (CI)** | lint / typecheck / build / unit, integración (Postgres + proxy neon) y E2E (Playwright) | `.github/workflows/ci.yml` | — (usa `apps/web/.env.test`, sin secretos) | $0 | $0 | Workflow listo; falta proteger `main` con los checks requeridos (`.github/workflows/README.md`) |
 
 ## Total infra estimado (sin WhatsApp ni comisiones de pago)
 

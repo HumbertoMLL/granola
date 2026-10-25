@@ -29,6 +29,7 @@ packages/config eslint / tsconfig compartidos
 6. **Dinero en centavos (int), fechas en UTC (timestamptz), zona horaria del nutri guardada aparte.**
 7. Sin `any`. Zod en toda frontera (forms, webhooks, API).
 8. Commits en español, imperativo, cortos. Un PR por workstream.
+9. **Todo feature nuevo llega con su test (integración si toca DB, E2E si toca el flujo de reserva). Nada se da por terminado con CI en rojo.**
 
 ## Comandos
 
@@ -38,9 +39,18 @@ pnpm dev --filter web
 pnpm db:generate    # drizzle-kit generate
 pnpm db:migrate
 pnpm db:studio
-pnpm test           # vitest en packages/core
+pnpm test               # vitest unit (core, whatsapp, payments, web) — sin DB
+pnpm test:integration   # apps/web/**/*.int.test.ts contra Postgres real (granola_test)
+pnpm e2e                # Playwright: reservar → agenda → cancelar (levanta next dev en :3100)
 pnpm lint && pnpm typecheck
 ```
+
+## Tests
+
+- `test:integration` y `e2e` necesitan `docker-compose -f docker-compose.local.yml up -d` (Postgres en 5433 + `neon-proxy-test` en 4445). Leen **solo** `apps/web/.env.test` (sin secretos, commiteado).
+- Helpers en `@granola/db/testing`: `ensureTestDb`, `resetDb`, `seedNutritionist`, `seedService`, `seedPatient`, `seedAppointment`. Se niegan a tocar una base cuyo nombre no termine en `_test`.
+- Integración: archivo `*.int.test.ts` junto al código, estilo BDD (`describe("Cuando…")` / `it("…")`). Solo se mockean fronteras externas (Inngest `@/lib/inngest-client`, Stripe/MP con fixtures, `@/lib/session`, `next/headers`, `next/navigation`, `next/cache`).
+- CI: `.github/workflows/ci.yml` (jobs checks / integration / e2e). Ver `.github/workflows/README.md`.
 
 ## Env vars (apps/web/.env.local)
 

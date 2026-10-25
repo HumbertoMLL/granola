@@ -16,12 +16,18 @@ Empieza por aquí, en este orden:
 - Dinero en centavos, fechas en UTC, zona horaria aparte.
 - Sin `any`; zod en toda frontera.
 - UI en español MX; código en inglés.
+- **Todo feature nuevo llega con su test (integración si toca DB, E2E si toca el flujo de reserva). Nada se da por terminado con CI en rojo.**
 
 ## Verificación antes de dar algo por terminado
 
 ```bash
 pnpm typecheck && pnpm lint && pnpm test && pnpm --filter @granola/web exec next build
+# si tocaste DB o flujos críticos (requiere docker-compose.local.yml arriba):
+pnpm test:integration   # vitest *.int.test.ts contra granola_test
+pnpm e2e                # Playwright: reservar → agenda de la nutri → cancelar
 ```
+
+CI (`.github/workflows/ci.yml`) corre lo mismo en cada PR; `main` debe exigir los tres checks (ver `.github/workflows/README.md`).
 
 ## Acceso
 
@@ -32,7 +38,7 @@ pnpm typecheck && pnpm lint && pnpm test && pnpm --filter @granola/web exec next
 ## Dev
 
 ```bash
-docker-compose -f docker-compose.local.yml up -d   # Postgres local + proxy HTTP Neon (puertos 5433 / 4444)
+docker-compose -f docker-compose.local.yml up -d   # Postgres local + proxy HTTP Neon (5433 / 4444; tests: 4445 → granola_test)
 pnpm --filter @granola/web exec next dev -p 3100
 ```
 
