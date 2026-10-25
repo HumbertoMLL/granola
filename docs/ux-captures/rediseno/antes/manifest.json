@@ -1,0 +1,182 @@
+[
+  {
+    "name": "inicio",
+    "width": 390,
+    "url": "http://localhost:3196/"
+  },
+  {
+    "name": "login",
+    "width": 390,
+    "url": "http://localhost:3196/login"
+  },
+  {
+    "name": "registro",
+    "width": 390,
+    "url": "http://localhost:3196/registro"
+  },
+  {
+    "name": "perfil",
+    "width": 390,
+    "url": "http://localhost:3196/karla"
+  },
+  {
+    "name": "reserva-1",
+    "width": 390,
+    "url": "http://localhost:3196/karla/agendar"
+  },
+  {
+    "name": "reserva-2",
+    "width": 390,
+    "url": "http://localhost:3196/karla/agendar?paso=2&servicio=cc5d6a5f-2625-4bdc-90a5-6eee36d84822"
+  },
+  {
+    "name": "reserva-3",
+    "width": 390,
+    "url": "http://localhost:3196/karla/agendar?paso=3&servicio=cc5d6a5f-2625-4bdc-90a5-6eee36d84822&fecha=2026-10-26"
+  },
+  {
+    "name": "reserva-4",
+    "width": 390,
+    "url": "http://localhost:3196/karla/agendar?paso=4&servicio=cc5d6a5f-2625-4bdc-90a5-6eee36d84822&fecha=2026-10-26&hora=2026-10-26T15%3A00%3A00.000Z"
+  },
+  {
+    "name": "cita",
+    "width": 390,
+    "url": "http://localhost:3196/cita/seed-karla-hoy-0001"
+  },
+  {
+    "name": "resena",
+    "width": 390,
+    "url": "http://localhost:3196/resena/visual-review-karla-2026"
+  },
+  {
+    "name": "dashboard",
+    "width": 390,
+    "url": "http://localhost:3196/app"
+  },
+  {
+    "name": "agenda-dia",
+    "width": 390,
+    "url": "http://localhost:3196/app/agenda"
+  },
+  {
+    "name": "agenda-semana",
+    "width": 390,
+    "url": "http://localhost:3196/app/agenda"
+  },
+  {
+    "name": "pacientes",
+    "width": 390,
+    "url": "http://localhost:3196/app/pacientes"
+  },
+  {
+    "name": "expediente",
+    "width": 390,
+    "url": "http://localhost:3196/app/pacientes"
+  },
+  {
+    "name": "cobros",
+    "width": 390,
+    "url": "http://localhost:3196/app/cobros"
+  },
+  {
+    "name": "mi-pagina",
+    "width": 390,
+    "url": "http://localhost:3196/app/mi-pagina"
+  },
+  {
+    "name": "configuracion",
+    "width": 390,
+    "url": "http://localhost:3196/app/configuracion"
+  },
+  {
+    "name": "inicio",
+    "width": 1280,
+    "url": "http://localhost:3196/"
+  },
+  {
+    "name": "login",
+    "width": 1280,
+    "url": "http://localhost:3196/login"
+  },
+  {
+    "name": "registro",
+    "width": 1280,
+    "url": "http://localhost:3196/registro"
+  },
+  {
+    "name": "perfil",
+    "width": 1280,
+    "url": "http://localhost:3196/karla"
+  },
+  {
+    "name": "reserva-1",
+    "width": 1280,
+    "url": "http://localhost:3196/karla/agendar"
+  },
+  {
+    "name": "reserva-2",
+    "width": 1280,
+    "url": "http://localhost:3196/karla/agendar?paso=2&servicio=cc5d6a5f-2625-4bdc-90a5-6eee36d84822"
+  },
+  {
+    "name": "reserva-3",
+    "width": 1280,
+    "url": "http://localhost:3196/karla/agendar?paso=3&servicio=cc5d6a5f-2625-4bdc-90a5-6eee36d84822&fecha=2026-10-26"
+  },
+  {
+    "name": "reserva-4",
+    "width": 1280,
+    "url": "http://localhost:3196/karla/agendar?paso=4&servicio=cc5d6a5f-2625-4bdc-90a5-6eee36d84822&fecha=2026-10-26&hora=2026-10-26T15%3A00%3A00.000Z"
+  },
+  {
+    "name": "cita",
+    "width": 1280,
+    "url": "http://localhost:3196/cita/seed-karla-hoy-0001"
+  },
+  {
+    "name": "resena",
+    "width": 1280,
+    "url": "http://localhost:3196/resena/visual-review-karla-2026"
+  },
+  {
+    "name": "dashboard",
+    "width": 1280,
+    "url": "http://localhost:3196/app"
+  },
+  {
+    "name": "agenda-dia",
+    "width": 1280,
+    "url": "http://localhost:3196/app/agenda"
+  },
+  {
+    "name": "agenda-semana",
+    "width": 1280,
+    "url": "http://localhost:3196/app/agenda"
+  },
+  {
+    "name": "pacientes",
+    "width": 1280,
+    "url": "http://localhost:3196/app/pacientes"
+  },
+  {
+    "name": "expediente",
+    "width": 1280,
+    "url": "http://localhost:3196/app/pacientes"
+  },
+  {
+    "name": "cobros",
+    "width": 1280,
+    "url": "http://localhost:3196/app/cobros"
+  },
+  {
+    "name": "mi-pagina",
+    "width": 1280,
+    "url": "http://localhost:3196/app/mi-pagina"
+  },
+  {
+    "name": "configuracion",
+    "width": 1280,
+    "url": "http://localhost:3196/app/configuracion"
+  }
+]
