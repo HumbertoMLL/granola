@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nutriólogas · Granola</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{max-width:390px;margin:0 auto;min-height:100vh;padding:20px 16px 32px;font-family:system-ui,-apple-system,sans-serif;color:#fff;background:linear-gradient(180deg,#7FA892 0%,#3F6453 45%,#2B4539 100%)}
+h1{font-size:22px;font-weight:800;text-align:center;line-height:1.2}
+.sub{font-size:13px;text-align:center;opacity:.85;margin:4px 0 14px}
+.search{display:flex;gap:8px;margin-bottom:12px}
+.search input{flex:1;min-width:0;padding:14px 16px;border-radius:999px;border:0;background:#fff;color:#2B4539;font-size:15px}
+.search input::placeholder{color:#64748B}
+.search button{border:0;border-radius:999px;background:#FFD60A;color:#2B4539;font-weight:800;padding:0 18px;font-size:14px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px;scrollbar-width:none}
+.chip{flex:0 0 auto;font-size:13px;font-weight:700;padding:8px 14px;border-radius:999px;border:1px solid #ffffff4d;background:#ffffff1a}
+.chip.on{background:#fff;color:#2B4539;border-color:#fff}
+.count{font-size:12px;opacity:.8;margin-bottom:10px}
+.res{background:#ffffff1a;border:1px solid #ffffff33;border-radius:18px;padding:14px;margin-bottom:10px}
+.top{display:flex;gap:12px;align-items:center}
+.ph{width:64px;height:64px;border-radius:50%;background:#ffffff33;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:11px;flex:0 0 auto}
+.info{flex:1;min-width:0}
+.info b{display:block;font-size:16px}
+.esp{font-size:13px;opacity:.92}
+.meta{font-size:12px;opacity:.8;margin-top:2px}
+.rt{font-size:12px;font-weight:700;margin-top:3px}
+.go{display:block;width:100%;margin-top:12px;text-align:center;background:#fff;color:#2B4539;font-weight:800;font-size:14px;padding:12px;border-radius:999px;text-decoration:none}
+.pag{display:flex;justify-content:center;gap:8px;margin-top:18px}
+.pag span{width:38px;height:38px;border-radius:50%;border:1px solid #ffffff4d;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
+.pag .on{background:#fff;color:#2B4539;border-color:#fff}
+</style>
+</head>
+<body>
+<h1>Nutriólogas en México</h1>
+<p class="sub">Agenda en línea o presencial, sin llamadas</p>
+
+<div class="search">
+  <input type="text" placeholder="Busca por nombre o especialidad">
+  <button>Buscar</button>
+</div>
+
+<div class="chips">
+  <span class="chip on">Online</span>
+  <span class="chip">Presencial</span>
+  <span class="chip">CDMX</span>
+  <span class="chip">Deportiva</span>
+  <span class="chip">Bariatría</span>
+  <span class="chip">Pediátrica</span>
+</div>
+
+<p class="count">4 nutriólogas disponibles</p>
+
+<div class="res">
+  <div class="top">
+    <div class="ph">foto</div>
+    <div class="info">
+      <b>Lucía Torres</b>
+      <div class="esp">Nutrición deportiva</div>
+      <div class="meta">CDMX · Online y presencial</div>
+      <div class="rt">★ 4.9 (31) · Desde $650</div>
+    </div>
+  </div>
+  <a class="go" href="#">Ver perfil</a>
+</div>
+
+<div class="res">
+  <div class="top">
+    <div class="ph">foto</div>
+    <div class="info">
+      <b>Fernanda Gil</b>
+      <div class="esp">Bariatría y obesidad</div>
+      <div class="meta">Guadalajara · Presencial</div>
+      <div class="rt">★ 4.8 (18) · Desde $700</div>
+    </div>
+  </div>
+  <a class="go" href="#">Ver perfil</a>
+</div>
+
+<div class="res">
+  <div class="top">
+    <div class="ph">foto</div>
+    <div class="info">
+      <b>Mónica Salas</b>
+      <div class="esp">Nutrición pediátrica</div>
+      <div class="meta">CDMX · Online</div>
+      <div class="rt">★ 5.0 (12) · Desde $550</div>
+    </div>
+  </div>
+  <a class="go" href="#">Ver perfil</a>
+</div>
+
+<div class="res">
+  <div class="top">
+    <div class="ph">foto</div>
+    <div class="info">
+      <b>Daniela Ibarra</b>
+      <div class="esp">Control de peso y hábitos</div>
+      <div class="meta">Monterrey · Online</div>
+      <div class="rt">★ 4.7 (9) · Desde $500</div>
+    </div>
+  </div>
+  <a class="go" href="#">Ver perfil</a>
+</div>
+
+<div class="pag"><span>‹</span><span class="on">1</span><span>2</span><span>3</span><span>›</span></div>
+</body>
+</html>
