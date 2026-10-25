@@ -6,7 +6,6 @@ import { db, eq, nutritionists, sql } from "@/lib/db";
 import { requireNutritionist } from "@/lib/session";
 import { cacheTagFor } from "@/lib/public-profile";
 import { saveProfileIdentity } from "@/components/configuracion/save-profile";
-import { slugSchema } from "../mi-pagina/schema";
 import { createService, saveAvailabilityRules } from "../agenda/actions";
 import { serviceSchema, ruleSchema } from "@/components/agenda/schemas";
 
@@ -19,9 +18,7 @@ async function advance(step: number) {
 
 export async function saveOnboardingProfile(input: unknown) {
   const { nutritionist: n } = await requireNutritionist();
-  const parsed = z.object({ displayName: z.string().trim().min(2).max(60), slug: slugSchema }).safeParse(input);
-  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]!.message };
-  const result = await saveProfileIdentity(n, parsed.data);
+  const result = await saveProfileIdentity(n, input);
   if (!result.ok) return result;
   await advance(1);
   return { ok: true };
