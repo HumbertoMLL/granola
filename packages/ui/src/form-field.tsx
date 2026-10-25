@@ -63,7 +63,7 @@ export function FormField({
 }) {
   const id = React.useId();
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-2">
       <Label htmlFor={id}>{label}</Label>
       {associateControls(
         children,
@@ -72,11 +72,15 @@ export function FormField({
         !!error,
       )}
       {error ? (
-        <p id={`${id}-help`} role="alert" className="text-xs text-destructive">
+        <p
+          id={`${id}-help`}
+          role="alert"
+          className="text-sm text-destructive-ink"
+        >
           {error}
         </p>
       ) : hint ? (
-        <p id={`${id}-help`} className="text-xs text-muted-foreground">
+        <p id={`${id}-help`} className="text-sm text-muted-foreground">
           {hint}
         </p>
       ) : null}

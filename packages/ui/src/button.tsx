@@ -6,29 +6,27 @@ import { Loader2 } from "lucide-react";
 import { cn } from "./lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold transition-all duration-150 outline-none select-none disabled:pointer-events-none disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.98] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium transition-colors duration-150 outline-none select-none disabled:pointer-events-none disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
-        primary:
-          "bg-primary text-primary-foreground shadow-soft hover:bg-primary-hover hover:shadow-float",
+        primary: "bg-primary text-primary-foreground hover:bg-primary-hover",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-border/70",
+          "border border-border bg-transparent text-secondary-foreground hover:bg-secondary",
         outline:
-          "border border-border bg-card text-foreground hover:bg-secondary",
+          "border border-border bg-transparent text-foreground hover:bg-secondary",
         ghost: "text-foreground hover:bg-secondary",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        accent:
-          "bg-accent text-accent-foreground shadow-soft hover:brightness-95 hover:shadow-float",
+          "bg-destructive-ink text-destructive-foreground hover:bg-destructive-ink/90",
+        accent: "bg-accent text-accent-foreground hover:brightness-95",
         link: "text-primary underline-offset-4 hover:underline rounded-none",
       },
       size: {
-        sm: "h-9 px-4 text-sm",
-        md: "h-11 px-5 text-sm",
-        lg: "h-13 px-7 text-base",
-        icon: "size-10",
-        "icon-sm": "size-9",
+        sm: "h-12 px-3 text-sm md:h-8",
+        md: "h-12 px-4 text-base md:h-10",
+        lg: "h-12 px-6 text-base",
+        icon: "size-11 md:size-10",
+        "icon-sm": "size-11 md:size-8",
       },
     },
     defaultVariants: {

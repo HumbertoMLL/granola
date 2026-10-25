@@ -27,7 +27,7 @@ export function SegmentedControl({
       role="radiogroup"
       aria-label={label}
       className={cn(
-        "flex flex-wrap gap-1 rounded-xl border border-border bg-secondary p-1",
+        "inline-flex gap-1 rounded-md border border-border bg-secondary p-1",
         className,
       )}
     >
@@ -45,7 +45,7 @@ export function SegmentedControl({
             onChange={() => onValueChange(option.value)}
             className="peer sr-only"
           />
-          <span className="flex min-h-11 w-full items-center justify-center rounded-md px-3 text-center text-sm font-medium text-muted-foreground peer-checked:bg-card peer-checked:font-bold peer-checked:text-primary peer-checked:shadow-soft peer-focus-visible:outline-2 peer-focus-visible:outline-ring peer-disabled:cursor-not-allowed peer-disabled:opacity-50">
+          <span className="flex min-h-11 w-full md:min-h-8 items-center justify-center rounded-md px-3 text-center text-sm font-medium text-muted-foreground peer-checked:bg-card peer-checked:font-semibold peer-checked:text-foreground peer-focus-visible:outline-2 peer-focus-visible:outline-ring peer-disabled:cursor-not-allowed peer-disabled:opacity-50">
             {option.label}
           </span>
         </label>
