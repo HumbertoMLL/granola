@@ -33,12 +33,18 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: pnpm/action-setup@v4 # versión de pnpm: campo packageManager de package.json
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Revisar migraciones
+        env:
+          MIGRATIONS_BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: pnpm check:migrations
       - name: Lint
         run: pnpm lint
       - name: Typecheck
@@ -82,7 +88,7 @@ jobs:
             --network ${{ job.services.postgres.network }} \
             -e PG_CONNECTION_STRING=postgres://granola:granola@postgres:5432/granola_test \
             -p 4445:4444 "$NEON_PROXY_IMAGE"
-          for i in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl -s -o /dev/null http://localhost:4445/sql; then echo "proxy listo"; exit 0; fi
             sleep 1
           done
@@ -140,7 +146,7 @@ jobs:
             --network ${{ job.services.postgres.network }} \
             -e PG_CONNECTION_STRING=postgres://granola:granola@postgres:5432/granola_test \
             -p 4445:4444 "$NEON_PROXY_IMAGE"
-          for i in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl -s -o /dev/null http://localhost:4445/sql; then echo "proxy listo"; exit 0; fi
             sleep 1
           done

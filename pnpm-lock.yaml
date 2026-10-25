@@ -18,6 +18,9 @@ importers:
       '@granola/db':
         specifier: workspace:*
         version: link:packages/db
+      '@types/node':
+        specifier: ^20.19.43
+        version: 20.19.43
       better-auth:
         specifier: 1.7.12
         version: 1.7.12(@opentelemetry/api@1.10.0)(drizzle-kit@0.31.11)(next@16.4.3(@babel/core@7.29.7(supports-color@7.2.0))(@opentelemetry/api@1.10.0)(@playwright/test@1.56.1)(@types/node@20.19.43)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.23.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vitest@3.2.7(@types/debug@4.1.13)(@types/node@20.19.43)(jiti@2.7.0)(lightningcss@1.32.0)(supports-color@7.2.0)(tsx@4.23.15)(yaml@2.9.1))
@@ -33,6 +36,9 @@ importers:
       typescript:
         specifier: ^5.9.0
         version: 5.9.3
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
 
   apps/web:
     dependencies:
