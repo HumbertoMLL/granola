@@ -1,3 +1,4 @@
+import { bienvenida, magicLink as magicLinkEmail, sendEmail } from "@granola/email";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { magicLink } from "better-auth/plugins/magic-link";
@@ -19,6 +20,26 @@ function createAuth() {
       enabled: true,
       minPasswordLength: 8,
     },
+    databaseHooks: {
+      user: {
+        create: {
+          async after(user) {
+            // La cuenta ya existe: un fallo de bienvenida no debe romper registro/login.
+            try {
+              const origin = process.env.NEXT_PUBLIC_APP_URL ?? process.env.BETTER_AUTH_URL ?? "http://localhost:3000";
+              await sendEmail({
+                to: user.email,
+                ...bienvenida({ name: user.name, appUrl: new URL("/app", origin).toString() }),
+                tags: [{ name: "template", value: "bienvenida" }],
+                idempotencyKey: `welcome-${user.id}`,
+              });
+            } catch {
+              console.error("[email:welcome-failed]");
+            }
+          },
+        },
+      },
+    },
     // Google solo se registra si hay credenciales; así el resto funciona sin ellas.
     socialProviders:
       googleClientId && googleClientSecret
@@ -33,8 +54,11 @@ function createAuth() {
         expiresIn: 60 * 15,
         storeToken: "hashed",
         async sendMagicLink({ email, url }) {
-          // TODO(Resend): enviar correo real. Por ahora el link sale en la consola del server.
-          console.log(`[granola/auth] Magic link para ${email}:\n${url}`);
+          await sendEmail({
+            to: email,
+            ...magicLinkEmail({ url }),
+            tags: [{ name: "template", value: "magic_link" }],
+          });
         },
       }),
     ],
