@@ -9,6 +9,7 @@ import {
   eq,
   gt,
   inArray,
+  isNull,
   lt,
   nutritionists,
   services,
@@ -74,7 +75,8 @@ const PUBLIC_SERVICE_COLUMNS = {
 
 export async function getPublicNutritionistBySlug(slug: string): Promise<PublicNutritionist | null> {
   const row = await db.query.nutritionists.findFirst({
-    where: eq(nutritionists.slug, slug),
+    // Cuenta en gracia de borrado (ADR 0015) → como si no existiera.
+    where: and(eq(nutritionists.slug, slug), isNull(nutritionists.deletedAt)),
     columns: PUBLIC_NUTRITIONIST_COLUMNS,
   });
   return row ?? null;
