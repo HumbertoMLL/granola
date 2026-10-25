@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agendar · Karla Demo</title>
+<style>
+  body{max-width:390px;margin:0 auto;font-family:system-ui,-apple-system,sans-serif;color:#1f2328;background:#fff;font-size:14px;line-height:1.45;padding:0 16px 40px}
+  :root{--ink:#3E7C75;--line:#e4e4e4;--muted:#8a8f98}
+  header{padding:20px 0 12px;border-bottom:1px solid var(--line)}
+  header b{font-weight:600;font-size:16px}
+  header small{display:block;color:var(--muted)}
+  .step{margin-top:22px}
+  .step h2{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 8px;font-weight:600}
+  .box{border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center}
+  .link{color:var(--ink);font-size:13px}
+  .mes{display:flex;justify-content:space-between;align-items:center;font-weight:600}
+  .mes span{color:var(--muted);font-weight:400;font-size:18px;padding:0 8px}
+  .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;margin-top:10px}
+  .grid i{font-style:normal;color:var(--muted);font-size:11px}
+  .grid div{padding:8px 0;font-size:13px;color:#bbb;border-radius:8px}
+  .grid .ok{color:#1f2328;border:1px solid var(--ink)}
+  .grid .sel{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .horas{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+  .horas button,.pago button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:10px 0;font:inherit;color:#1f2328}
+  .horas .sel{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .tz{color:var(--muted);font-size:12px;margin-top:8px}
+  label{display:block;font-size:12px;color:var(--muted);margin:12px 0 4px}
+  input[type=text],input[type=tel],input[type=email]{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:8px;padding:12px;font:inherit;background:#fff}
+  .tel{display:flex;gap:8px}
+  .tel span{border:1px solid var(--line);border-radius:8px;padding:12px;color:#555}
+  .check{display:flex;gap:10px;margin-top:14px;font-size:13px;color:#444}
+  .check i{width:16px;height:16px;border:1px solid #999;border-radius:3px;flex:none;margin-top:2px}
+  .pago{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .pago .sel{border-color:var(--ink);color:var(--ink);font-weight:600}
+  .cta{margin-top:20px;width:100%;padding:15px;border:0;border-radius:10px;background:var(--ink);color:#fff;font:inherit;font-weight:600;font-size:16px}
+  .nota{text-align:center;color:var(--muted);font-size:12px;margin-top:10px}
+</style>
+</head>
+<body>
+  <header><b>Karla Demo</b><small>Nutrióloga · Agendar cita</small></header>
+
+  <section class="step">
+    <h2>1 · Servicio</h2>
+    <div class="box"><div><b>Primera consulta</b><br><small style="color:#8a8f98">60 min · $800</small></div><span class="link">Cambiar</span></div>
+  </section>
+
+  <section class="step">
+    <h2>2 · Fecha y hora</h2>
+    <div class="mes"><span>‹</span>Noviembre 2026<span>›</span></div>
+    <div class="grid">
+      <i>L</i><i>M</i><i>M</i><i>J</i><i>V</i><i>S</i><i>D</i>
+      <div>·</div><div class="ok">2</div><div class="ok">3</div><div>4</div><div class="ok">5</div><div class="ok">6</div><div>7</div>
+      <div class="ok">9</div><div class="ok">10</div><div class="ok">11</div><div>12</div><div class="ok sel">13</div><div class="ok">14</div><div>15</div>
+    </div>
+    <div class="horas">
+      <button>10:00</button><button>10:30</button><button class="sel">11:00</button>
+      <button>11:30</button><button>12:00</button><button>12:30</button>
+    </div>
+    <div class="tz">Hora Ciudad de México (GMT-6)</div>
+  </section>
+
+  <section class="step">
+    <h2>3 · Tus datos</h2>
+    <label>Nombre completo</label>
+    <input type="text" placeholder="Nombre y apellido">
+    <label>WhatsApp</label>
+    <div class="tel"><span>+52</span><input type="tel" placeholder="55 1234 5678"></div>
+    <label>Correo (opcional)</label>
+    <input type="email" placeholder="tu@correo.com">
+    <label>Forma de pago</label>
+    <div class="pago">
+      <button class="sel">Tarjeta</button><button>SPEI</button>
+      <button>OXXO</button><button>En consulta</button>
+    </div>
+    <div class="check"><i></i><span>Acepto que mis datos de salud sean usados para agendar y dar seguimiento a mi consulta.</span></div>
+  </section>
+
+  <button class="cta">Confirmar cita</button>
+  <p class="nota">Te llega confirmación por WhatsApp</p>
+</body>
+</html>

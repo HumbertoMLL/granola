@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Propuesta C — Agenda embebida</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{max-width:390px;margin:0 auto;font-family:system-ui;color:#111;background:#fff;padding:0 16px 84px}
+.tag{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#666;padding:10px 16px;border-bottom:1px dashed #bbb;margin:0 -16px}
+.head{display:flex;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid #ddd}
+.photo{width:44px;height:44px;flex:none;border:1px solid #111;background:#e5e5e5}
+.photo svg{width:100%;height:100%;display:block}
+h1{font-size:17px;font-weight:800}
+.meta{font-size:12px;color:#555}
+.meta b{color:#111}
+h2{font-size:18px;font-weight:800;margin:14px 0 2px}
+.sub{font-size:13px;color:#555;margin-bottom:10px}
+.svc{display:flex;border:1px solid #111;margin-bottom:12px}
+.svc span{flex:1;padding:9px 4px;font-size:13px;text-align:center}
+.svc .on{background:#111;color:#fff;font-weight:700}
+.week{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;margin-bottom:6px}
+.week i{font-style:normal;color:#999;border:1px solid #ccc;padding:2px 8px}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:12px}
+.d{border:1px solid #ccc;text-align:center;padding:6px 0;font-size:11px;color:#555}
+.d b{display:block;font-size:16px;color:#111}
+.d.off{color:#bbb;border-style:dashed}.d.off b{color:#bbb}
+.d.sel{border:2px solid #111;background:#111;color:#fff}.d.sel b{color:#fff}
+.lbl{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#666;margin-bottom:6px}
+.hours{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
+.h{border:1px solid #111;padding:10px 0;text-align:center;font-size:14px;font-weight:600}
+.h.off{border:1px dashed #ccc;color:#bbb;text-decoration:line-through;font-weight:400}
+.h.sel{background:#111;color:#fff}
+.go{display:block;width:100%;background:#111;color:#fff;border:1px solid #111;padding:16px;font-size:17px;font-weight:800;text-align:center;text-decoration:none}
+.go small{display:block;font-size:12px;font-weight:400;color:#ccc}
+details{border:1px solid #111;border-top:none}
+details:first-of-type{border-top:1px solid #111;margin-top:18px}
+summary{list-style:none;padding:14px 12px;font-size:15px;font-weight:700;display:flex;justify-content:space-between}
+summary::after{content:"+";font-weight:400}
+details[open] summary::after{content:"–"}
+details div{padding:0 12px 14px;font-size:14px;line-height:1.4;color:#333}
+.rev{border-top:1px solid #ddd;padding-top:8px;margin-top:8px}
+.links{display:flex;gap:8px;margin-top:14px}
+.links a{flex:1;border:1px solid #ccc;padding:10px 2px;font-size:12px;text-align:center;color:#111;text-decoration:none}
+footer{text-align:center;font-size:12px;color:#777;padding:16px 0}
+.fold{position:relative;border-top:1px dashed #999;margin:6px -16px 0;height:0}
+.fold i{position:absolute;right:16px;top:-9px;background:#fff;font-size:10px;color:#999;font-style:normal;padding:0 4px}
+.bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:390px;display:flex;gap:8px;padding:10px 16px 14px;background:#fff;border-top:1px solid #111}
+.bar a{flex:1;border:1px solid #111;padding:14px 4px;font-size:15px;font-weight:700;text-align:center;color:#111;text-decoration:none}
+.bar a.pri{flex:1.6;background:#111;color:#fff}
+.notes{margin:0 -16px;padding:16px;background:#f2f2f2;border-top:1px solid #111;font-size:13px;line-height:1.4}
+.notes h2{font-size:13px;margin:0 0 6px;text-transform:uppercase;letter-spacing:.06em}
+.notes li{margin:0 0 6px 18px}
+</style>
+</head>
+<body>
+<div class="tag">Propuesta C — El calendario es la página</div>
+
+<div class="head">
+  <div class="photo"><svg viewBox="0 0 44 44"><line x1="0" y1="0" x2="44" y2="44" stroke="#999"/><line x1="44" y1="0" x2="0" y2="44" stroke="#999"/></svg></div>
+  <div><h1>Karla Demo</h1><p class="meta">Nutrióloga · Céd. 12345678 · <b>★ 4.9</b> (23)</p></div>
+</div>
+
+<h2>Agenda tu consulta</h2>
+<p class="sub">En línea o en Guadalajara · Confirmación inmediata</p>
+<div class="svc"><span class="on">Primera · 60 min · $800</span><span>Seguimiento · $500</span></div>
+
+<div class="week"><span>Octubre · semana 27 – 2 nov</span><i>›</i></div>
+<div class="days">
+  <div class="d off">Lun<b>27</b></div><div class="d sel">Mar<b>28</b></div><div class="d">Mié<b>29</b></div>
+  <div class="d">Jue<b>30</b></div><div class="d">Vie<b>31</b></div><div class="d">Sáb<b>1</b></div><div class="d off">Dom<b>2</b></div>
+</div>
+<p class="lbl">Martes 28 · horarios libres</p>
+<div class="hours">
+  <div class="h off">9:00</div><div class="h sel">10:30</div><div class="h">12:00</div>
+  <div class="h">16:00</div><div class="h off">17:30</div><div class="h">19:00</div>
+</div>
+<a class="go" href="#">Reservar 10:30<small>Martes 28 oct · Primera consulta · $800 MXN</small></a>
+<div class="fold"><i>— 600 px —</i></div>
+
+<details><summary>Servicios y precios</summary><div>Primera consulta · 60 min · $800 MXN<br>Seguimiento · 30 min · $500 MXN</div></details>
+<details><summary>Sobre Karla</summary><div>Te ayudo a comer rico y bajar de peso sin dietas de hambre. Cédula profesional 12345678.</div></details>
+<details><summary>Reseñas · ★ 4.9 (23 verificadas)</summary><div>
+  “Bajé 6 kilos en tres meses y nunca sentí que estaba a dieta.” — Mariana R.
+  <p class="rev">“Por fin entendí qué comer en la oficina. Los menús son fáciles y baratos.” — Luis G.</p>
+</div></details>
+<div class="links"><a href="#">Instagram</a><a href="#">TikTok</a><a href="#">Recetario gratis</a></div>
+<footer>Hecho con Granola</footer>
+
+<section class="notes">
+  <h2>Notas UX</h2>
+  <ul>
+    <li><b>Primeros 600 px:</b> header mínimo con ★4.9, selector de servicio, semana, horas del día y “Reservar 10:30”; la barra fija WhatsApp/Agendar siempre visible.</li>
+    <li><b>Toques hasta reservar:</b> 1 si acepta la hora sugerida (+ datos y confirmar ≈ 3); 3 si cambia día y hora.</li>
+    <li><b>Riesgo:</b> pide decidir fecha y hora antes de confiar; bio y reseñas están colapsadas y casi nadie abre acordeones. Se siente “sistema”, no “mi nutri”, y el calendario puede abrumar al que solo vino a curiosear.</li>
+  </ul>
+</section>
+
+<nav class="bar"><a href="#">WhatsApp</a><a class="pri" href="#">Agendar</a></nav>
+</body>
+</html>

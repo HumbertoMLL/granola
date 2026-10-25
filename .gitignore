@@ -12,5 +12,7 @@ coverage
 .env*
 .neon
 .claude/worktrees
-
+# Excepciones: plantillas y env de tests sin secretos.
+!.env.example
+!apps/web/.env.test
 !.env.docker.example

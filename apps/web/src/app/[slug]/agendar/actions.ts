@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+import { ANON_ACTION_LIMIT, checkRateLimit, RATE_LIMIT_MESSAGE } from "@granola/api/rate-limit";
 import { isValidTimeZone } from "@granola/core/scheduling";
 import { createCheckout } from "@granola/payments";
 
@@ -58,6 +59,12 @@ export type BookingResult = { ok: false; error: string; fieldErrors?: Record<str
  * instrucciones de SPEI/OXXO. La decisión vive en `decideBookingOutcome()`.
  */
 export async function createBooking(input: BookingInput): Promise<BookingResult> {
+  // Freno anti-abuso por IP (en memoria por instancia; ver @granola/api/rate-limit).
+  const ip = await getClientIp();
+  if (!checkRateLimit(`booking:create:${ip}`, ANON_ACTION_LIMIT).ok) {
+    return { ok: false, error: RATE_LIMIT_MESSAGE };
+  }
+
   const parsed = bookingSchema.safeParse(input);
   if (!parsed.success) {
     const fe: Record<string, string> = {};
@@ -92,7 +99,6 @@ export async function createBooking(input: BookingInput): Promise<BookingResult>
   if (!free) return { ok: false, error: SLOT_TAKEN_ERROR };
 
   // --- Paciente: upsert por (nutritionistId, phoneWa). Consentimiento LFPDPPP obligatorio.
-  const ip = await getClientIp();
   const existing = await db.query.patients.findFirst({
     where: and(eq(patients.nutritionistId, nutri.id), eq(patients.phoneWa, phone.e164)),
     columns: { id: true },

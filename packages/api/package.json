@@ -1,0 +1,20 @@
+{
+  "name": "@granola/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./rate-limit": "./src/rate-limit.ts"
+  },
+  "scripts": { "typecheck": "tsc --noEmit", "test": "vitest run" },
+  "dependencies": {
+    "@granola/auth": "workspace:*",
+    "@granola/core": "workspace:*",
+    "@granola/db": "workspace:*",
+    "@hono/zod-validator": "^0.9.1",
+    "hono": "^4.13.9",
+    "zod": "^4.1.0"
+  },
+  "devDependencies": { "@granola/config": "workspace:*", "@types/node": "^20", "typescript": "^5.9.0", "vitest": "^3.2.0" }
+}
