@@ -25,7 +25,10 @@ for migration in packages/db/migrations/*.sql; do
   if [ "$(q "SELECT count(*) FROM public.docker_migrations WHERE name = '$name'")" != 0 ]; then
     continue
   fi
-  if output=$({ printf 'BEGIN;\n'; cat "$migration"; printf "\nINSERT INTO public.docker_migrations (name) VALUES ('%s');\nCOMMIT;\n" "$name"; } | psql "$DATABASE_URL" -q -v ON_ERROR_STOP=1 2>&1); then
+  # -1: archivo + marca en una sola transacción. Con -f (no un pipe) un archivo ilegible
+  # hace fallar a psql en vez de registrar como aplicada una migración vacía.
+  if output=$(psql "$DATABASE_URL" -q -1 -v ON_ERROR_STOP=1 -f "$migration" \
+    -c "INSERT INTO public.docker_migrations (name) VALUES ('$name')" 2>&1); then
     echo "[migrate] aplicada $name"
   elif [ "$legacy" = 1 ] && printf '%s' "$output" | grep -q 'already exists'; then
     # El BEGIN se revirtió al salir psql: nada quedó a medias.
