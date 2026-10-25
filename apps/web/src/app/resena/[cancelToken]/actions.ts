@@ -2,7 +2,10 @@
 
 import { updateTag } from "next/cache";
 
+import { ANON_ACTION_LIMIT, checkRateLimit, RATE_LIMIT_MESSAGE } from "@granola/api/rate-limit";
+
 import { reviewInputSchema, type ReviewInput } from "@/components/reviews/review-schema";
+import { getClientIp } from "@/lib/booking";
 import { appointments, db, eq, reviews } from "@/lib/db";
 import { cacheTagFor } from "@/lib/public-profile";
 
@@ -15,6 +18,10 @@ export type SubmitReviewResult =
  * es la credencial). Solo citas `completed` y una reseña por cita.
  */
 export async function submitReview(input: ReviewInput): Promise<SubmitReviewResult> {
+  // Freno anti-abuso por IP (en memoria por instancia; ver @granola/api/rate-limit).
+  const ip = await getClientIp();
+  if (!checkRateLimit(`resena:submit:${ip}`, ANON_ACTION_LIMIT).ok) return { ok: false, error: RATE_LIMIT_MESSAGE };
+
   const parsed = reviewInputSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Revisa tu reseña" };
   const { token, rating, text, isPublic } = parsed.data;
