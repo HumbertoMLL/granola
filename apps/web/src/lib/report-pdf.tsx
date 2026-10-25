@@ -162,7 +162,7 @@ export async function renderReport(report: ReportInput, patientName: string) {
         )}
         <Text style={{ marginTop: 24 }}>{report.brand.firma}</Text>
         <View style={styles.footer} fixed>
-          <Text style={{ fontSize: 8, lineHeight: 1.3 }} render={({ pageNumber, totalPages }) => `Reporte elaborado por tu profesional de nutrición · ${pageNumber} / ${totalPages}`} />
+          <Text style={{ fontSize: 8, lineHeight: 1.3 }}>Reporte elaborado por tu profesional de nutrición</Text>
         </View>
       </Page>
     </Document>,
