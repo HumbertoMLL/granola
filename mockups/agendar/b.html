@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es-MX"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agendar · Propuesta B</title>
+<style>
+*{box-sizing:border-box}
+body{max-width:390px;margin:0 auto;font-family:system-ui;color:#111;background:#fff;padding:0 16px 110px;font-size:15px}
+.tag{font:600 12px/1 system-ui;letter-spacing:.04em;background:#111;color:#fff;padding:8px 10px;margin:0 -16px 10px}
+.top{display:flex;justify-content:space-between;font-size:14px;color:#666;padding:4px 0 10px}
+.top b{color:#111}
+.steps{display:flex;gap:4px;margin-bottom:6px}
+.steps i{flex:1;height:4px;border-radius:2px;background:#ddd}
+.steps i.d{background:#111}.steps i.a{background:#666}
+.lbl{display:flex;justify-content:space-between;font-size:11px;color:#999;margin-bottom:12px}
+.lbl .d{color:#111}.lbl .a{color:#111;font-weight:700}
+.sum{position:sticky;top:0;background:#f2f2f2;border-radius:10px;padding:10px 12px;display:flex;justify-content:space-between;font-size:14px;z-index:2}
+.sum u{color:#444}
+h1{font-size:22px;margin:18px 0 4px}
+.sub{color:#666;font-size:14px;margin:0 0 14px}
+.tz{display:flex;justify-content:space-between;border:1px solid #ccc;border-radius:8px;padding:10px 12px;font-size:14px}
+.tz u{font-weight:600}
+h3{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:#666;margin:20px 0 8px}
+h3 small{text-transform:none;letter-spacing:0;color:#999;font-weight:400}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.slot{border:1px solid #bbb;border-radius:10px;text-align:center;padding:14px 0;font-weight:600}
+.slot.sel{background:#111;color:#fff;border-color:#111}
+.hint{font-size:13px;color:#666;margin-top:14px;background:#f2f2f2;border-radius:8px;padding:8px 10px}
+.bar{position:fixed;left:0;right:0;bottom:0;max-width:390px;margin:0 auto;background:#fff;border-top:1px solid #ccc;padding:10px 16px 14px;display:flex;gap:10px}
+.back{flex:1;border:1px solid #111;border-radius:999px;text-align:center;padding:15px;font-weight:600}
+.next{flex:2;background:#111;color:#fff;border-radius:999px;text-align:center;padding:15px;font-weight:700}
+.mini{margin-top:30px;border-top:2px dashed #999;padding-top:8px}
+.mini p{font-size:12px;color:#666;margin:0 0 8px}
+.thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.th{border:1px solid #ccc;border-radius:8px;padding:6px;font-size:10px;color:#666;background:#fafafa}
+.th b{display:block;color:#111;font-size:11px;margin-bottom:4px}
+.th i{display:block;height:8px;background:#ddd;border-radius:3px;margin:4px 0}
+.th i.k{background:#999}
+.th .g{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.th .g i{height:7px;margin:0}
+.notes{border-top:2px dashed #999;margin-top:24px;padding-top:8px;font-size:13px;color:#333}
+.notes li{margin-bottom:8px}
+</style></head><body>
+<div class="tag">Propuesta B — Wizard: un paso a la vez</div>
+<div class="top"><span>✕ Salir</span><b>Agendar con Karla Demo</b><span>3 de 4</span></div>
+<div class="steps"><i class="d"></i><i class="d"></i><i class="a"></i><i></i></div>
+<div class="lbl"><span class="d">1 Servicio ✓</span><span class="d">2 Fecha ✓</span><span class="a">3 Hora</span><span>4 Tus datos</span></div>
+
+<div class="sum"><span><b>Primera consulta</b> · mar 27 oct</span><u>Editar</u></div>
+
+<h1>¿A qué hora?</h1>
+<p class="sub">60 min · $800 MXN · 7 horarios libres</p>
+<div class="tz"><span>Ciudad de México (GMT-6)</span><u>Cambiar</u></div>
+
+<h3>Mañana <small>· 5 libres</small></h3>
+<div class="grid"><span class="slot">10:00</span><span class="slot sel">10:30</span><span class="slot">11:00</span><span class="slot">11:30</span><span class="slot">12:00</span></div>
+
+<h3>Tarde <small>· 2 libres</small></h3>
+<div class="grid"><span class="slot">16:00</span><span class="slot">16:30</span></div>
+
+<div class="hint">Al continuar te apartamos las 10:30 por 10 min. Te llega la confirmación por WhatsApp.</div>
+
+<div class="bar"><span class="back">Atrás</span><span class="next">Continuar · 10:30</span></div>
+
+<div class="mini"><p>Los otros pasos (miniaturas)</p>
+<div class="thumbs">
+<div class="th"><b>1 Servicio</b><i class="k"></i><i></i><small>Primera consulta $800 / Seguimiento $500</small></div>
+<div class="th"><b>2 Fecha</b><div class="g"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="k"></i><i></i><i></i><i></i><i></i><i></i></div><small>Octubre 2026</small></div>
+<div class="th"><b>4 Tus datos</b><i></i><i></i><i></i><small>Nombre, WhatsApp +52, correo opc., aviso, pago: Tarjeta / SPEI / OXXO / En consulta</small></div>
+</div></div>
+
+<div class="notes"><b>Notas UX</b><ul>
+<li><b>Toques hasta confirmar:</b> ~9 (servicio, Continuar, día, Continuar, hora, Continuar, 2 campos, checkbox, pago, Confirmar). Más toques que A, pero cada pantalla tiene una sola decisión y cabe en el primer viewport sin scroll.</li>
+<li><b>Dónde abandona:</b> en el paso 4, el único con teclado. Mitigación: la cita ya está apartada al entrar (el paciente siente que "ya casi"), solo nombre + WhatsApp obligatorios y el pago se elige con chips en la misma pantalla.</li>
+<li><b>Si el horario se ocupa:</b> el apartado de 10 min empieza al tocar "Continuar" en este paso. Si caduca o se pierde, al confirmar se regresa al paso 3 con la hora tachada y las vecinas resaltadas; el paso 4 conserva lo escrito.</li>
+</ul></div>
+</body></html>

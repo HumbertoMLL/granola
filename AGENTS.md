@@ -16,6 +16,10 @@ Cada tarea va en su propio git worktree y rama (`scripts/wt.sh nueva <slug>`), s
 
 Seguimos Twelve-Factor (https://github.com/twelve-factor/twelve-factor). Estado y huecos por factor en `docs/twelve-factor.md`; toda decisión nueva se contrasta ahí.
 
+## UX
+
+Estructura elegida por pantalla y reglas de patrones de interfaz (checkbox vs radio vs chip, tab bar, listas, hojas) en `docs/ux-decisions.md`. Toda UI nueva las sigue.
+
 ## Reglas resumidas
 
 - Datos de salud **nunca** llegan al cliente sin pasar por la API; toda query filtra por `nutritionist_id` de la sesión.
