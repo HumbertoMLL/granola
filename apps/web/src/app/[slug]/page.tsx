@@ -2,11 +2,8 @@ import { Suspense } from "react";
 import { connection } from "next/server";
 import { Skeleton } from "@granola/ui";
 import { getFirstAvailableSlot } from "@/lib/booking";
-import {
-  formatDateInTz,
-  formatTimeInTz,
-  timeZoneLabel,
-} from "@granola/core/scheduling";
+import { formatTimeInTz } from "@granola/core/scheduling";
+import { formatShortDate } from "@/components/booking/format";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -79,13 +76,11 @@ async function NextAvailable({ slug }: { slug: string }) {
   await connection();
   const slot = await getFirstAvailableSlot(slug);
   return (
-    <p className="text-center text-xs text-(--pp-muted)">
+    <p className="text-center text-sm text-(--pp-muted)">
       {slot ? (
         <>
-          Próximo horario disponible:{" "}
-          {formatDateInTz(new Date(slot.startsAt), slot.timezone)}{" "}
-          {formatTimeInTz(new Date(slot.startsAt), slot.timezone)} (
-          {timeZoneLabel(slot.timezone)})
+          Próximo horario: {formatShortDate(new Date(slot.startsAt), slot.timezone, new Date())}{" "}
+          {formatTimeInTz(new Date(slot.startsAt), slot.timezone).replace(/^0/, "")}
         </>
       ) : (
         "Sin horarios disponibles por ahora"
