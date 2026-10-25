@@ -1,3 +1,5 @@
+import { measurements } from "./measurements";
+import { clinicalNotes } from "./clinical_notes";
 import { relations } from "drizzle-orm";
 import { boolean, index, integer, jsonb, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { users } from "./auth";
@@ -101,4 +103,6 @@ export const nutritionistsRelations = relations(nutritionists, ({ one, many }) =
   patients: many(patients),
   appointments: many(appointments),
   reviews: many(reviews),
+  clinicalNotes: many(clinicalNotes),
+  measurements: many(measurements),
 }));

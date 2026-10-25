@@ -1,3 +1,5 @@
+import { measurements } from "./measurements";
+import { clinicalNotes } from "./clinical_notes";
 import { relations } from "drizzle-orm";
 import { date, index, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { nutritionists } from "./nutritionists";
@@ -38,5 +40,7 @@ export const patientsRelations = relations(patients, ({ one, many }) => ({
   nutritionist: one(nutritionists, { fields: [patients.nutritionistId], references: [nutritionists.id] }),
   appointments: many(appointments),
   reviews: many(reviews),
+  clinicalNotes: many(clinicalNotes),
+  measurements: many(measurements),
   waMessages: many(waMessages),
 }));
