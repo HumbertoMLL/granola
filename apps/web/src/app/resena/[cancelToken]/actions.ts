@@ -18,9 +18,9 @@ export type SubmitReviewResult =
  * es la credencial). Solo citas `completed` y una reseña por cita.
  */
 export async function submitReview(input: ReviewInput): Promise<SubmitReviewResult> {
-  // Freno anti-abuso por IP (en memoria por instancia; ver @granola/api/rate-limit).
+  // Freno anti-abuso por IP (store por entorno; ver @granola/api/rate-limit).
   const ip = await getClientIp();
-  if (!checkRateLimit(`resena:submit:${ip}`, ANON_ACTION_LIMIT).ok) return { ok: false, error: RATE_LIMIT_MESSAGE };
+  if (!(await checkRateLimit(`resena:submit:${ip}`, ANON_ACTION_LIMIT)).ok) return { ok: false, error: RATE_LIMIT_MESSAGE };
 
   const parsed = reviewInputSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Revisa tu reseña" };

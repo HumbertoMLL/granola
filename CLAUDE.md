@@ -24,6 +24,10 @@ packages/config eslint / tsconfig compartidos
 
 Seguimos Twelve-Factor (https://github.com/twelve-factor/twelve-factor). Estado y huecos por factor en `docs/twelve-factor.md`; toda decisión nueva se contrasta ahí.
 
+## UX
+
+Estructura elegida por pantalla y reglas de patrones de interfaz (checkbox vs radio vs chip, tab bar, listas, hojas) en `docs/ux-decisions.md`. Toda UI nueva las sigue.
+
 ## Reglas duras
 
 1. **Datos de salud nunca llegan al cliente sin pasar por la API.** Toda query filtra por `nutritionist_id` de la sesión. No hay cliente de DB en el navegador.

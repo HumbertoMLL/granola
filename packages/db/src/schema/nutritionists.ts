@@ -6,6 +6,8 @@ import { availabilityOverrides, availabilityRules } from "./availability";
 import { patients } from "./patients";
 import { appointments } from "./appointments";
 import { reviews } from "./reviews";
+import { measurements } from "./measurements";
+import { clinicalNotes } from "./clinical_notes";
 
 export const planEnum = pgEnum("plan", ["trial", "starter", "pro", "clinica"]);
 
@@ -101,4 +103,6 @@ export const nutritionistsRelations = relations(nutritionists, ({ one, many }) =
   patients: many(patients),
   appointments: many(appointments),
   reviews: many(reviews),
+  clinicalNotes: many(clinicalNotes),
+  measurements: many(measurements),
 }));

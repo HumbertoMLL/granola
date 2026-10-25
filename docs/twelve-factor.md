@@ -9,19 +9,19 @@ Guía de construcción adoptada el 25 oct 2026: https://github.com/twelve-factor
 | III | Config | ✅ | Todo por env vars (`.env.example` documenta cada una, sin valores); nada hardcodeado por entorno; `NEON_LOCAL_*` solo cambian la URL, no el código. Inherente a Next: `NEXT_PUBLIC_*` se hornea en build |
 | IV | Backing services | ✅ | Postgres (Neon ↔ Docker) se cambia por URL; R2 es S3-compatible; Email/WhatsApp/Stripe/MP/Inngest se desactivan quitando la var (dry run) sin tocar código |
 | V | Build, release, run | ⚠️ | Vercel hace releases inmutables con rollback. **Hueco:** las migraciones se corren a mano (`pnpm db:migrate`), no son parte del release → agregar paso de migración al deploy (job `migrate` del compose en F1.5 y step en CI/Vercel) |
-| VI | Processes | ⚠️ | Sesiones en DB, archivos en R2, jobs en Inngest: stateless. **Hueco:** el rate limiter de `@granola/api` guarda estado en memoria (`globalThis`) → mover a Upstash/KV antes de escrituras públicas por API |
+| VI | Processes | ✅ | `RateLimitStore` intercambiable en `packages/api/src/store.ts`: con ambas variables UPSTASH_REDIS_REST_* los contadores están en Redis vía REST (INCR + PEXPIRE NX, 2 comandos por intento). Memoria solo como fallback explícito, con warning único en producción. Fallos o timeout de 500 ms permiten continuar y se registran sin PII. Evidencia: tests de stores, timeout y headers en middleware; [ADR 0011](adr/0011-rate-limit-store.md). Operación distribuida requiere configurar las dos variables |
 | VII | Port binding | ✅ | Next escucha `PORT`; Hono montado dentro; nada depende de un servidor externo |
-| VIII | Concurrency | ✅ | Serverless horizontal en Vercel; Inngest escala por evento; webhooks idempotentes. Limitado solo por el hueco de VI |
+| VIII | Concurrency | ✅ | Serverless horizontal en Vercel; Inngest escala por evento; webhooks idempotentes. Rate limit compartido por Redis cuando está configurado (VI) |
 | IX | Disposability | ✅ | Funciones efímeras; `step.run` idempotentes con `cancelOn`; webhooks seguros ante replay; constraint anti-doble reserva en DB (no en memoria) |
 | X | Dev/prod parity | ✅ | Mismo Postgres 17 y **mismo driver** (`neon-http` vía proxy local); misma migración SQL; CI usa los mismos contenedores. ⚠️ `drizzle-kit migrate` no corre contra el proxy local (se usa `psql`) |
 | XI | Logs | ⚠️ | Email emite solo metadatos a stdout, sin PII ni tokens. Resto: `console.*` sin estructura; Sentry y PostHog aún no conectados. **Hueco:** logger JSON a stdout (pino) + log drain de Vercel; nunca escribir a archivo |
 | XII | Admin processes | ✅ | `pnpm db:migrate`, `pnpm db:seed`, `scripts/*.ts` viven en el repo y corren con el mismo env que la app |
 
-**Balance:** 9 ✅ · 3 ⚠️. Ningún factor en rojo.
+**Balance:** 10 ✅ · 2 ⚠️. Ningún factor en rojo.
 
 ## Acciones que salen de aquí (en orden)
 
-1. **VI** — rate limiter a Upstash Redis/Vercel KV (`packages/api/src/rate-limit.ts`). Bloqueante antes de exponer POST públicos en `/api/v1`.
+1. **VI** — ✅ Store Upstash REST implementado; configurar ambas variables en producción. La memoria de dev/test y el fail-open por indisponibilidad son degradaciones explícitas, no garantías contra abuso durante una caída.
 2. **V** — migraciones como paso de release: job `migrate` en `docker-compose.yml` (F1.5, ya pedido a Codex) y step `pnpm db:migrate` en el workflow de deploy a producción (con `DATABASE_URL` de Neon como secret de GitHub).
 3. **XI** — `packages/logger` con pino (JSON a stdout, `requestId`, sin PII de pacientes), Sentry para errores, drain de Vercel a donde se decida.
 4. **X** — hacer que `drizzle-kit migrate` funcione en local (driver `pg` solo para drizzle-kit) para no tener dos caminos de migración.
