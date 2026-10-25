@@ -12,6 +12,10 @@ Empieza por aquí, en este orden:
 
 Cada tarea va en su propio git worktree y rama (`scripts/wt.sh nueva <slug>`), se entrega por PR a `main` y CI decide. Guía y prompt-plantilla en `docs/worktrees.md`.
 
+## Guía de construcción
+
+Seguimos Twelve-Factor (https://github.com/twelve-factor/twelve-factor). Estado y huecos por factor en `docs/twelve-factor.md`; toda decisión nueva se contrasta ahí.
+
 ## Reglas resumidas
 
 - Datos de salud **nunca** llegan al cliente sin pasar por la API; toda query filtra por `nutritionist_id` de la sesión.

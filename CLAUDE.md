@@ -20,6 +20,10 @@ packages/ui     Design system Granola
 packages/config eslint / tsconfig compartidos
 ```
 
+## Guía de construcción
+
+Seguimos Twelve-Factor (https://github.com/twelve-factor/twelve-factor). Estado y huecos por factor en `docs/twelve-factor.md`; toda decisión nueva se contrasta ahí.
+
 ## Reglas duras
 
 1. **Datos de salud nunca llegan al cliente sin pasar por la API.** Toda query filtra por `nutritionist_id` de la sesión. No hay cliente de DB en el navegador.
