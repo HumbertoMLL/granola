@@ -205,13 +205,13 @@ export function SlotPicker({
         </div>
       )}
 
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
         <Globe className="size-4 shrink-0" />
         <span className="shrink-0">Horarios en</span>
         <Select value={timezone} onValueChange={onTimezoneChange}>
           <SelectTrigger
             aria-label="Zona horaria"
-            className="h-9 min-w-0 w-0 flex-1 rounded-full text-sm [&_[data-slot=select-value]]:min-w-0 [&_[data-slot=select-value]]:truncate"
+            className="h-11 min-w-0 basis-full rounded-xl text-sm [&_[data-slot=select-value]]:min-w-0 [&_[data-slot=select-value]]:truncate"
           >
             <SelectValue />
           </SelectTrigger>

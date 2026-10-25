@@ -451,7 +451,12 @@ function BookingForm({
   }
 
   return (
-    <form id="booking-form" onSubmit={submit} className="flex flex-col gap-5">
+    <form
+      id="booking-form"
+      noValidate
+      onSubmit={submit}
+      className="flex flex-col gap-5"
+    >
       <Card className="gap-1 p-4">
         <p className="text-sm text-muted-foreground">{service.name}</p>
         <p className="text-lg font-bold capitalize">
@@ -530,20 +535,27 @@ function BookingForm({
         </>
       )}
 
-      <Field
-        label="¿Algo que deba saber tu nutrióloga? (opcional)"
-        error={errors.notes}
-        hint={`${form.notes.length}/${NOTES_MAX}`}
-      >
-        <Textarea
-          value={form.notes}
-          maxLength={NOTES_MAX}
-          rows={3}
-          onChange={(e) => set("notes", e.target.value)}
-          placeholder="Objetivo, alergias, si es tu primera consulta…"
-          aria-invalid={!!errors.notes}
-        />
-      </Field>
+      <details>
+        <summary className="cursor-pointer text-sm text-muted-foreground">
+          + Agregar nota (opcional)
+        </summary>
+        <div className="mt-3">
+          <Field
+            label="¿Algo que deba saber tu nutrióloga? (opcional)"
+            error={errors.notes}
+            hint={`${form.notes.length}/${NOTES_MAX}`}
+          >
+            <Textarea
+              value={form.notes}
+              maxLength={NOTES_MAX}
+              rows={3}
+              onChange={(e) => set("notes", e.target.value)}
+              placeholder="Objetivo, alergias, si es tu primera consulta…"
+              aria-invalid={!!errors.notes}
+            />
+          </Field>
+        </div>
+      </details>
 
       {service.modality === "ambas" ? (
         <Field label="¿Cómo prefieres tu consulta?">
@@ -601,6 +613,9 @@ function BookingForm({
       >
         <input
           type="checkbox"
+          required
+          aria-invalid={!!errors.consent}
+          aria-describedby={errors.consent ? "consent-error" : undefined}
           className="mt-0.5 size-4 shrink-0 accent-primary"
           checked={form.consent}
           onChange={(e) => set("consent", e.target.checked)}
@@ -619,7 +634,13 @@ function BookingForm({
         </span>
       </label>
       {errors.consent ? (
-        <p className="-mt-3 text-xs text-destructive">{errors.consent}</p>
+        <p
+          id="consent-error"
+          role="alert"
+          className="-mt-3 text-xs text-destructive"
+        >
+          {errors.consent}
+        </p>
       ) : null}
 
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
