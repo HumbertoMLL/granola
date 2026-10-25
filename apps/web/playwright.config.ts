@@ -47,6 +47,8 @@ const EXTERNAL_KEYS_BLANK = Object.fromEntries(
     "R2_ACCESS_KEY_ID",
     "R2_SECRET_ACCESS_KEY",
     "RESEND_API_KEY",
+    "UPSTASH_REDIS_REST_URL",
+    "UPSTASH_REDIS_REST_TOKEN",
   ].map((k) => [k, ""]),
 );
 
