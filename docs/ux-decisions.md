@@ -43,3 +43,5 @@ Implementación en `feature/ux`:
 - E2E adaptado a wizard y nuevos recorridos de agenda/historial; capturas móviles en `docs/ux-captures/`.
 
 Límites: el directorio permanece en F6. Pacientes aún es provisional en la base inicial; no se crea el módulo. El apartado de 10 minutos mostrado en los wireframes no existe en backend: no se promete ni se implementa en esta tarea de presentación. Nueva cita desde un hueco reutiliza la reserva pública prellenada. No se cambian server actions, schema, migraciones ni paquetes de backend.
+
+Rebase final: integrado el dashboard real de main (#1), preservando consultas y métricas; sus listas vacías usan EmptyState compartido. Pacientes continúa provisional.
