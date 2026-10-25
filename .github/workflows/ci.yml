@@ -1,0 +1,158 @@
+# CI de Granola. Tres jobs que deben quedar en verde para mergear a main
+# (cómo exigirlo en GitHub: ver .github/workflows/README.md).
+#
+#   checks       lint + typecheck + build de apps/web + unit tests (sin servicios)
+#   integration  vitest *.int.test.ts contra Postgres 17 real + proxy neon-http
+#   e2e          Playwright: reservar → agenda de la nutri → cancelar por token
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Un solo run por rama/PR: un push nuevo cancela el anterior.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "25"
+  NEXT_TELEMETRY_DISABLED: "1"
+  TURBO_TELEMETRY_DISABLED: "1"
+  # Igual que docker-compose.local.yml / apps/web/.env.test.
+  NEON_PROXY_IMAGE: ghcr.io/timowilhelm/local-neon-http-proxy:main
+
+jobs:
+  checks:
+    name: Lint, typecheck, build y unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4 # versión de pnpm: campo packageManager de package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm lint
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Build (apps/web)
+        run: pnpm --filter @granola/web exec next build
+      - name: Unit tests
+        run: pnpm test
+
+  integration:
+    name: Tests de integración (Postgres real)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: granola
+          POSTGRES_PASSWORD: granola
+          POSTGRES_DB: granola_test
+        ports:
+          - "5433:5432"
+        options: >-
+          --health-cmd "pg_isready -U granola"
+          --health-interval 3s
+          --health-timeout 3s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Proxy neon-http (granola_test)
+        # Se arranca aquí (no como `services:`) para que empiece cuando Postgres ya está sano.
+        # Comparte la red del service: "postgres:5432" = NEON_LOCAL_PG_HOST de .env.test.
+        run: |
+          docker run -d --name neon-proxy-test \
+            --network ${{ job.services.postgres.network }} \
+            -e PG_CONNECTION_STRING=postgres://granola:granola@postgres:5432/granola_test \
+            -p 4445:4444 "$NEON_PROXY_IMAGE"
+          for i in $(seq 1 60); do
+            if curl -s -o /dev/null http://localhost:4445/sql; then echo "proxy listo"; exit 0; fi
+            sleep 1
+          done
+          docker logs neon-proxy-test; exit 1
+      - name: Integration tests
+        run: pnpm test:integration
+      - name: Logs del proxy (si falló)
+        if: failure()
+        run: docker logs neon-proxy-test 2>&1 | tail -200
+
+  e2e:
+    name: E2E (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: granola
+          POSTGRES_PASSWORD: granola
+          POSTGRES_DB: granola_test
+        ports:
+          - "5433:5432"
+        options: >-
+          --health-cmd "pg_isready -U granola"
+          --health-interval 3s
+          --health-timeout 3s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Versión de Playwright
+        id: pw
+        run: echo "version=$(pnpm --filter @granola/web exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+      - name: Cache de navegadores
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+      - name: Instalar Chromium
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: pnpm --filter @granola/web exec playwright install --with-deps chromium
+      - name: Dependencias del sistema para Chromium (cache hit)
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: pnpm --filter @granola/web exec playwright install-deps chromium
+      - name: Proxy neon-http (granola_test)
+        run: |
+          docker run -d --name neon-proxy-test \
+            --network ${{ job.services.postgres.network }} \
+            -e PG_CONNECTION_STRING=postgres://granola:granola@postgres:5432/granola_test \
+            -p 4445:4444 "$NEON_PROXY_IMAGE"
+          for i in $(seq 1 60); do
+            if curl -s -o /dev/null http://localhost:4445/sql; then echo "proxy listo"; exit 0; fi
+            sleep 1
+          done
+          docker logs neon-proxy-test; exit 1
+      - name: E2E
+        run: pnpm e2e
+      - name: Reporte de Playwright
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            apps/web/playwright-report
+            apps/web/test-results
+          retention-days: 7

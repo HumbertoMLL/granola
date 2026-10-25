@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mi agenda · Granola</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{max-width:390px;margin:0 auto;min-height:100vh;padding-bottom:160px;font-family:system-ui,-apple-system,sans-serif;background:#F3F5F2;color:#1F2D27}
+header{background:#2B4539;color:#fff;padding:18px 16px 14px}
+header small{font-size:12px;opacity:.8}
+header h1{font-size:20px;font-weight:800;margin-top:2px}
+.sum{font-size:12px;opacity:.85;margin-top:4px}
+.tabs{display:flex;background:#fff;border-bottom:1px solid #0000000f}
+.tabs span{flex:1;text-align:center;padding:12px 0;font-size:13px;font-weight:700;color:#64748B;border-bottom:3px solid transparent}
+.tabs .on{color:#2B4539;border-bottom-color:#2B4539}
+main{padding:6px 16px 0}
+.hr{font-size:12px;font-weight:800;color:#2B4539;letter-spacing:.06em;margin:14px 0 6px}
+.cita{background:#fff;border:1px solid #0000000f;border-radius:14px;padding:12px;margin-bottom:8px}
+.row{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.cita b{font-size:15px}
+.cita small{display:block;font-size:12px;color:#64748B;margin-top:2px}
+.st{font-size:11px;font-weight:700;padding:4px 9px;border-radius:999px;white-space:nowrap}
+.ok{background:#DCFCE7;color:#166534}
+.pend{background:#FEF3C7;color:#92400E}
+.done{background:#E2E8F0;color:#334155}
+.acts{display:flex;gap:8px;margin-top:10px}
+.acts span{flex:1;text-align:center;font-size:12px;font-weight:700;padding:8px 0;border-radius:999px;border:1px solid #0000001a}
+.acts .pri{background:#2B4539;color:#fff;border-color:#2B4539}
+.fab{position:fixed;left:50%;transform:translateX(-50%);bottom:86px;width:calc(100% - 32px);max-width:358px;background:#FFD60A;color:#2B4539;font-weight:800;text-align:center;padding:16px;border-radius:999px;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:390px;background:#fff;border-top:1px solid #0000001a;display:flex;justify-content:space-around;padding:8px 0 22px}
+nav span{font-size:11px;font-weight:700;color:#64748B;text-align:center}
+nav .on{color:#2B4539}
+nav i{display:block;font-style:normal;font-size:17px;line-height:1.3}
+</style>
+</head>
+<body>
+<header>
+  <small>Sábado 24 de octubre</small>
+  <h1>Hola, Karla</h1>
+  <p class="sum">4 citas hoy · 1 pendiente de pago</p>
+</header>
+<div class="tabs"><span class="on">Citas</span><span>Servicios</span><span>Disponibilidad</span></div>
+
+<main>
+  <div class="hr">10:00</div>
+  <div class="cita">
+    <div class="row"><div><b>Ana López</b><small>Primera consulta · 60 min · Online</small></div><span class="st ok">Confirmada</span></div>
+    <div class="acts"><span>Cancelar</span><span class="pri">Completada</span></div>
+  </div>
+
+  <div class="hr">11:30</div>
+  <div class="cita">
+    <div class="row"><div><b>Paula Ríos</b><small>Seguimiento · 30 min · Presencial</small></div><span class="st pend">Pendiente de pago</span></div>
+    <div class="acts"><span>Cancelar</span><span class="pri">Completada</span></div>
+  </div>
+
+  <div class="hr">13:00</div>
+  <div class="cita">
+    <div class="row"><div><b>Jimena Cruz</b><small>Primera consulta · 60 min · Online</small></div><span class="st done">Completada</span></div>
+    <div class="acts"><span>Cancelar</span><span class="pri">Completada</span></div>
+  </div>
+
+  <div class="hr">16:00</div>
+  <div class="cita">
+    <div class="row"><div><b>Roberto Tapia</b><small>Seguimiento · 30 min · Presencial</small></div><span class="st ok">Confirmada</span></div>
+    <div class="acts"><span>Cancelar</span><span class="pri">Completada</span></div>
+  </div>
+</main>
+
+<div class="fab">+ Bloquear horario</div>
+
+<nav>
+  <span><i>⌂</i>Inicio</span>
+  <span class="on"><i>▦</i>Agenda</span>
+  <span><i>☰</i>Pacientes</span>
+  <span><i>$</i>Cobros</span>
+  <span><i>✎</i>Mi página</span>
+</nav>
+</body>
+</html>

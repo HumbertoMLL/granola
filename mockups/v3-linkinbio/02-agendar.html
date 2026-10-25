@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agendar · Karla Demo</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{max-width:390px;margin:0 auto;min-height:100vh;padding:18px 16px 32px;font-family:system-ui,-apple-system,sans-serif;background:#2B4539;color:#fff}
+header{text-align:center;padding:8px 0 16px}
+header b{display:block;font-size:17px}
+header small{font-size:12px;opacity:.8}
+.step{background:#ffffff14;border:1px solid #ffffff26;border-radius:18px;padding:14px;margin-bottom:12px}
+.lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.8;font-weight:700;margin-bottom:10px;display:flex;justify-content:space-between}
+.lbl em{font-style:normal;text-transform:none;letter-spacing:0;font-weight:600}
+.svc{background:#fff;color:#2B4539;border-radius:12px;padding:12px;display:flex;justify-content:space-between;font-weight:700;font-size:14px}
+.svc small{font-weight:500;opacity:.8}
+.month{font-weight:800;text-align:center;margin-bottom:8px;font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;font-size:13px}
+.grid .h{font-size:10px;opacity:.6;font-weight:700;padding-bottom:2px}
+.grid span{padding:8px 0;border-radius:8px;background:#ffffff0d;color:#ffffff55}
+.grid .x{background:none}
+.grid .ok{background:#fff;color:#2B4539;font-weight:800}
+.grid .sel{background:#FFD60A;color:#2B4539;font-weight:800}
+.hours{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.hours span{border:1px solid #ffffff33;border-radius:999px;text-align:center;padding:9px 0;font-size:13px;font-weight:700}
+.hours .sel{background:#FFD60A;color:#2B4539;border-color:#FFD60A}
+.tz{font-size:11px;opacity:.75;margin-top:10px;text-align:center}
+input[type=text],input:not([type]){width:100%;margin-bottom:10px;padding:13px 14px;border-radius:12px;border:1px solid #ffffff26;background:#ffffff14;color:#fff;font-size:15px}
+input::placeholder{color:#cbd5e1aa}
+.wa{display:flex;gap:8px;margin-bottom:10px}
+.wa span{padding:13px 12px;border-radius:12px;background:#ffffff14;border:1px solid #ffffff26;font-size:14px;font-weight:700}
+.wa input{flex:1;min-width:0;width:auto;margin:0}
+.check{display:flex;gap:10px;font-size:12px;line-height:1.4;opacity:.92;margin:4px 0 14px}
+.check input{width:auto;margin:2px 0 0}
+.pay{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pay span{border:1px solid #ffffff33;border-radius:12px;padding:11px;text-align:center;font-size:13px;font-weight:700}
+.pay .on{background:#fff;color:#2B4539;border-color:#fff}
+.cta{display:block;width:100%;margin-top:14px;border:0;border-radius:999px;background:#FFD60A;color:#2B4539;font-size:17px;font-weight:800;padding:18px;box-shadow:0 0 30px rgba(255,214,10,.3)}
+.note{text-align:center;font-size:12px;opacity:.85;margin-top:12px}
+</style>
+</head>
+<body>
+<header><b>Agendar consulta</b><small>Karla Demo · Nutrióloga</small></header>
+
+<section class="step">
+  <div class="lbl">1. Servicio <em>Cambiar</em></div>
+  <div class="svc"><div>Primera consulta <small>· 60 min</small></div><span>$800</span></div>
+</section>
+
+<section class="step">
+  <div class="lbl">2. Fecha y hora <em>Martes 27 oct</em></div>
+  <div class="month">Octubre 2026</div>
+  <div class="grid">
+    <div class="h">L</div><div class="h">M</div><div class="h">X</div><div class="h">J</div><div class="h">V</div><div class="h">S</div><div class="h">D</div>
+    <span class="x"></span><span class="x"></span><span class="x"></span><span>1</span><span>2</span><span>3</span><span>4</span>
+    <span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span><span>11</span>
+    <span>12</span><span>13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span>
+    <span>19</span><span>20</span><span>21</span><span>22</span><span>23</span><span>24</span><span>25</span>
+    <span class="ok">26</span><span class="sel">27</span><span class="ok">28</span><span class="ok">29</span><span class="ok">30</span><span>31</span><span class="x"></span>
+  </div>
+  <div class="hours">
+    <span>10:00</span><span>10:30</span><span>11:00</span>
+    <span>11:30</span><span class="sel">12:00</span><span>12:30</span>
+    <span>13:00</span><span>13:30</span><span>16:00</span>
+  </div>
+  <p class="tz">Zona horaria: Ciudad de México (GMT-6)</p>
+</section>
+
+<section class="step">
+  <div class="lbl">3. Tus datos</div>
+  <input type="text" placeholder="Nombre completo">
+  <div class="wa"><span>+52</span><input type="text" placeholder="WhatsApp (10 dígitos)"></div>
+  <input type="text" placeholder="Correo (opcional)">
+  <label class="check"><input type="checkbox">Acepto que la nutrióloga guarde y use mis datos de salud para dar mi consulta.</label>
+  <div class="lbl">Forma de pago</div>
+  <div class="pay"><span class="on">Tarjeta</span><span>SPEI</span><span>OXXO</span><span>En consulta</span></div>
+</section>
+
+<button class="cta">Confirmar cita</button>
+<p class="note">Te llega confirmación por WhatsApp.</p>
+</body>
+</html>
