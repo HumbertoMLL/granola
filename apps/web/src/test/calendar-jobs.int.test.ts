@@ -17,6 +17,7 @@ type Data = { appointmentId: string; nutritionistId: string; by?: "patient"; pre
 type TestContext = { event: { data: Data }; step: {
   run: <T>(name: string, fn: () => T | Promise<T>) => Promise<T>;
   sendEvent: (name: string, data: unknown) => Promise<void>;
+  sleep: (name: string, duration: string) => Promise<void>;
 } };
 type TestJob = { handler: (context: TestContext) => Promise<unknown> };
 class StopAfterCalendar extends Error {}
@@ -50,6 +51,7 @@ async function run(job: unknown, data: Data) {
         return fn();
       },
       sendEvent: async (name) => { steps.push(name); },
+      sleep: async (name) => { steps.push(name); },
     } });
   } catch (error) { if (!(error instanceof StopAfterCalendar)) throw error; }
 }
@@ -63,6 +65,14 @@ describe("Cuando Inngest recibe eventos de citas con Google Calendar", () => {
     expect(await row(appointment.id)).toMatchObject({ googleEventId: "google-event", meetUrl: meet });
     expect(steps.indexOf("calendar-confirmed")).toBeGreaterThan(steps.indexOf("wa-nueva-cita-nutri"));
     await run(onAppointmentConfirmed, data); expect(create).toHaveBeenCalledTimes(1);
+  });
+  it("si Meet sigue pending, lo recupera en un paso durable sin duplicar el evento", async () => {
+    const { appointment, data } = await fixture();
+    create.mockResolvedValueOnce({ id: "google-event", meetUrl: null });
+    await run(onAppointmentConfirmed, data);
+    expect(create).toHaveBeenCalledTimes(1); expect(move).toHaveBeenCalledTimes(1);
+    expect(steps).toContain("esperar-meet-1"); expect(steps).toContain("calendar-meet-1");
+    expect((await row(appointment.id))?.meetUrl).toBe(meet);
   });
   it("cancelled borra el evento y limpia sus referencias", async () => {
     const { appointment, data } = await fixture();
@@ -93,6 +103,7 @@ describe("Cuando Inngest recibe eventos de citas con Google Calendar", () => {
     const log = vi.spyOn(console, "warn").mockImplementation(() => {});
     await run(onAppointmentConfirmed, data);
     expect(steps).toContain("wa-cita-confirmada"); expect(steps).toContain("plan");
+    expect(create).toHaveBeenCalledTimes(1);
     expect(log).toHaveBeenCalled(); expect(JSON.stringify(log.mock.calls)).not.toContain("private-provider-response");
   });
   it("si cancelan mientras Google crea el evento, lo borra en vez de dejarlo huérfano", async () => {

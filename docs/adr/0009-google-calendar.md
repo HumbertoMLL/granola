@@ -42,7 +42,10 @@ falla, loguea solo operación/status y continúa los recordatorios.
 - Las queries y updates se filtran por cita y `nutritionist_id`; se relee estado
   dentro del paso y no se confirma una respuesta remota sobre fechas ya cambiadas.
 - Meet puede tardar en generarse en Google: hay polling acotado del recurso
-  mientras esté pending. La UI muestra el link en `/listo` y `/cita/<token>` si ya
+  mientras esté pending. Si continúa pendiente, la confirmación hace hasta tres
+  reconsultas durables separadas por 10 s, preservando el evento y el WhatsApp ya
+  enviado. Si Google sigue sin entregar link se conserva el evento y continúan los
+  recordatorios. La UI muestra el link en `/listo` y `/cita/<token>` si ya
   existe; no agrega polling del navegador. Los recordatorios releen `meet_url`.
 
 ## Slots y Twelve-Factor

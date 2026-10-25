@@ -78,7 +78,13 @@ export const onAppointmentConfirmed = inngest.createFunction(
       );
     }
 
-    await step.run("calendar-confirmed", () => syncAppointmentCalendar(appointmentId, event.data.nutritionistId, "confirmed"));
+    let calendar = await step.run("calendar-confirmed", () => syncAppointmentCalendar(appointmentId, event.data.nutritionistId, "confirmed"));
+    // Meet es asíncrono: resolverlo en pasos durables, sin repetir WhatsApp ni
+    // crear otro evento. Un fallo posterior deja continuar los recordatorios.
+    for (let attempt = 1; calendar.pendingMeet && attempt <= 3; attempt++) {
+      await step.sleep(`esperar-meet-${attempt}`, "10s");
+      calendar = await step.run(`calendar-meet-${attempt}`, () => syncAppointmentCalendar(appointmentId, event.data.nutritionistId, "confirmed"));
+    }
 
     const plan = await step.run("plan", () => planFor(ctx));
 

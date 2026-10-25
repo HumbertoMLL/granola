@@ -6,7 +6,7 @@ export async function syncAppointmentCalendar(
   appointmentId: string,
   nutritionistId: string,
   operation: "confirmed" | "cancelled" | "rescheduled",
-): Promise<{ synced?: true; skipped?: true; failed?: true }> {
+): Promise<{ synced?: true; skipped?: true; failed?: true; pendingMeet?: true }> {
   try {
     const row = await db.query.appointments.findFirst({
       where: and(eq(appointments.id, appointmentId), eq(appointments.nutritionistId, nutritionistId)),
@@ -16,6 +16,7 @@ export async function syncAppointmentCalendar(
     if (row.status !== (operation === "cancelled" ? "cancelled" : "confirmed")) return { skipped: true };
     const client = createGoogleCalendarClient(row.nutritionist.googleRefreshTokenEnc);
     const where = and(eq(appointments.id, appointmentId), eq(appointments.nutritionistId, nutritionistId));
+    let pendingMeet = false;
     if (operation === "cancelled") {
       await client.deleteEvent(row.googleEventId ?? calendarEventId(row.id));
       await db.update(appointments).set({ googleEventId: null, meetUrl: null, updatedAt: new Date() }).where(where);
@@ -27,19 +28,21 @@ export async function syncAppointmentCalendar(
       const saved = await db.update(appointments).set({ googleEventId: result.id, meetUrl: result.meetUrl, updatedAt: new Date() })
         .where(and(where, eq(appointments.status, "confirmed"), eq(appointments.startsAt, row.startsAt), eq(appointments.endsAt, row.endsAt)))
         .returning({ id: appointments.id });
+      pendingMeet = saved.length > 0 && row.modality === "online" && !result.meetUrl;
       // Cancelación mientras Google respondía: no dejar un evento huérfano.
       if (!saved.length) {
         const fresh = await db.query.appointments.findFirst({ where, columns: { status: true, startsAt: true, endsAt: true, modality: true } });
         if (!fresh || fresh.status === "cancelled") await client.deleteEvent(result.id);
         else if (fresh.status === "confirmed") {
           const reconciled = await client.updateEvent(result.id, { ...input, startsAt: fresh.startsAt.toISOString(), endsAt: fresh.endsAt.toISOString(), modality: fresh.modality });
+          pendingMeet = fresh.modality === "online" && !reconciled.meetUrl;
           await db.update(appointments).set({ googleEventId: reconciled.id, meetUrl: reconciled.meetUrl, updatedAt: new Date() })
             .where(and(where, eq(appointments.status, "confirmed"), eq(appointments.startsAt, fresh.startsAt), eq(appointments.endsAt, fresh.endsAt)));
         }
       }
     }
     clearCalendarBusyCache(nutritionistId);
-    return { synced: true };
+    return { synced: true, ...(pendingMeet ? { pendingMeet: true as const } : {}) };
   } catch (error) {
     // El fallo queda aislado y sin PII: WhatsApp ya se envió y los recordatorios siguen.
     console.warn("[google-calendar] sincronización no disponible", { operation, status: error instanceof GoogleCalendarError ? error.status : "unavailable" });
