@@ -7,12 +7,15 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run --project unit",
+    "test:integration": "vitest run --project integration",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1156.0",
     "@aws-sdk/s3-request-presigner": "^3.1156.0",
+    "@granola/api": "workspace:*",
     "@granola/auth": "workspace:*",
     "@granola/core": "workspace:*",
     "@granola/db": "workspace:*",
@@ -20,6 +23,8 @@
     "@granola/payments": "workspace:*",
     "@granola/ui": "workspace:*",
     "@granola/whatsapp": "workspace:*",
+    "@hono/vercel": "^1.0.1",
+    "hono": "^4.13.9",
     "inngest": "^3.40.0",
     "lucide-react": "^0.550.0",
     "next": "16.4.3",
@@ -29,13 +34,16 @@
     "zod": "^4.1.0"
   },
   "devDependencies": {
+    "@playwright/test": "1.56.1",
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "16.4.3",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5",
     "vitest": "^3.2.7"
   }

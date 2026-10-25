@@ -25,7 +25,7 @@ Orden por lo que tú pediste + lo que la investigación dice que duele:
 | 3 | **WhatsApp (Meta Cloud API)**: confirmación al agendar, recordatorio 24h y 2h, link para reagendar/cancelar, aviso al nutriólogo | Tu pedido explícito. Avena lo cobra en Premium ($999). Pacientes mexicanos viven en WhatsApp | F1 |
 | 4 | **Cobro en la reserva**: tarjeta (Stripe), SPEI/OXXO (Mercado Pago), pago en consulta, paquetes de N consultas. **Comisión 0%** (vs 10% Avena) | Hueco confirmado: nadie da OXXO/SPEI al paciente del nutriólogo | F1 |
 | 5 | Pacientes + expediente + antropometría (ISAK básico, OMS) + cálculo de requerimientos | Base de la consulta | F2 |
-| 6 | Notas IA por grabación de consulta + lectura de labs/InBody PDF | Paridad con Avena/HeyNutre; vendible suelta | F2 |
+| 6 | InBody y labs: subir PDF, extraer datos, **personalizar** con comentarios y marca de la nutri, enviar al paciente | Hueco: Avena solo lee; nadie deja que la nutri lo haga suyo. Notas por grabación de voz **descartadas** (decisión Beto, 25 oct 2026) | F2 |
 | 7 | Motor de planes por equivalentes SMAE + plantillas + PDF con marca | El core de Avena; aquí hay que igualar | F3 |
 | 8 | Recetas (1–2K validadas, etiquetadas, marcadas "revisada por nutrióloga") | Contenido = moat; empezar con menos pero mejor | F3 |
 | 9 | **App paciente (PWA)**: menú del día, intercambio libre, "comí fuera", registro con foto, lista del súper por pasillo compartible por WhatsApp, kcal visibles si el nutri lo permite, offline-first | Dolor #1 de Avena (57 quejas de rigidez, 37 de bugs, 36 de lista/PDF) | F4 |
@@ -168,7 +168,7 @@ Plantillas WhatsApp a registrar en Meta (categoría *utility*): `cita_confirmada
 |------|---------|-----------|---------------------|
 | **F0 Fundamentos** | 1 | Monorepo corriendo, Neon + Drizzle + Better Auth, design system Granola, layout del panel, deploy en Vercel, CI | A infra+db, B design system+shell |
 | **F1 Negocio** | 2–4 | Link-tree + agenda + reservas + WhatsApp + cobros. **Vendible.** | C scheduling core+booking UI, D whatsapp, E payments, F editor de página pública, G Google Calendar |
-| **F2 Consulta** | 5–8 | Pacientes, expediente, antropometría, notas IA, labs PDF | H expediente, I nutrition core, J IA notas |
+| **F2 Consulta** | 5–8 | Pacientes, expediente, antropometría, InBody/labs PDF (subir → extraer → personalizar con la marca de la nutri → enviar), importador CSV | H expediente, I nutrition core, J inbody, K importador |
 | **F3 Planes** | 9–14 | Motor SMAE, plantillas, recetas, PDF con marca | K smae core, L editor de plan, M recetas+seed, N PDF |
 | **F4 Paciente** | 15–20 | PWA paciente offline-first, plan por WhatsApp, lista del súper | O PWA, P sync, Q WA delivery |
 | **F5 Monetiza** | 21+ | CFDI, paquetes, retos, Expo | — |

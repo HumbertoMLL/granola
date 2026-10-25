@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Directorio · Granola</title>
+<style>
+  body{max-width:390px;margin:0 auto;font-family:system-ui,-apple-system,sans-serif;color:#1f2328;background:#fff;font-size:14px;line-height:1.45;padding:0 16px 32px}
+  :root{--ink:#3E7C75;--line:#e4e4e4;--muted:#8a8f98}
+  header{padding:22px 0 12px;font-weight:600;font-size:16px}
+  .search{border:1px solid var(--line);border-radius:10px;padding:12px 14px;color:var(--muted)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .chips span{border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;color:#444}
+  .chips .on{border-color:var(--ink);color:var(--ink)}
+  .count{margin-top:16px;color:var(--muted);font-size:12px}
+  .card{border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:10px;display:flex;gap:12px}
+  .foto{width:64px;height:64px;flex:none;border:1px solid var(--line);background:#f4f4f4;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:11px}
+  .info{flex:1;min-width:0}
+  .info b{font-weight:600}
+  .esp{color:#555;font-size:13px}
+  .meta{color:var(--muted);font-size:12px;margin-top:2px}
+  .fila{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+  .precio{font-size:13px}
+  .rating{font-size:12px;color:var(--muted)}
+  .btn{border:1px solid var(--ink);color:var(--ink);background:#fff;border-radius:8px;padding:8px 12px;font:inherit;font-size:13px}
+  .pag{display:flex;justify-content:center;align-items:center;gap:6px;margin-top:22px}
+  .pag span{border:1px solid var(--line);border-radius:8px;min-width:34px;text-align:center;padding:8px 0;color:#444}
+  .pag .on{background:var(--ink);border-color:var(--ink);color:#fff}
+</style>
+</head>
+<body>
+  <header>Encuentra tu nutrióloga</header>
+
+  <div class="search">Buscar por especialidad o ciudad</div>
+
+  <div class="chips">
+    <span class="on">Online</span><span>Presencial</span><span>CDMX</span>
+    <span>Deportiva</span><span>Bariatría</span><span>Pediátrica</span>
+  </div>
+
+  <div class="count">12 nutriólogas disponibles</div>
+
+  <div class="card">
+    <div class="foto">foto</div>
+    <div class="info">
+      <b>Karla Demo</b>
+      <div class="esp">Nutrición clínica y metabólica</div>
+      <div class="meta">CDMX · Online y presencial</div>
+      <div class="fila"><div><span class="precio">Desde $500</span> <span class="rating">★ 4.9 (23)</span></div><button class="btn">Ver perfil</button></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="foto">foto</div>
+    <div class="info">
+      <b>Sofía Ramírez</b>
+      <div class="esp">Nutrición deportiva</div>
+      <div class="meta">Guadalajara · Online</div>
+      <div class="fila"><div><span class="precio">Desde $600</span> <span class="rating">★ 4.8 (41)</span></div><button class="btn">Ver perfil</button></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="foto">foto</div>
+    <div class="info">
+      <b>Mariana Torres</b>
+      <div class="esp">Bariatría y cirugía bariátrica</div>
+      <div class="meta">CDMX · Presencial</div>
+      <div class="fila"><div><span class="precio">Desde $700</span> <span class="rating">★ 4.7 (15)</span></div><button class="btn">Ver perfil</button></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="foto">foto</div>
+    <div class="info">
+      <b>Daniela Ortiz</b>
+      <div class="esp">Nutrición pediátrica</div>
+      <div class="meta">Monterrey · Online</div>
+      <div class="fila"><div><span class="precio">Desde $450</span> <span class="rating">★ 5.0 (9)</span></div><button class="btn">Ver perfil</button></div>
+    </div>
+  </div>
+
+  <nav class="pag">
+    <span>‹</span><span class="on">1</span><span>2</span><span>3</span><span>›</span>
+  </nav>
+</body>
+</html>

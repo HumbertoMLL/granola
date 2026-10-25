@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buscar nutriólogas · Granola</title>
+<style>
+:root{--bg:#FBF7F0;--ink:#2B2118;--green:#4A7A2B;--honey:#E8A93B;--mute:#8A7D6E;--line:#EFE7DA}
+*{box-sizing:border-box}
+body{max-width:390px;margin:0 auto;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,sans-serif;padding:16px 16px 32px;font-size:15px;line-height:1.4}
+h1{font-size:22px;margin:6px 0 12px}
+.search{background:#fff;border:1.5px solid var(--line);border-radius:999px;padding:14px 16px;color:var(--mute);box-shadow:0 2px 10px rgba(43,33,24,.05)}
+.chips{display:flex;gap:8px;overflow-x:auto;margin:12px -16px 0;padding:0 16px 4px;scrollbar-width:none}
+.chips span{flex:none;border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600}
+.chips .on{background:var(--green);border-color:var(--green);color:#fff}
+.count{font-size:13px;color:var(--mute);margin:16px 4px 8px}
+.card{background:#fff;border-radius:20px;padding:16px;box-shadow:0 2px 12px rgba(43,33,24,.06);margin-bottom:12px}
+.top{display:flex;gap:12px;align-items:center}
+.foto{width:64px;height:64px;border-radius:50%;background:var(--line);flex:none;display:grid;place-items:center;color:var(--mute);font-size:12px}
+.name{font-weight:700;font-size:16px}
+.esp{font-size:13px;color:var(--mute)}
+.meta{display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-size:13px}
+.rating{color:var(--ink);font-weight:600}
+.precio{font-weight:700}
+.btn{display:block;width:100%;border:0;border-radius:999px;padding:12px;font:inherit;font-weight:700;font-size:15px;background:var(--honey);color:var(--ink);margin-top:12px}
+.pages{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:20px}
+.pages span{min-width:40px;text-align:center;padding:10px 0;border-radius:12px;background:#fff;border:1.5px solid var(--line);font-size:14px}
+.pages .on{background:var(--green);color:#fff;border-color:var(--green);font-weight:700}
+</style>
+</head>
+<body>
+<h1>Encuentra tu nutrióloga</h1>
+<div class="search">Buscar por nombre o especialidad</div>
+
+<div class="chips">
+  <span class="on">Online</span><span>Presencial</span><span>CDMX</span><span>Deportiva</span><span>Bariatría</span><span>Pediátrica</span>
+</div>
+
+<div class="count">4 nutriólogas disponibles</div>
+
+<article class="card">
+  <div class="top">
+    <div class="foto">foto</div>
+    <div>
+      <div class="name">Karla Demo</div>
+      <div class="esp">Nutrición metabólica</div>
+      <div class="esp">Ciudad de México · Online</div>
+    </div>
+  </div>
+  <div class="meta"><span class="rating">★ 4.9 (23)</span><span class="precio">Desde $500</span></div>
+  <button class="btn">Ver perfil</button>
+</article>
+
+<article class="card">
+  <div class="top">
+    <div class="foto">foto</div>
+    <div>
+      <div class="name">Sofía Demo</div>
+      <div class="esp">Nutrición deportiva</div>
+      <div class="esp">Monterrey · Online</div>
+    </div>
+  </div>
+  <div class="meta"><span class="rating">★ 4.8 (41)</span><span class="precio">Desde $650</span></div>
+  <button class="btn">Ver perfil</button>
+</article>
+
+<article class="card">
+  <div class="top">
+    <div class="foto">foto</div>
+    <div>
+      <div class="name">Daniela Demo</div>
+      <div class="esp">Bariatría y obesidad</div>
+      <div class="esp">Ciudad de México · Presencial</div>
+    </div>
+  </div>
+  <div class="meta"><span class="rating">★ 4.7 (18)</span><span class="precio">Desde $900</span></div>
+  <button class="btn">Ver perfil</button>
+</article>
+
+<article class="card">
+  <div class="top">
+    <div class="foto">foto</div>
+    <div>
+      <div class="name">Valeria Demo</div>
+      <div class="esp">Nutrición pediátrica</div>
+      <div class="esp">Guadalajara · Presencial</div>
+    </div>
+  </div>
+  <div class="meta"><span class="rating">★ 5.0 (9)</span><span class="precio">Desde $600</span></div>
+  <button class="btn">Ver perfil</button>
+</article>
+
+<nav class="pages">
+  <span>‹</span><span class="on">1</span><span>2</span><span>3</span><span>›</span>
+</nav>
+</body>
+</html>
