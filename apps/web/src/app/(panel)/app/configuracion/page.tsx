@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Bell, CalendarSync, LogOut, MessageCircle, Settings, UserRound } from "lucide-react";
+import { GoogleCalendarCard } from "./google-calendar-card";
+import { Bell, LogOut, MessageCircle, Settings, UserRound } from "lucide-react";
 
 import {
   Avatar,
@@ -28,11 +29,6 @@ const sections = [
     icon: UserRound,
     title: "Cuenta",
     description: "Nombre, correo, cédula profesional y contraseña.",
-  },
-  {
-    icon: CalendarSync,
-    title: "Google Calendar",
-    description: "Sincroniza disponibilidad y crea eventos con link de Meet.",
   },
   {
     icon: MessageCircle,
@@ -79,6 +75,11 @@ async function ConfiguracionPageContent() {
         </div>
         <Badge variant="accent">Plan {me.plan}</Badge>
       </Card>
+
+      <GoogleCalendarCard
+        connected={Boolean(nutritionist.googleRefreshTokenEnc)}
+        configured={Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.GOOGLE_TOKEN_ENC_KEY)}
+      />
 
       <Card className="gap-0 p-0">
         {sections.map((s, i) => (

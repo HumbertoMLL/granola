@@ -33,3 +33,17 @@ Guía de construcción adoptada el 25 oct 2026: https://github.com/twelve-factor
 - Nunca estado en memoria del proceso que importe entre requests.
 - Logs a stdout, nunca a archivo; sin datos de salud en logs.
 - Tareas administrativas = scripts en el repo, no comandos pegados en un chat.
+
+## Google Calendar (ADR 0009)
+
+API adjunta por `GOOGLE_CLIENT_ID` y `GOOGLE_CLIENT_SECRET`; cifrado por
+`GOOGLE_TOKEN_ENC_KEY` (III/IV). Sin estas vars, el build y la agenda local
+siguen funcionando. Tokens durables cifrados en Postgres; nunca en cachés,
+props de cliente, snapshots de pasos Inngest ni logs.
+
+El free/busy tiene una caché **descartable por instancia de 60 s**, acotada a 200
+entradas, con TTL y deduplicación de peticiones concurrentes. Es una optimización,
+no fuente de verdad (VI): otra instancia puede consultar Google de nuevo y los
+cambios externos pueden tardar hasta 60 s en verse. Se invalida localmente al
+sincronizar/desconectar; no garantiza exclusión distribuida con Google.
+Los errores solo emiten operación/status a stdout (XI), sin tokens ni eventos.

@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@granola/db": "workspace:*",
+    "@granola/google-calendar": "workspace:*",
     "@granola/payments": "workspace:*",
     "@granola/whatsapp": "workspace:*",
     "inngest": "^3.40.0",

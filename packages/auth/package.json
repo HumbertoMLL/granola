@@ -17,6 +17,7 @@
     "@granola/db": "workspace:*",
     "better-auth": "^1.4.0",
     "zod": "^4.1.0",
+    "@granola/google-calendar": "workspace:*",
     "@granola/email": "workspace:*"
   },
   "devDependencies": {

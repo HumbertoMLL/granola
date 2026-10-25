@@ -1,3 +1,4 @@
+import { syncAppointmentCalendar } from "../lib/calendar";
 import { citaCancelada } from "@granola/email";
 import { appointmentEmailFields, sendJobEmail } from "../lib/email";
 import { buildCitaCancelada } from "@granola/whatsapp";
@@ -28,6 +29,8 @@ export const onAppointmentCancelled = inngest.createFunction(
         }),
       ),
     );
+    await step.run("calendar-cancelled", () => syncAppointmentCalendar(appointmentId, event.data.nutritionistId, "cancelled"));
+
     const patientEmail = ctx.patient.email;
     if (patientEmail) {
       const origin = process.env.NEXT_PUBLIC_APP_URL ?? process.env.BETTER_AUTH_URL ?? "http://localhost:3000";

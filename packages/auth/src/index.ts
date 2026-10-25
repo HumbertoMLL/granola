@@ -4,6 +4,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { magicLink } from "better-auth/plugins/magic-link";
 import { bearer } from "better-auth/plugins";
 import { db, schema } from "@granola/db";
+import { GOOGLE_CALENDAR_SCOPES, persistGoogleCalendarAccount } from "./google-calendar";
 
 function createAuth() {
   const googleClientId = process.env.GOOGLE_CLIENT_ID;
@@ -39,12 +40,21 @@ function createAuth() {
           },
         },
       },
+      account: {
+        create: { after: async (account, ctx) => {
+          if (ctx) await persistGoogleCalendarAccount(account, ctx.context.secretConfig);
+        } },
+        update: { after: async (account, ctx) => {
+          if (ctx) await persistGoogleCalendarAccount(account, ctx.context.secretConfig);
+        } },
+      },
     },
     // Google solo se registra si hay credenciales; así el resto funciona sin ellas.
     socialProviders:
       googleClientId && googleClientSecret
-        ? { google: { clientId: googleClientId, clientSecret: googleClientSecret } }
+        ? { google: { clientId: googleClientId, clientSecret: googleClientSecret, scope: GOOGLE_CALENDAR_SCOPES, accessType: "offline", prompt: "consent" } }
         : {},
+    account: { encryptOAuthTokens: true },
     plugins: [
       // Expo / clientes sin cookies: `Authorization: Bearer <token>` se convierte en
       // cookie de sesión antes de validar, y al iniciar sesión la respuesta trae el
