@@ -42,7 +42,7 @@
   {
     "name": "cita",
     "width": 390,
-    "url": "http://localhost:3196/cita/seed-karla-hoy-0001"
+    "url": "http://localhost:3196/cita/seed-karla-hoy-confirmada-0002"
   },
   {
     "name": "resena",
@@ -72,7 +72,7 @@
   {
     "name": "expediente",
     "width": 390,
-    "url": "http://localhost:3196/app/pacientes"
+    "url": "http://localhost:3196/app/pacientes/42392f3d-7448-472d-9461-6a68c93089ec"
   },
   {
     "name": "cobros",
@@ -132,7 +132,7 @@
   {
     "name": "cita",
     "width": 1280,
-    "url": "http://localhost:3196/cita/seed-karla-hoy-0001"
+    "url": "http://localhost:3196/cita/seed-karla-hoy-confirmada-0002"
   },
   {
     "name": "resena",
@@ -162,7 +162,7 @@
   {
     "name": "expediente",
     "width": 1280,
-    "url": "http://localhost:3196/app/pacientes"
+    "url": "http://localhost:3196/app/pacientes/42392f3d-7448-472d-9461-6a68c93089ec"
   },
   {
     "name": "cobros",

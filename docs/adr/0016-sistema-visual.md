@@ -24,4 +24,6 @@ Los nuevos PageHeader, Toolbar, SectionHeader, DataList/DataRow y KPI expresan e
 
 No cambian acciones del servidor, schema, contratos de datos, reservas, pagos ni autorización. Los consumidores reciben componentes y tokens de presentación compatibles. Las pruebas de render/ARIA cubren las nuevas jerarquías y las interacciones de formularios, Tabs y confirmaciones. Las capturas antes/después y la comprobación automática de contraste verifican el resultado en móvil y desktop.
 
-Esta decisión afecta presentación y no añade servicios, dependencias ni estado persistente: mantiene Twelve-Factor sin cambios de configuración o despliegue.
+Esta decisión afecta presentación y no añade servicios, dependencias de runtime ni estado persistente (axe solo se usa en desarrollo/tests): mantiene Twelve-Factor sin cambios de configuración o despliegue.
+
+Los valores heredados `pill/rounded/square` se conservan en el guardado del tema. Su representación se normaliza a los radios del sistema; los cinco presets cambian acento y fondo, manteniendo la estructura y el CTA público. El verde de navegación sobre superficie secundaria usa la tinta oscura de la misma familia (`primary-hover`) para alcanzar AA.
