@@ -44,6 +44,29 @@ pnpm --filter @granola/web exec next dev -p 3100
 
 Sin `DATABASE_URL` en `apps/web/.env.local` las páginas con datos fallan en runtime (esperado); todo lo demás compila.
 
+## API v1 (Hono)
+
+`packages/api` (`@granola/api`) define la API HTTP versionada; Next la monta en `/api/v1/*` (`apps/web/src/app/api/v1/[[...route]]/route.ts`). Es para Expo y lecturas públicas; **no** reemplaza server actions, webhooks ni `/api/auth`. Auth por cookie o `Authorization: Bearer` (plugin `bearer()` de Better Auth). Errores `{ error: { code, message } }`. Ver [ADR 0007](docs/adr/0007-hono-api-v1.md) y `packages/api/README.md`.
+
+Cómo probar (dev en el puerto 3100):
+
+```bash
+curl -s localhost:3100/api/v1/health
+curl -s localhost:3100/api/v1/public/karla
+curl -s "localhost:3100/api/v1/public/karla/slots?serviceId=<uuid>"
+
+# Con la cookie del navegador (DevTools → Application → Cookies → better-auth.session_token)
+curl -s localhost:3100/api/v1/me -H "Cookie: better-auth.session_token=<valor>"
+
+# Con bearer (como lo hará Expo): el token sale en el header set-auth-token
+TOKEN=$(curl -s -D - -o /dev/null localhost:3100/api/auth/sign-in/email \
+  -H 'Content-Type: application/json' -H 'Origin: http://localhost:3100' \
+  -d '{"email":"karla@granola.demo","password":"granola-demo-2026"}' \
+  | awk -F': ' 'tolower($1)=="set-auth-token"{print $2}' | tr -d '\r')
+curl -s localhost:3100/api/v1/me -H "Authorization: Bearer $TOKEN"
+curl -s "localhost:3100/api/v1/me/appointments?from=2026-10-01T00:00:00Z&to=2026-11-01T00:00:00Z" -H "Authorization: Bearer $TOKEN"
+```
+
 ## Qué sigue (al 24 oct 2026)
 
 - Probar F1 contra Neon real (migrar + seed + flujo completo). Google Calendar sync aún no existe.

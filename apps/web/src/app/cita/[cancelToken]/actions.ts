@@ -3,8 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { ANON_ACTION_LIMIT, checkRateLimit, RATE_LIMIT_MESSAGE, type RateLimitOptions } from "@granola/api/rate-limit";
+
 import { appointments, db, eq, isExclusionViolation } from "@/lib/db";
-import { checkSlotAvailable, computeAvailableSlots, getPublicNutritionistById } from "@/lib/booking";
+import { checkSlotAvailable, computeAvailableSlots, getClientIp, getPublicNutritionistById } from "@/lib/booking";
 import { sendEvent } from "@/lib/inngest-client";
 
 export type PatientActionResult = { ok: true } | { ok: false; error: string };
@@ -13,6 +15,15 @@ const tokenSchema = z.string().min(16).max(64);
 
 /** Horas de antelación mínima para que el paciente cancele/reagende por su cuenta. */
 const PATIENT_CHANGE_MIN_HOURS = 2;
+
+/** Ver horarios para reagendar es lectura: límite más holgado que cancelar/reagendar. */
+const SLOTS_LIMIT: RateLimitOptions = { limit: 30, windowMs: 60_000 };
+
+/** true si la IP ya pasó el límite de esta acción (freno anti-abuso, en memoria por instancia). */
+async function isRateLimited(action: string, options: RateLimitOptions = ANON_ACTION_LIMIT): Promise<boolean> {
+  const ip = await getClientIp();
+  return !checkRateLimit(`cita:${action}:${ip}`, options).ok;
+}
 
 async function loadByToken(token: string) {
   const parsed = tokenSchema.safeParse(token);
@@ -34,6 +45,8 @@ function canPatientChange(appt: { status: string; startsAt: Date }): string | nu
 }
 
 export async function cancelByPatient(token: string): Promise<PatientActionResult> {
+  if (await isRateLimited("cancel")) return { ok: false, error: RATE_LIMIT_MESSAGE };
+
   const appt = await loadByToken(token);
   if (!appt) return { ok: false, error: "Cita no encontrada" };
   const blocked = canPatientChange(appt);
@@ -58,6 +71,8 @@ export type RescheduleSlotsResult =
   | { ok: false; error: string };
 
 export async function fetchRescheduleSlots(token: string): Promise<RescheduleSlotsResult> {
+  if (await isRateLimited("slots", SLOTS_LIMIT)) return { ok: false, error: RATE_LIMIT_MESSAGE };
+
   const appt = await loadByToken(token);
   if (!appt) return { ok: false, error: "Cita no encontrada" };
   const blocked = canPatientChange(appt);
@@ -79,6 +94,8 @@ export async function fetchRescheduleSlots(token: string): Promise<RescheduleSlo
 }
 
 export async function rescheduleByPatient(token: string, startsAtIso: string): Promise<PatientActionResult> {
+  if (await isRateLimited("reschedule")) return { ok: false, error: RATE_LIMIT_MESSAGE };
+
   const parsed = z.iso.datetime().safeParse(startsAtIso);
   if (!parsed.success) return { ok: false, error: "Horario inválido" };
 
