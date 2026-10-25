@@ -1,17 +1,16 @@
 "use server";
 
-import { headers } from "next/headers";
 import { z } from "zod";
-import { and, appointments, asc, auditLog, clinicalNotes, db, desc, eq, measurements, patients, payments, sql } from "@/lib/db";
+import { and, appointments, asc, auditLog, clinicalNotes, db, desc, eq, gte, measurements, patients, payments, sql } from "@/lib/db";
+import { getClientIp } from "@/lib/request";
 import { requireNutritionist } from "@/lib/session";
 import { measurementSchema, noteSchema, patientSchema, recordRequestSchema } from "@/components/patients/schemas";
 
 // Server actions = frontera API autenticada. Nunca se acepta nutritionist_id del cliente.
 async function context() {
   const session = await requireNutritionist();
-  const h = await headers();
-  const candidate = h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? h.get("x-real-ip");
-  const ip = z.union([z.ipv4(), z.ipv6()]).safeParse(candidate);
+  // getClientIp() devuelve "unknown" si no hay IP; aquí solo se acepta una IP válida.
+  const ip = z.union([z.ipv4(), z.ipv6()]).safeParse(await getClientIp());
   return { ...session, ip: ip.success ? ip.data : null };
 }
 
@@ -28,6 +27,9 @@ async function safely<T>(operation: () => Promise<T>) {
   }
 }
 class RecordError extends Error {}
+
+/** Ventana en la que otra lectura de la misma ficha por la misma nutri no se vuelve a auditar. */
+const READ_AUDIT_WINDOW_MS = 15 * 60_000;
 
 export async function listPatients(input: unknown) {
   const c = await context();
@@ -72,7 +74,16 @@ export async function getPatientRecord(input: unknown) {
       appointmentId = appointment.id;
     }
     // Falla cerrado: no se entrega el expediente si no se pudo auditar la lectura.
-    await db.insert(auditLog).values({ actorId: c.user.id, action: "patient.read", entity: "patient", entityId: patient.id, ip: c.ip });
+    // Se audita la carga inicial; los refresh tras guardar (misma nutri, mismo paciente,
+    // dentro de la ventana) no agregan otra fila. Lo decide el servidor, no el cliente.
+    const recentRead = await db.query.auditLog.findFirst({
+      columns: { id: true },
+      where: and(eq(auditLog.actorId, c.user.id), eq(auditLog.action, "patient.read"), eq(auditLog.entity, "patient"),
+        eq(auditLog.entityId, patient.id), gte(auditLog.at, new Date(Date.now() - READ_AUDIT_WINDOW_MS))),
+    });
+    if (!recentRead) {
+      await db.insert(auditLog).values({ actorId: c.user.id, action: "patient.read", entity: "patient", entityId: patient.id, ip: c.ip });
+    }
     const [measurementRows, notes, visits, charges] = await Promise.all([
       db.query.measurements.findMany({ where: and(eq(measurements.nutritionistId, c.nutritionist.id), eq(measurements.patientId, patient.id)), orderBy: [asc(measurements.measuredAt), asc(measurements.id)] }),
       db.query.clinicalNotes.findMany({ where: and(eq(clinicalNotes.nutritionistId, c.nutritionist.id), eq(clinicalNotes.patientId, patient.id)), orderBy: [desc(clinicalNotes.createdAt), desc(clinicalNotes.id)] }),
