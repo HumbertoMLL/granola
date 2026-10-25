@@ -27,34 +27,54 @@ export function formatTimezone(timezone: string): string {
     : (timezone.split("/").at(-1) ?? timezone).replace(/_/g, " ");
 }
 
-/** Fecha breve en la zona elegida. `now` evita diferencias de hidratación. */
-export function formatShortDate(date: Date, timezone: string, now?: Date): string {
+/** Fecha breve; el año solo aparece si difiere del actual en la zona elegida. */
+export function formatShortDate(
+  date: Date,
+  timezone: string,
+  now?: Date,
+  options: { weekday?: boolean; relative?: boolean } = {},
+): string {
   const day = ymdInTz(date, timezone);
-  if (now) {
-    const today = ymdInTz(now, timezone);
+  const today = ymdInTz(now ?? new Date(), timezone);
+  if (now && options.relative !== false) {
     if (day === today) return "hoy";
     if (day === addDaysYmd(today, 1)) return "mañana";
   }
   return new Intl.DateTimeFormat("es-MX", {
     timeZone: timezone,
-    weekday: "short",
+    weekday: options.weekday === false ? undefined : "short",
     day: "numeric",
     month: "short",
-  }).formatToParts(date)
-    .filter((part) => part.type === "weekday" || part.type === "day" || part.type === "month")
+    year: day.slice(0, 4) !== today.slice(0, 4) ? "numeric" : undefined,
+  })
+    .formatToParts(date)
+    .filter(
+      (part) =>
+        part.type === "weekday" ||
+        part.type === "day" ||
+        part.type === "month" ||
+        part.type === "year",
+    )
     .map((part) => part.value.replace(/\./g, ""))
     .join(" ");
 }
 
 /** Un día de calendario no cambia al convertir la zona del navegador. */
-export function formatCalendarDate(day: string): string {
-  return formatShortDate(new Date(`${day}T12:00:00Z`), "UTC");
+export function formatCalendarDate(day: string, now?: Date): string {
+  return formatShortDate(new Date(`${day}T12:00:00Z`), "UTC", now, {
+    relative: false,
+  });
 }
 
 export type Modality = "online" | "presencial" | "ambas";
 export type AppointmentModality = "online" | "presencial";
 export type PaymentMode = "prepaid" | "at_visit" | "optional";
-export type AppointmentStatus = "pending_payment" | "confirmed" | "cancelled" | "no_show" | "completed";
+export type AppointmentStatus =
+  | "pending_payment"
+  | "confirmed"
+  | "cancelled"
+  | "no_show"
+  | "completed";
 
 export const MODALITY_LABEL: Record<Modality, string> = {
   online: "En línea",

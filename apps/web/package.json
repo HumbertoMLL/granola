@@ -19,6 +19,7 @@
     "@granola/auth": "workspace:*",
     "@granola/core": "workspace:*",
     "@granola/db": "workspace:*",
+    "@granola/google-calendar": "workspace:*",
     "@granola/jobs": "workspace:*",
     "@granola/payments": "workspace:*",
     "@granola/ui": "workspace:*",
@@ -31,10 +32,11 @@
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "server-only": "^0.0.1",
-    "zod": "^4.1.0",
-    "@granola/google-calendar": "workspace:*"
+    "zod": "^4.1.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.11.1",
+    "@granola/email": "workspace:*",
     "@playwright/test": "1.56.1",
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^20",
@@ -46,7 +48,6 @@
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
     "typescript": "^5",
-    "vitest": "^3.2.7",
-    "@granola/email": "workspace:*"
+    "vitest": "^3.2.7"
   }
 }

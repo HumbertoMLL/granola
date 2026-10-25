@@ -31,7 +31,7 @@ export function Sidebar({ user }: { user: PanelUser }) {
               className={cn(
                 "flex h-12 items-center gap-3 rounded-md px-4 text-base font-medium transition-colors",
                 active
-                  ? "bg-secondary font-semibold text-primary"
+                  ? "bg-secondary font-semibold text-primary-hover"
                   : "text-muted-foreground hover:bg-secondary hover:text-foreground",
               )}
             >
@@ -47,24 +47,37 @@ export function Sidebar({ user }: { user: PanelUser }) {
       </nav>
 
       <details className="group relative m-4 border-t border-border pt-4">
-       <summary className="flex cursor-pointer list-none items-center gap-3 rounded-md p-3 hover:bg-secondary focus-visible:outline-2 focus-visible:outline-primary [&::-webkit-details-marker]:hidden">
-        <Avatar className="size-8">
-          <AvatarFallback>{user.initials}</AvatarFallback>
-        </Avatar>
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold">{user.name}</p>
-          <div className="flex items-center gap-1.5">
-            <p className="truncate text-xs text-muted-foreground">
-              @{user.slug}
-            </p>
+        <summary className="flex cursor-pointer list-none items-center gap-3 rounded-md p-3 hover:bg-secondary focus-visible:outline-2 focus-visible:outline-primary [&::-webkit-details-marker]:hidden">
+          <Avatar className="size-8">
+            <AvatarFallback>{user.initials}</AvatarFallback>
+          </Avatar>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold">{user.name}</p>
+            <div className="flex items-center gap-1.5">
+              <p className="truncate text-xs text-muted-foreground">
+                @{user.slug}
+              </p>
+            </div>
           </div>
+          <ChevronRight
+            className="size-4 text-muted-foreground group-open:-rotate-90"
+            aria-hidden
+          />
+        </summary>
+        <div className="absolute inset-x-0 bottom-full mb-2 rounded-xl border border-border bg-card p-2 shadow-float">
+          <Link
+            href="/app/configuracion"
+            className="block rounded-md px-3 py-3 text-sm hover:bg-secondary"
+          >
+            Configuración
+          </Link>
+          <Link
+            href={`/${user.slug}`}
+            className="block rounded-md px-3 py-3 text-sm hover:bg-secondary"
+          >
+            Ver mi página
+          </Link>
         </div>
-        <ChevronRight className="size-4 text-muted-foreground group-open:-rotate-90" aria-hidden />
-       </summary>
-       <div className="absolute inset-x-0 bottom-full mb-2 rounded-xl border border-border bg-card p-2 shadow-float">
-         <Link href="/app/configuracion" className="block rounded-md px-3 py-3 text-sm hover:bg-secondary">Configuración</Link>
-         <Link href={`/${user.slug}`} className="block rounded-md px-3 py-3 text-sm hover:bg-secondary">Ver mi página</Link>
-       </div>
       </details>
     </aside>
   );
