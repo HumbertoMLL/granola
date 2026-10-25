@@ -641,7 +641,7 @@ function ReportEditor({
                 <li key={i.clave} className="py-3">
                   <p className="flex justify-between gap-3">
                     <strong>{i.etiqueta}</strong>
-                    <span>
+                    <span className="shrink-0 whitespace-nowrap text-right">
                       {i.valor} {i.unidad}
                     </span>
                   </p>

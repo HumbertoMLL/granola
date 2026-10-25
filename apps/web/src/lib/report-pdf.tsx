@@ -128,7 +128,11 @@ export async function renderReport(report: ReportInput, patientName: string) {
           </View>
         </View>
         <Text
-          style={{ fontSize: 16, lineHeight: 1.35, fontFamily: "Helvetica-Bold" }}
+          style={{
+            fontSize: 16,
+            lineHeight: 1.35,
+            fontFamily: "Helvetica-Bold",
+          }}
         >
           {patientName}
         </Text>
@@ -162,7 +166,9 @@ export async function renderReport(report: ReportInput, patientName: string) {
         )}
         <Text style={{ marginTop: 24 }}>{report.brand.firma}</Text>
         <View style={styles.footer} fixed>
-          <Text style={{ fontSize: 8, lineHeight: 1.3 }}>Reporte elaborado por tu profesional de nutrición</Text>
+          <Text style={{ fontSize: 8, lineHeight: 1.3 }}>
+            Reporte elaborado por tu profesional de nutrición
+          </Text>
         </View>
       </Page>
     </Document>,
