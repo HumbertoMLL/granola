@@ -60,6 +60,9 @@ importers:
       '@granola/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@granola/email':
+        specifier: workspace:*
+        version: link:../../packages/email
       '@granola/google-calendar':
         specifier: workspace:*
         version: link:../../packages/google-calendar
@@ -109,9 +112,6 @@ importers:
         specifier: ^4.1.0
         version: 4.6.7
     devDependencies:
-      '@granola/email':
-        specifier: workspace:*
-        version: link:../../packages/email
       '@playwright/test':
         specifier: 1.56.1
         version: 1.56.1

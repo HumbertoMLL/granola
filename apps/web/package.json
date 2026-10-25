@@ -19,6 +19,7 @@
     "@granola/auth": "workspace:*",
     "@granola/core": "workspace:*",
     "@granola/db": "workspace:*",
+    "@granola/email": "workspace:*",
     "@granola/google-calendar": "workspace:*",
     "@granola/jobs": "workspace:*",
     "@granola/payments": "workspace:*",
@@ -37,7 +38,6 @@
     "zod": "^4.1.0"
   },
   "devDependencies": {
-    "@granola/email": "workspace:*",
     "@playwright/test": "1.56.1",
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^20",
