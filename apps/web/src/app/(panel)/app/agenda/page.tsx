@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { ExternalLink } from "lucide-react";
 
-import { Button, Skeleton } from "@granola/ui";
+import { Button, Skeleton, SkeletonRow } from "@granola/ui";
 
 import { AgendaTabs, type AgendaData } from "@/components/agenda/agenda-tabs";
 import { PageHeader } from "@/components/panel/page-header";
@@ -115,10 +114,7 @@ async function AgendaContent() {
 
   return (
     <>
-      <PageHeader
-        title="Agenda"
-        description="Tus citas, servicios y disponibilidad."
-      >
+      <PageHeader title="Agenda" className="hidden md:flex">
         <Button
           size="sm"
           variant="outline"
@@ -130,7 +126,7 @@ async function AgendaContent() {
             target="_blank"
             rel="noreferrer"
           >
-            <ExternalLink /> Ver mi página de citas
+            Ver página de citas
           </a>
         </Button>
       </PageHeader>
@@ -146,10 +142,10 @@ function AgendaSkeleton() {
         <Skeleton className="h-8 w-40" />
         <Skeleton className="h-4 w-64" />
       </div>
-      <Skeleton className="h-11 w-full rounded-full sm:w-96" />
+      <Skeleton className="h-11 w-full rounded-md sm:w-96" />
       <div className="flex flex-col gap-2">
-        <Skeleton className="h-28 w-full rounded-2xl" />
-        <Skeleton className="h-28 w-full rounded-2xl" />
+        <SkeletonRow />
+        <SkeletonRow />
       </div>
     </>
   );

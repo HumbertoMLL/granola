@@ -2,7 +2,12 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  SlidersHorizontal,
+} from "lucide-react";
 import {
   addDaysYmd,
   formatTimeInTz,
@@ -29,6 +34,7 @@ import {
   Timeline,
   cn,
   toast,
+  Toolbar,
   type TimelineRange,
 } from "@granola/ui";
 import { addAvailabilityOverride } from "@/app/(panel)/app/agenda/actions";
@@ -36,6 +42,8 @@ import { AppointmentActions } from "@/app/(panel)/app/agenda/[appointmentId]/app
 import {
   STATUS_BADGE_VARIANT,
   STATUS_LABEL,
+  formatCalendarDate,
+  formatTimezone,
 } from "@/components/booking/format";
 import type { AgendaData } from "./agenda-tabs";
 import { freeRangesForDay, minuteInZone, minuteLabel } from "./calendar-layout";
@@ -62,6 +70,7 @@ export function AgendaCalendar({ data }: { data: AgendaData }) {
     ymdInTz(new Date(data.nowIso), data.timezone),
   );
   const [view, setView] = React.useState("day");
+  const [filtersOpen, setFiltersOpen] = React.useState(false);
   const [filters, setFilters] = React.useState<string[]>([]);
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
   const [gap, setGap] = React.useState<
@@ -104,12 +113,7 @@ export function AgendaCalendar({ data }: { data: AgendaData }) {
           ? minuteInZone(a.endsAt, data.timezone)
           : 1440,
       label: `${a.patientName}, ${a.serviceName}, ${formatTimeInTz(new Date(a.startsAt), data.timezone)}, ${STATUS_LABEL[a.status]}`,
-      className: cn(
-        a.status === "pending_payment" &&
-          "border border-dashed border-primary border-l-4",
-        (a.status === "completed" || a.status === "no_show") &&
-          "border-muted-foreground bg-muted text-muted-foreground",
-      ),
+      status: STATUS_BADGE_VARIANT[a.status],
       content: (
         <>
           <span className="flex items-center justify-between gap-1">
@@ -128,7 +132,7 @@ export function AgendaCalendar({ data }: { data: AgendaData }) {
               {STATUS_LABEL[a.status]}
             </Badge>
           </span>
-          <span className="block truncate text-xs">
+          <span className="block truncate text-sm text-muted-foreground">
             {a.serviceName} ·{" "}
             {a.modality === "online" ? "Online" : "Presencial"}
           </span>
@@ -203,103 +207,157 @@ export function AgendaCalendar({ data }: { data: AgendaData }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <SegmentedControl
-        label="Vista de agenda"
-        value={view}
-        onValueChange={(value) => {
-          setView(value);
-          setFilters((f) => f.filter((id) => id !== "today" && id !== "week"));
-        }}
-        options={[
-          { value: "day", label: "Día" },
-          { value: "week", label: "Semana" },
-        ]}
-        className="sm:w-64"
-      />
-      <div className="flex items-center justify-between gap-2">
-        <Button
-          variant="outline"
-          size="icon"
-          aria-label="Semana anterior"
-          onClick={() => changeDate(addDaysYmd(date, -7))}
-        >
-          <ChevronLeft />
-        </Button>
-        <div className="min-w-0 text-center">
-          <h2 className="text-sm font-semibold capitalize">
-            {view === "day"
-              ? formatYmdLong(date)
-              : `${formatYmdLong(days[0]!)} – ${formatYmdLong(days[6]!)}`}
-          </h2>
-          <p className="text-xs text-muted-foreground">
-            {data.timezone.replace(/_/g, " ")}
-          </p>
-        </div>
-        <Button
-          variant="outline"
-          size="icon"
-          aria-label="Semana siguiente"
-          onClick={() => changeDate(addDaysYmd(date, 7))}
-        >
-          <ChevronRight />
-        </Button>
-      </div>
-      <div className="grid grid-cols-7 gap-1" aria-label="Días de la semana">
-        {days.map((day) => (
-          <button
-            key={day}
-            type="button"
-            aria-label={formatYmdLong(day)}
-            aria-pressed={date === day}
-            onClick={() => changeDate(day)}
-            className={cn(
-              "flex min-h-14 flex-col items-center justify-center rounded-xl text-xs",
-              day === date
-                ? "bg-primary-soft font-bold text-primary"
-                : "bg-card text-muted-foreground",
-            )}
-          >
-            {new Intl.DateTimeFormat("es-MX", {
-              weekday: "short",
-              timeZone: "UTC",
-            }).format(new Date(`${day}T12:00:00Z`))}
-            <span className="text-base">{Number(day.slice(-2))}</span>
-            {data.appointments.some(
-              (a) =>
-                a.status !== "cancelled" &&
-                ymdInTz(new Date(a.startsAt), data.timezone) === day,
-            ) && (
-              <span aria-hidden className="size-1 rounded-full bg-current" />
-            )}
-          </button>
-        ))}
-      </div>
-      <div
-        className="flex gap-2 overflow-x-auto py-1"
-        aria-label="Filtrar citas"
+      <Toolbar
+        label="Herramientas de agenda"
+        className="relative flex-nowrap gap-1 border-b border-border pb-3"
       >
-        {FILTERS.map((filter) => (
-          <FilterChip
-            key={filter.id}
-            className="shrink-0 whitespace-nowrap"
-            pressed={filters.includes(filter.id)}
-            onPressedChange={(pressed) => toggle(filter.id, pressed)}
+        <div className="flex shrink-0 items-center">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={view === "day" ? "Día anterior" : "Semana anterior"}
+            onClick={() => changeDate(addDaysYmd(date, view === "day" ? -1 : -7))}
           >
-            {filter.label}
-          </FilterChip>
-        ))}
-      </div>
-      <AppliedFilters
-        count={matches.length}
-        filters={FILTERS.filter((f) => filters.includes(f.id))}
-        onRemove={(id) => toggle(id, false)}
-        onClear={() => setFilters([])}
-      />
-      <p className="text-xs text-muted-foreground">
-        {matches.filter((a) => a.status === "completed").length} completadas ·{" "}
-        {matches.filter((a) => a.status === "pending_payment").length} por
-        cobrar
-      </p>
+            <ChevronLeft />
+          </Button>
+          <Button
+            variant="ghost"
+            className="w-11 px-0"
+            onClick={() => changeDate(today)}
+          >
+            Hoy
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={view === "day" ? "Día siguiente" : "Semana siguiente"}
+            onClick={() => changeDate(addDaysYmd(date, view === "day" ? 1 : 7))}
+          >
+            <ChevronRight />
+          </Button>
+        </div>
+        <h2
+          className="min-w-0 flex-1 truncate text-sm font-medium"
+          title={
+            view === "day"
+              ? formatCalendarDate(date)
+              : `${formatCalendarDate(days[0]!)} – ${formatCalendarDate(days[6]!)}`
+          }
+        >
+          <span className="md:hidden">
+            {view === "week" ? `${Number(days[0]!.slice(-2))}–` : ""}
+            {new Intl.DateTimeFormat("es-MX", {
+              day: "numeric",
+              month: "short",
+              timeZone: "UTC",
+            })
+              .format(new Date(`${view === "day" ? date : days[6]}T12:00:00Z`))
+              .replace(/\./g, "")}
+          </span>
+          <span className="hidden md:inline">
+            {view === "day"
+              ? formatCalendarDate(date)
+              : `${formatCalendarDate(days[0]!)} – ${formatCalendarDate(days[6]!)}`}
+          </span>
+        </h2>
+        <SegmentedControl
+          label="Vista de agenda"
+          value={view}
+          onValueChange={(value) => {
+            setView(value);
+            setFilters((f) =>
+              f.filter((id) => id !== "today" && id !== "week"),
+            );
+          }}
+          options={[
+            { value: "day", label: "Día" },
+            { value: "week", label: "Semana" },
+          ]}
+          className="w-[100px] shrink-0 [&_span]:px-1"
+        />
+        <div className="relative shrink-0">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Filtros"
+            aria-expanded={filtersOpen}
+            aria-controls="agenda-filters"
+            onClick={() => setFiltersOpen(!filtersOpen)}
+            className="md:w-auto md:gap-2 md:px-3"
+          >
+            <SlidersHorizontal />
+            <span className="hidden md:inline">Filtros</span>
+            <ChevronDown className="hidden md:block" />
+          </Button>
+          {filtersOpen && (
+            <div
+              id="agenda-filters"
+              className="absolute right-0 top-full z-30 mt-2 w-64 space-y-3 rounded-xl border border-border bg-card p-4 shadow-float"
+            >
+              <p className="text-sm font-medium">Filtrar citas</p>
+              <div className="flex flex-wrap gap-2">
+                {FILTERS.map((filter) => (
+                  <FilterChip
+                    key={filter.id}
+                    pressed={filters.includes(filter.id)}
+                    onPressedChange={(pressed) => toggle(filter.id, pressed)}
+                  >
+                    {filter.label}
+                  </FilterChip>
+                ))}
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {formatTimezone(data.timezone)}
+              </p>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setFiltersOpen(false)}
+              >
+                Cerrar filtros
+              </Button>
+            </div>
+          )}
+        </div>
+      </Toolbar>
+      {view === "day" && (
+        <div
+          className="grid grid-cols-7 border-b border-border pb-3 md:hidden"
+          aria-label="Días de la semana"
+        >
+          {days.map((day) => (
+            <button
+              key={day}
+              type="button"
+              aria-label={formatYmdLong(day)}
+              aria-pressed={date === day}
+              onClick={() => changeDate(day)}
+              className={cn(
+                "flex min-h-12 flex-col items-center justify-center gap-1 rounded-md text-xs",
+                day === date
+                  ? "bg-secondary font-semibold text-primary-hover"
+                  : "text-muted-foreground",
+              )}
+            >
+              {new Intl.DateTimeFormat("es-MX", {
+                weekday: "short",
+                timeZone: "UTC",
+              })
+                .format(new Date(`${day}T12:00:00Z`))
+                .replace(/\./g, "")}
+              <span className="text-base">{Number(day.slice(-2))}</span>
+            </button>
+          ))}
+        </div>
+      )}
+      {filters.length > 0 && (
+        <AppliedFilters
+          count={matches.length}
+          filters={FILTERS.filter((f) => filters.includes(f.id))}
+          onRemove={(id) => toggle(id, false)}
+          onClear={() => setFilters([])}
+        />
+      )}
       {!matches.length && (
         <EmptyState
           title="Sin citas en esta vista"
@@ -324,7 +382,7 @@ export function AgendaCalendar({ data }: { data: AgendaData }) {
       {view === "day" ? (
         <div
           ref={timelineViewport}
-          className="max-h-[35dvh] overflow-y-auto overscroll-contain rounded-xl border border-border bg-card px-2 py-4 sm:max-h-[60dvh]"
+          className="max-h-[60dvh] overflow-y-auto overscroll-contain bg-card px-2 py-4"
         >
           <Timeline
             label="Agenda del día"
@@ -340,91 +398,124 @@ export function AgendaCalendar({ data }: { data: AgendaData }) {
           />
         </div>
       ) : (
-        <section
-          aria-label="Agenda de la semana"
-          className="relative ml-8 grid grid-cols-7 rounded-xl border border-border bg-card"
-          style={{ height: (endMinute - startMinute) * 0.8 }}
-        >
-          {Array.from(
-            { length: (endMinute - startMinute) / 60 + 1 },
-            (_, i) => startMinute + i * 60,
-          ).map((minute) => (
-            <span
-              key={minute}
-              aria-hidden
-              className="pointer-events-none absolute -left-8 text-xs text-muted-foreground"
-              style={{ top: (minute - startMinute) * 0.8 }}
-            >
-              {minute / 60}
-            </span>
-          ))}
-          {days.map((day) => (
-            <div
-              key={day}
-              className="relative border-l border-border first:border-0"
-              aria-label={formatYmdLong(day)}
-            >
-              {Array.from(
-                { length: (endMinute - startMinute) / 60 },
-                (_, i) => (
-                  <div
-                    key={i}
-                    aria-hidden
-                    className="pointer-events-none absolute inset-x-0 border-t border-border"
-                    style={{ top: i * 48 }}
+        <div className="overflow-x-auto">
+          <div
+            className="ml-8 grid grid-cols-7 border-b border-border"
+            aria-hidden
+          >
+            {days.map((day) => (
+              <div
+                key={day}
+                className={cn(
+                  "py-3 text-center text-xs",
+                  day === today &&
+                    "bg-secondary font-semibold text-primary-hover",
+                )}
+              >
+                <span className="block">
+                  {new Intl.DateTimeFormat("es-MX", {
+                    weekday: "short",
+                    timeZone: "UTC",
+                  })
+                    .format(new Date(`${day}T12:00:00Z`))
+                    .replace(/\./g, "")}
+                </span>
+                <span className="text-base">{Number(day.slice(-2))}</span>
+              </div>
+            ))}
+          </div>
+          <section
+            aria-label="Agenda de la semana"
+            className="relative ml-8 grid grid-cols-7 border-b border-border bg-card"
+            style={{ height: (endMinute - startMinute) * 0.8 }}
+          >
+            {Array.from(
+              { length: (endMinute - startMinute) / 60 + 1 },
+              (_, i) => startMinute + i * 60,
+            ).map((minute) => (
+              <span
+                key={minute}
+                aria-hidden
+                className="pointer-events-none absolute -left-8 font-mono text-xs text-muted-foreground"
+                style={{ top: (minute - startMinute) * 0.8 }}
+              >
+                {minute / 60}
+              </span>
+            ))}
+            {days.map((day) => (
+              <div
+                key={day}
+                className="relative border-l border-border first:border-0"
+                aria-label={formatYmdLong(day)}
+              >
+                {Array.from(
+                  { length: (endMinute - startMinute) / 60 },
+                  (_, i) => (
+                    <div
+                      key={i}
+                      aria-hidden
+                      className="pointer-events-none absolute inset-x-0 border-t border-border"
+                      style={{ top: i * 48 }}
+                    />
+                  ),
+                )}
+                {free(day).map((range) => (
+                  <button
+                    key={`free-${range.startMinute}`}
+                    type="button"
+                    aria-label={`Libre ${formatYmdLong(day)} ${minuteLabel(range.startMinute)}–${minuteLabel(range.endMinute)}`}
+                    className="absolute inset-x-px rounded-sm hover:bg-primary-soft focus-visible:bg-primary-soft"
+                    style={{
+                      top: (range.startMinute - startMinute) * 0.8,
+                      height: (range.endMinute - range.startMinute) * 0.8,
+                    }}
+                    onClick={() => setGap({ ...range, date: day })}
                   />
-                ),
-              )}
-              {free(day).map((range) => (
-                <button
-                  key={`free-${range.startMinute}`}
-                  type="button"
-                  aria-label={`Libre ${formatYmdLong(day)} ${minuteLabel(range.startMinute)}–${minuteLabel(range.endMinute)}`}
-                  className="absolute inset-x-px rounded-sm hover:bg-primary-soft focus-visible:bg-primary-soft"
-                  style={{
-                    top: (range.startMinute - startMinute) * 0.8,
-                    height: (range.endMinute - range.startMinute) * 0.8,
-                  }}
-                  onClick={() => setGap({ ...range, date: day })}
-                />
-              ))}
-              <ul>
-                {dayBlocks(day).map((block) => (
-                  <li key={block.id}>
-                    <button
-                      type="button"
-                      aria-label={block.label}
-                      onClick={() => setSelectedId(block.id)}
-                      className={cn(
-                        "absolute inset-x-px overflow-hidden rounded-sm border-2 border-primary bg-primary-soft text-xs font-bold text-primary",
-                        block.className,
-                      )}
-                      style={{
-                        top: (block.startMinute - startMinute) * 0.8,
-                        height: (block.endMinute - block.startMinute) * 0.8,
-                      }}
-                    >
-                      {block.label.slice(0, 1)}
-                    </button>
-                  </li>
                 ))}
-              </ul>
-            </div>
-          ))}
-        </section>
+                <ul>
+                  {dayBlocks(day).map((block) => (
+                    <li key={block.id}>
+                      <button
+                        type="button"
+                        aria-label={block.label}
+                        onClick={() => setSelectedId(block.id)}
+                        className={cn(
+                          "absolute inset-x-px overflow-hidden rounded-md border-l-[3px] px-1 text-left text-xs font-medium",
+                          block.status === "confirmed"
+                            ? "border-status-confirmed bg-status-confirmed-soft text-status-confirmed-foreground"
+                            : block.status === "pending"
+                              ? "border-status-pending bg-status-pending-soft text-status-pending-foreground"
+                              : "border-status-done bg-status-done-soft text-status-done-foreground",
+                        )}
+                        style={{
+                          top: (block.startMinute - startMinute) * 0.8,
+                          height: (block.endMinute - block.startMinute) * 0.8,
+                        }}
+                      >
+                        <span className="block truncate">
+                          {
+                            dayRows(day)
+                              .find((row) => row.id === block.id)
+                              ?.patientName.split(" ")[0]
+                          }
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </section>
+        </div>
       )}
-      <p className="text-xs text-muted-foreground">
-        Borde sólido: confirmada · Punteado: pendiente de pago · Atenuado:
-        completada / no asistió. Los huecos Libre respetan tu disponibilidad y
-        el margen entre citas.
-      </p>
       <Button
-        variant="outline"
+        variant="ghost"
+        className="self-start"
         onClick={() =>
           setGap({ date, startMinute: 540, endMinute: 600, kind: "block" })
         }
       >
-        <Plus /> Bloquear horario
+        Bloquear horario
       </Button>
       <Sheet
         open={!!selected}
@@ -436,7 +527,7 @@ export function AgendaCalendar({ data }: { data: AgendaData }) {
               <SheetHeader>
                 <SheetTitle>{selected.patientName}</SheetTitle>
                 <SheetDescription>
-                  {formatYmdLong(
+                  {formatCalendarDate(
                     ymdInTz(new Date(selected.startsAt), data.timezone),
                   )}{" "}
                   · {formatTimeInTz(new Date(selected.startsAt), data.timezone)}
@@ -539,7 +630,7 @@ function GapSheet({
           <SheetTitle>Nueva cita / Bloquear</SheetTitle>
           <SheetDescription>
             {gap
-              ? `${formatYmdLong(gap.date)} · ${minuteLabel(gap.startMinute)}–${minuteLabel(gap.endMinute)}`
+              ? `${formatCalendarDate(gap.date)} · ${minuteLabel(gap.startMinute)}–${minuteLabel(gap.endMinute)}`
               : "Elige qué hacer con este horario."}
           </SheetDescription>
         </SheetHeader>

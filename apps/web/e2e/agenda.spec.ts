@@ -1,6 +1,21 @@
 import { expect, test, type Page } from "@playwright/test";
 import { fileURLToPath } from "node:url";
 
+test("en escritorio la vista Día permite avanzar y volver un día", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/login?next=/app/agenda");
+  await page.getByLabel("Correo").fill("karla@granola.demo");
+  await page.getByLabel("Contraseña").fill("granola-demo-2026");
+  await page.getByRole("button", { name: "Entrar", exact: true }).click();
+  await page.waitForURL(/\/app\/agenda/);
+  const date = page.getByRole("heading", { level: 2 });
+  const initial = await date.textContent();
+  await page.getByRole("button", { name: "Día siguiente", exact: true }).click();
+  await expect(date).not.toHaveText(initial!);
+  await page.getByRole("button", { name: "Día anterior", exact: true }).click();
+  await expect(date).toHaveText(initial!);
+});
+
 /** Los cuatro archivos quedan disponibles como artefactos del PR a 390 px. */
 const capture = (name: string) =>
   fileURLToPath(new URL(`../../../docs/ux-captures/${name}`, import.meta.url));
@@ -23,7 +38,7 @@ test("Karla consulta Día, cambia a Semana y abre una cita en la hoja inferior",
   await expect(
     page.getByRole("link", { name: "Agendar consulta", exact: true }),
   ).toBeVisible();
-  await expect(page.getByText(/Próximo horario disponible:/)).toBeVisible();
+  await expect(page.getByText(/Próximo horario:/)).toBeVisible();
   await mobileCapture(page, "01-perfil-390.png");
 
   await page.goto("/karla/agendar");
@@ -72,12 +87,16 @@ test("Karla consulta Día, cambia a Semana y abre una cita en la hoja inferior",
   ).toBeVisible();
   await mobileCapture(page, "04-agenda-semana-390.png");
   await sheet.getByRole("button", { name: "Cerrar", exact: true }).click();
+  await page.getByRole("button", { name: "Filtros", exact: true }).click();
   await page
     .getByRole("button", { name: "Pendientes de pago", exact: true })
     .click();
   await expect(
     page.getByRole("button", { name: "Quitar filtro Pendientes de pago" }),
   ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Cerrar filtros", exact: true })
+    .click();
   await page.getByRole("button", { name: "Limpiar todo", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "Quitar filtro Pendientes de pago" }),

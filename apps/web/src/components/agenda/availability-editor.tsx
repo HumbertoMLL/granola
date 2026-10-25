@@ -13,7 +13,6 @@ import {
   DialogDescription,
   DialogFooter,
   Button,
-  Card,
   Input,
   Label,
   Select,
@@ -24,7 +23,7 @@ import {
   Switch,
   toast,
 } from "@granola/ui";
-import { formatYmdLong, parseTimeToMinutes } from "@granola/core/scheduling";
+import { parseTimeToMinutes } from "@granola/core/scheduling";
 
 import {
   addAvailabilityOverride,
@@ -33,6 +32,7 @@ import {
   updateSchedulingSettings,
   updateTimezone,
 } from "@/app/(panel)/app/agenda/actions";
+import { formatCalendarDate } from "@/components/booking/format";
 import { Field } from "@/components/agenda/services-manager";
 import { LATAM_TIMEZONES, WEEKDAY_NAMES } from "@/components/agenda/timezones";
 
@@ -95,7 +95,7 @@ function TimezoneCard({ timezone }: { timezone: string }) {
   const [pending, startTransition] = React.useTransition();
   const known = LATAM_TIMEZONES.some((t) => t.value === timezone);
   return (
-    <Card className="gap-3 p-4">
+    <section className="flex flex-col gap-3 border-b border-border pb-6">
       <div>
         <p className="font-semibold">Zona horaria</p>
         <p className="text-sm text-muted-foreground">
@@ -126,7 +126,7 @@ function TimezoneCard({ timezone }: { timezone: string }) {
           ))}
         </SelectContent>
       </Select>
-    </Card>
+    </section>
   );
 }
 
@@ -217,13 +217,10 @@ function SchedulingSettingsCard({
   ];
 
   return (
-    <Card className="gap-4 p-4">
+    <section className="flex flex-col gap-4 border-b border-border py-6">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="font-semibold">Reglas de agenda</p>
-          <p className="text-sm text-muted-foreground">
-            Cómo se calculan los horarios que ven tus pacientes.
-          </p>
         </div>
         {dirty ? <Badge variant="accent">Sin guardar</Badge> : null}
       </div>
@@ -270,7 +267,7 @@ function SchedulingSettingsCard({
           Guardar reglas
         </Button>
       </div>
-    </Card>
+    </section>
   );
 }
 
@@ -377,13 +374,10 @@ function WeeklyEditor({ rules }: { rules: RuleRow[] }) {
   }
 
   return (
-    <Card className="gap-4 p-4">
+    <section className="flex flex-col gap-4 border-b border-border py-6">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="font-semibold">Horario semanal</p>
-          <p className="text-sm text-muted-foreground">
-            Puedes tener varias ventanas por día (p. ej. mañana y tarde).
-          </p>
         </div>
         {dirty ? <Badge variant="accent">Sin guardar</Badge> : null}
       </div>
@@ -496,7 +490,7 @@ function WeeklyEditor({ rules }: { rules: RuleRow[] }) {
       </ul>
 
       {validation && dirty ? (
-        <p className="text-sm text-destructive">{validation}</p>
+        <p className="text-sm text-destructive-ink">{validation}</p>
       ) : null}
 
       <div className="flex justify-end gap-2">
@@ -520,7 +514,7 @@ function WeeklyEditor({ rules }: { rules: RuleRow[] }) {
           Guardar horario
         </Button>
       </div>
-    </Card>
+    </section>
   );
 }
 
@@ -563,13 +557,10 @@ function OverridesEditor({ overrides }: { overrides: OverrideRow[] }) {
   }
 
   return (
-    <Card className="gap-4 p-4">
+    <section className="flex flex-col gap-4 border-b border-border py-6">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="font-semibold">Excepciones</p>
-          <p className="text-sm text-muted-foreground">
-            Vacaciones, días festivos o un sábado que sí vas a atender.
-          </p>
         </div>
         <Button size="sm" variant="outline" onClick={() => setOpen((o) => !o)}>
           <Plus /> Agregar
@@ -668,15 +659,15 @@ function OverridesEditor({ overrides }: { overrides: OverrideRow[] }) {
       ) : (
         <ul className="flex flex-col divide-y divide-border">
           {upcoming.map((o) => (
-            <li key={o.id} className="flex items-center gap-3 py-2.5">
+            <li key={o.id} className="flex items-center gap-3 py-3">
               {o.isBlocked ? (
-                <CalendarOff className="size-4 shrink-0 text-destructive" />
+                <CalendarOff className="size-4 shrink-0 text-destructive-ink" />
               ) : (
-                <CalendarPlus className="size-4 shrink-0 text-primary" />
+                <CalendarPlus className="size-4 shrink-0 text-muted-foreground" />
               )}
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium capitalize">
-                  {formatYmdLong(o.date, "es-MX", { year: "numeric" })}
+                  {formatCalendarDate(o.date)}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {o.isBlocked ? "Bloqueado" : "Ventana extra"}
@@ -730,6 +721,6 @@ function OverridesEditor({ overrides }: { overrides: OverrideRow[] }) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </Card>
+    </section>
   );
 }
