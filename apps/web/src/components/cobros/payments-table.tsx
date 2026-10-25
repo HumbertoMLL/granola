@@ -36,8 +36,8 @@ export function PaymentsTable({
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border">
-      <div className="hidden grid-cols-[1.1fr_1.4fr_1.4fr_1fr_1fr_1fr] gap-3 border-b border-border bg-secondary/60 px-4 py-2 text-xs font-semibold tracking-wide text-muted-foreground md:grid">
+    <div className="overflow-hidden border-y border-border">
+      <div className="hidden grid-cols-[1.1fr_1.4fr_1.4fr_1fr_1fr_1fr] gap-3 border-b border-border px-0 py-3 text-xs font-semibold tracking-wide text-muted-foreground md:grid">
         <span>Fecha</span>
         <span>Paciente</span>
         <span>Servicio</span>
@@ -49,7 +49,7 @@ export function PaymentsTable({
         {items.map((p) => (
           <li
             key={p.id}
-            className="grid grid-cols-[1fr_auto] gap-x-3 gap-y-1 px-4 py-3 md:grid-cols-[1.1fr_1.4fr_1.4fr_1fr_1fr_1fr] md:items-center md:gap-3"
+            className="grid grid-cols-[1fr_auto] gap-x-3 gap-y-2 px-0 py-3 md:grid-cols-[1.1fr_1.4fr_1.4fr_1fr_1fr_1fr] md:items-center md:gap-3"
           >
             {/* Móvil: paciente + monto arriba; servicio, método y fecha abajo */}
             <p className="truncate font-medium md:order-2">{p.patientName}</p>

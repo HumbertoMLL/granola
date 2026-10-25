@@ -38,9 +38,7 @@ import {
 import { LinkIcon } from "@/components/public-profile/link-icon";
 import { initials } from "@/components/public-profile/profile-view";
 import {
-  BUTTON_RADIUS,
   BUTTON_STYLES,
-  BUTTON_STYLE_LABELS,
   LINK_ICONS,
   LINK_ICON_LABELS,
   PRESETS,
@@ -129,9 +127,9 @@ export function AvatarUploader({
 
   return (
     <div className="flex items-center gap-4">
-      <Avatar className="size-20 ring-2 ring-border">
+      <Avatar className="size-16">
         {avatarUrl ? <AvatarImage src={avatarUrl} alt="" /> : null}
-        <AvatarFallback className="text-xl">
+        <AvatarFallback className="text-lg">
           {initials(name || "N")}
         </AvatarFallback>
       </Avatar>
@@ -168,10 +166,10 @@ export function AvatarUploader({
             </Button>
           ) : null}
         </div>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           {storageConfigured
-            ? "Cuadrada, mínimo 400 px. La recortamos y optimizamos por ti."
-            : "Configura R2 (R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET) para subir fotos."}
+            ? "JPG, PNG o WebP. Recorte cuadrado."
+            : "La carga de fotos aún no está disponible."}
         </p>
       </div>
     </div>
@@ -254,7 +252,7 @@ export function LinksEditor({ links, onChange, errors }: LinksEditorProps) {
           <li
             key={l.id}
             className={cn(
-              "flex gap-3 rounded-xl border border-border bg-background p-3",
+              "flex gap-3 border-b border-border py-4",
               !l.visible && "opacity-70",
             )}
           >
@@ -262,7 +260,7 @@ export function LinksEditor({ links, onChange, errors }: LinksEditorProps) {
               <button
                 type="button"
                 aria-label="Subir"
-                className="rounded-md p-1 text-muted-foreground hover:bg-secondary hover:text-foreground disabled:opacity-30"
+                className="rounded-md p-3 text-muted-foreground hover:bg-secondary hover:text-foreground disabled:opacity-30"
                 disabled={i === 0}
                 onClick={() => move(i, -1)}
               >
@@ -271,7 +269,7 @@ export function LinksEditor({ links, onChange, errors }: LinksEditorProps) {
               <button
                 type="button"
                 aria-label="Bajar"
-                className="rounded-md p-1 text-muted-foreground hover:bg-secondary hover:text-foreground disabled:opacity-30"
+                className="rounded-md p-3 text-muted-foreground hover:bg-secondary hover:text-foreground disabled:opacity-30"
                 disabled={i === links.length - 1}
                 onClick={() => move(i, 1)}
               >
@@ -336,7 +334,7 @@ export function LinksEditor({ links, onChange, errors }: LinksEditorProps) {
                 aria-label={l.visible ? "Ocultar link" : "Mostrar link"}
                 aria-pressed={l.visible}
                 title={l.visible ? "Visible" : "Oculto"}
-                className="rounded-md p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground"
+                className="rounded-md p-3 text-muted-foreground hover:bg-secondary hover:text-foreground"
                 onClick={() => update(l.id, { visible: !l.visible })}
               >
                 {l.visible ? (
@@ -348,7 +346,7 @@ export function LinksEditor({ links, onChange, errors }: LinksEditorProps) {
               <button
                 type="button"
                 aria-label="Borrar link"
-                className="rounded-md p-1.5 text-muted-foreground hover:bg-destructive-soft hover:text-destructive"
+                className="rounded-md p-3 text-muted-foreground hover:bg-destructive-soft hover:text-destructive-ink"
                 onClick={() => setDeleting(l.id)}
               >
                 <Trash2 className="size-4" />
@@ -387,7 +385,7 @@ export function LinksEditor({ links, onChange, errors }: LinksEditorProps) {
       </Dialog>
 
       {errors?.length ? (
-        <p className="text-xs text-destructive">{errors[0]}</p>
+        <p className="text-sm text-destructive-ink">{errors[0]}</p>
       ) : null}
 
       <Button
@@ -420,7 +418,7 @@ export function AppearanceEditor({
 }: AppearanceEditorProps) {
   return (
     <div className="flex flex-col gap-6">
-      <div className="grid gap-2.5">
+      <div className="grid gap-2">
         <Label>Tema</Label>
         <SegmentedControl
           label="Tema"
@@ -434,7 +432,7 @@ export function AppearanceEditor({
               <span className="flex flex-col items-center gap-1">
                 <span
                   aria-hidden
-                  className="size-6 rounded-full border border-border"
+                  className="size-6 rounded-md border border-border"
                   style={{ background: PRESETS[preset].primary }}
                 />
                 <span className="text-[11px]">{PRESETS[preset].label}</span>
@@ -444,7 +442,7 @@ export function AppearanceEditor({
         />
       </div>
 
-      <div className="grid gap-2.5">
+      <div className="grid gap-2">
         <Label>Estilo de botones</Label>
         <SegmentedControl
           label="Estilo de botones"
@@ -461,10 +459,17 @@ export function AppearanceEditor({
               <span className="flex flex-col gap-1">
                 <span
                   aria-hidden
-                  className="h-5 w-12 bg-primary"
-                  style={{ borderRadius: BUTTON_RADIUS[style] }}
+                  className="h-5 w-12 bg-foreground"
+                  style={{
+                    borderRadius:
+                      style === "pill" ? 999 : style === "rounded" ? 12 : 6,
+                  }}
                 />
-                {BUTTON_STYLE_LABELS[style]}
+                {
+                  { pill: "Clásico", rounded: "Suave", square: "Compacto" }[
+                    style
+                  ]
+                }
               </span>
             ),
           }))}
@@ -476,7 +481,7 @@ export function AppearanceEditor({
         title="Botón de WhatsApp"
         description={
           hasPhone
-            ? "Muestra “Escríbeme por WhatsApp” debajo de Agendar."
+            ? "Permite contactarte desde tu página."
             : "Agrega tu número de WhatsApp en Perfil para activarlo."
         }
         checked={theme.showWhatsApp && hasPhone}
@@ -486,7 +491,7 @@ export function AppearanceEditor({
       <ToggleRow
         id="show-reviews"
         title="Mostrar reseñas verificadas"
-        description="Solo de pacientes con cita completada. Nunca son obligatorias ni editables."
+        description="De pacientes con consulta completada."
         checked={theme.showReviews}
         onCheckedChange={(v) => onChange({ ...theme, showReviews: v })}
       />
@@ -510,12 +515,12 @@ function ToggleRow({
   onCheckedChange: (v: boolean) => void;
 }) {
   return (
-    <div className="flex items-center justify-between gap-4 rounded-xl border border-border px-4 py-3">
+    <div className="flex items-center justify-between gap-4 border-b border-border py-4">
       <div>
         <Label htmlFor={id} className="text-sm font-medium">
           {title}
         </Label>
-        <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
+        <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
       </div>
       <Switch
         id={id}

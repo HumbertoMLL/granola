@@ -11,15 +11,15 @@ const links = [
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" aria-label="Granola, inicio" className="rounded-full">
-          <Logo size={30} />
+    <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-md">
+      <div className="mx-auto flex h-16 max-w-[1120px] items-center justify-between px-4 md:px-8">
+        <Link href="/" aria-label="Granola, inicio" className="rounded-md">
+          <Logo size={24} />
         </Link>
 
         <nav
           aria-label="Principal"
-          className="hidden items-center gap-7 md:flex"
+          className="hidden items-center gap-8 md:flex"
         >
           {links.map((l) => (
             <a
@@ -33,12 +33,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Button
-            asChild
-            variant="ghost"
-            size="sm"
-            className="hidden sm:inline-flex"
-          >
+          <Button asChild variant="ghost" size="sm" className="inline-flex">
             {/* TODO(auth): ruta real de login */}
             <Link href="/login">Entrar</Link>
           </Button>

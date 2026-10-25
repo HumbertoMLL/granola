@@ -1,15 +1,12 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { Landmark, Store } from "lucide-react";
-
 import {
   Badge,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+  KPI,
+  SectionHeader,
   Skeleton,
+  SkeletonKPI,
+  SkeletonRow,
 } from "@granola/ui";
 import {
   accountStatusFromColumns,
@@ -21,11 +18,21 @@ import {
 } from "@granola/payments";
 
 import { PageHeader } from "@/components/panel/page-header";
-import { currentMonth, formatDateTime, formatMoney, monthLabel, monthOffsetMinutes, recentMonths } from "@/components/cobros/format";
+import {
+  currentMonth,
+  formatDateTime,
+  formatMoney,
+  monthLabel,
+  monthOffsetMinutes,
+  recentMonths,
+} from "@/components/cobros/format";
 import { MarkCashPaidButton } from "@/components/cobros/mark-cash-paid-button";
 import { MonthFilter } from "@/components/cobros/month-filter";
 import { PaymentsTable } from "@/components/cobros/payments-table";
-import { StripeConnectCard, type StripeCardState } from "@/components/cobros/stripe-connect-card";
+import {
+  StripeConnectCard,
+  type StripeCardState,
+} from "@/components/cobros/stripe-connect-card";
 import { requireNutritionist } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Cobros" };
@@ -36,23 +43,33 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>;
  * Con `cacheComponents` todo lo que lee cookies (sesión) o searchParams va
  * dentro de Suspense; el shell estático (header + explicación) se sirve al instante.
  */
-export default function CobrosPage({ searchParams }: { searchParams: SearchParams }) {
+export default function CobrosPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title="Cobros" description="Lo que te pagan tus pacientes, sin comisión.">
-        <Badge>Comisión Granola: 0%</Badge>
+      <PageHeader title="Cobros">
+        <span className="text-sm text-muted-foreground">
+          Comisión Granola{" "}
+          <span className="font-medium text-foreground">0%</span> · MXN
+        </span>
       </PageHeader>
 
       <Suspense fallback={<SummarySkeleton />}>
         <SummaryAndTable searchParams={searchParams} />
       </Suspense>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Suspense fallback={<Skeleton className="h-52" />}>
-          <StripeSection searchParams={searchParams} />
-        </Suspense>
-        <MercadoPagoCard />
-      </div>
+      <section className="grid gap-4 border-t border-border pt-6">
+        <SectionHeader title="Métodos de cobro" />
+        <div className="grid gap-6 md:grid-cols-2">
+          <Suspense fallback={<Skeleton className="h-52" />}>
+            <StripeSection searchParams={searchParams} />
+          </Suspense>
+          <MercadoPagoCard />
+        </div>
+      </section>
 
       <Suspense fallback={<Skeleton className="h-32" />}>
         <CashSection searchParams={searchParams} />
@@ -74,53 +91,51 @@ async function resolveMonth(searchParams: SearchParams, timeZone: string) {
 
 // ───────────── resumen + tabla ─────────────
 
-async function SummaryAndTable({ searchParams }: { searchParams: SearchParams }) {
+async function SummaryAndTable({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
   const { nutritionist } = await requireNutritionist();
   const tz = nutritionist.timezone;
   const { month, months, offset } = await resolveMonth(searchParams, tz);
 
   const [summary, items] = await Promise.all([
     summarizeMonth(nutritionist.id, month, { timezoneOffsetMinutes: offset }),
-    listPaymentsForMonth(nutritionist.id, month, { timezoneOffsetMinutes: offset }),
+    listPaymentsForMonth(nutritionist.id, month, {
+      timezoneOffsetMinutes: offset,
+    }),
   ]);
 
   return (
     <>
       <div className="flex items-center justify-between gap-3">
-        <p className="text-sm font-semibold">{monthLabel(month)}</p>
+        <h2 className="text-lg font-semibold">{monthLabel(month)}</h2>
         <MonthFilter months={months} value={month} />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardDescription>Cobrado este mes</CardDescription>
-            <CardTitle className="text-3xl font-extrabold tabular-nums">{formatMoney(summary.paidCents)}</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            {summary.paidCount} {summary.paidCount === 1 ? "pago" : "pagos"} · comisión Granola $0
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardDescription>Pendientes (SPEI / OXXO)</CardDescription>
-            <CardTitle className="text-3xl font-extrabold tabular-nums">{summary.pendingCount}</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            {formatMoney(summary.pendingCents)} esperando acreditarse
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardDescription>Pagos en consulta</CardDescription>
-            <CardTitle className="text-3xl font-extrabold tabular-nums">{summary.cashCount}</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">Cobrados en efectivo y registrados aquí.</CardContent>
-        </Card>
+      <div className="grid grid-cols-3 gap-4 border-y border-border py-6 md:gap-6">
+        <KPI
+          label="Cobrado"
+          value={formatMoney(summary.paidCents)}
+          delta={`${summary.paidCount} ${summary.paidCount === 1 ? "pago" : "pagos"}`}
+        />
+        <KPI
+          label="Por acreditar"
+          value={formatMoney(summary.pendingCents)}
+          delta={`${summary.pendingCount} pendientes`}
+        />
+        <KPI
+          label="En consulta"
+          value={summary.cashCount}
+          delta={
+            summary.cashCount === 1 ? "pago en efectivo" : "pagos en efectivo"
+          }
+        />
       </div>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-base font-semibold">Historial</h2>
+        <SectionHeader title="Historial" />
         <PaymentsTable items={items} timeZone={tz} />
       </section>
     </>
@@ -135,11 +150,12 @@ function SummarySkeleton() {
         <Skeleton className="h-9 w-44" />
       </div>
       <div className="grid gap-4 md:grid-cols-3">
-        <Skeleton className="h-28" />
-        <Skeleton className="h-28" />
-        <Skeleton className="h-28" />
+        <SkeletonKPI />
+        <SkeletonKPI />
+        <SkeletonKPI />
       </div>
-      <Skeleton className="h-40" />
+      <SkeletonRow />
+      <SkeletonRow />
     </>
   );
 }
@@ -147,7 +163,10 @@ function SummarySkeleton() {
 // ───────────── Stripe ─────────────
 
 async function StripeSection({ searchParams }: { searchParams: SearchParams }) {
-  const [{ nutritionist }, sp] = await Promise.all([requireNutritionist(), searchParams]);
+  const [{ nutritionist }, sp] = await Promise.all([
+    requireNutritionist(),
+    searchParams,
+  ]);
   const justReturned = sp.stripe === "return";
 
   // Flags persistidos (webhook `account.updated` / botón "Actualizar estado"):
@@ -184,34 +203,26 @@ async function StripeSection({ searchParams }: { searchParams: SearchParams }) {
 function MercadoPagoCard() {
   const configured = isMercadoPagoConfigured();
   return (
-    <Card className="gap-4">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex size-11 items-center justify-center rounded-xl bg-accent-soft text-[#8a5a0b]">
-          <Store className="size-5" />
-        </div>
-        <Badge variant={configured ? "default" : "secondary"}>{configured ? "Incluido" : "No disponible"}</Badge>
+    <section className="flex flex-col items-start gap-3">
+      <div className="flex w-full items-center justify-between gap-3">
+        <h3 className="font-semibold">SPEI y OXXO</h3>
+        <Badge variant={configured ? "confirmed" : "done"}>
+          {configured ? "Disponible" : "No disponible"}
+        </Badge>
       </div>
-      <div>
-        <p className="font-semibold">SPEI y OXXO vía Granola</p>
-        <p className="text-sm text-muted-foreground">
-          Para pacientes sin tarjeta. No tienes que abrir ninguna cuenta: el paciente transfiere por SPEI
-          o paga en OXXO a Granola, la cita se confirma al acreditarse y te lo depositamos.
-        </p>
-      </div>
-      <ul className="flex flex-col gap-1.5 text-sm text-muted-foreground">
-        <li className="flex items-center gap-2">
-          <Landmark className="size-4" /> SPEI: la CLABE vence a las 24 h; se acredita en minutos.
-        </li>
-        <li className="flex items-center gap-2">
-          <Store className="size-4" /> OXXO: la ficha vence a las 48 h; se acredita en 1–2 h hábiles.
-        </li>
-      </ul>
-      {!configured ? (
-        <p className="text-sm text-muted-foreground">
-          Mercado Pago no está configurado en este entorno (falta <code>MP_ACCESS_TOKEN</code>).
-        </p>
-      ) : null}
-    </Card>
+      <p className="text-sm text-muted-foreground">
+        Transferencia o efectivo en OXXO, a través de Granola.
+      </p>
+      <details className="text-sm">
+        <summary className="w-fit cursor-pointer text-muted-foreground">
+          Tiempos de acreditación
+        </summary>
+        <ul className="mt-3 grid gap-2 text-muted-foreground">
+          <li>SPEI: referencia válida 24 h. Se acredita en minutos.</li>
+          <li>OXXO: referencia válida 48 h. Se acredita en 1–2 h hábiles.</li>
+        </ul>
+      </details>
+    </section>
   );
 }
 
@@ -221,35 +232,41 @@ async function CashSection({ searchParams }: { searchParams: SearchParams }) {
   const { nutritionist } = await requireNutritionist();
   const tz = nutritionist.timezone;
   const { month, offset } = await resolveMonth(searchParams, tz);
-  const unpaid = await listUnpaidVisitAppointments(nutritionist.id, month, { timezoneOffsetMinutes: offset });
+  const unpaid = await listUnpaidVisitAppointments(nutritionist.id, month, {
+    timezoneOffsetMinutes: offset,
+  });
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Cobros en consulta</CardTitle>
-        <CardDescription>
-          Citas de {monthLabel(month).toLowerCase()} con pago en consulta que aún no registraste.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+    <section className="grid gap-3 border-t border-border pt-6">
+      <SectionHeader title="Cobros en consulta" />
+      <div>
         {unpaid.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nada pendiente. Todo registrado.</p>
+          <p className="text-sm text-muted-foreground">
+            Nada pendiente. Todo registrado.
+          </p>
         ) : (
           <ul className="divide-y divide-border">
             {unpaid.map((a) => (
-              <li key={a.appointmentId} className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
+              <li
+                key={a.appointmentId}
+                className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between"
+              >
                 <div className="min-w-0">
                   <p className="truncate font-medium">{a.patientName}</p>
                   <p className="text-sm text-muted-foreground">
-                    {a.serviceName} · {formatDateTime(a.startsAt, tz)} · {formatMoney(a.priceCents, a.currency)}
+                    {a.serviceName} · {formatDateTime(a.startsAt, tz)} ·{" "}
+                    {formatMoney(a.priceCents, a.currency)}
                   </p>
                 </div>
-                <MarkCashPaidButton appointmentId={a.appointmentId} amountCents={a.priceCents} />
+                <MarkCashPaidButton
+                  appointmentId={a.appointmentId}
+                  amountCents={a.priceCents}
+                />
               </li>
             ))}
           </ul>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   );
 }

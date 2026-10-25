@@ -1,7 +1,6 @@
-import { Check } from "lucide-react";
 import { cn } from "./lib/utils";
 
-/** currentStep es un índice basado en cero. */
+/** currentStep es un índice basado en cero. Los pasos completos siguen accesibles. */
 export function Stepper({
   steps,
   currentStep,
@@ -11,45 +10,34 @@ export function Stepper({
   currentStep: number;
   label?: string;
 }) {
+  const active = Math.max(0, Math.min(currentStep, steps.length - 1));
   return (
-    <ol aria-label={label} className="flex w-full gap-2">
-      {steps.map((step, i) => (
-        <li
-          key={step}
-          aria-current={i === currentStep ? "step" : undefined}
-          data-state={
-            i < currentStep
-              ? "completed"
-              : i === currentStep
-                ? "current"
-                : "pending"
-          }
-          className={cn(
-            "flex min-w-0 flex-1 flex-col gap-2 text-xs",
-            i <= currentStep
-              ? "font-semibold text-primary"
-              : "text-muted-foreground",
-          )}
-        >
-          <span
+    <div className="w-full space-y-3">
+      <p aria-hidden="true" className="text-sm text-muted-foreground">
+        Paso {active + 1} de {steps.length}
+        <span className="mx-2">·</span>
+        <span className="font-medium text-foreground">{steps[active]}</span>
+      </p>
+      <ol aria-label={label} className="flex w-full gap-1">
+        {steps.map((step, i) => (
+          <li
+            key={step}
+            aria-current={i === active ? "step" : undefined}
+            data-state={
+              i < active ? "completed" : i === active ? "current" : "pending"
+            }
             className={cn(
-              "flex size-7 items-center justify-center rounded-full border",
-              i < currentStep &&
-                "border-primary bg-primary text-primary-foreground",
+              "h-1 min-w-0 flex-1 rounded-md",
+              i <= active ? "bg-primary" : "bg-border",
             )}
           >
-            {i < currentStep ? (
-              <>
-                <Check className="size-4" aria-hidden />
-                <span className="sr-only">Paso {i + 1}, completado</span>
-              </>
-            ) : (
-              i + 1
-            )}
-          </span>
-          <span>{step}</span>
-        </li>
-      ))}
-    </ol>
+            <span className="sr-only">
+              Paso {i + 1} de {steps.length}: {step}
+              {i < active ? ", completado" : ""}
+            </span>
+          </li>
+        ))}
+      </ol>
+    </div>
   );
 }

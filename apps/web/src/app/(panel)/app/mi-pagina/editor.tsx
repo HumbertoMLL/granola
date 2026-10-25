@@ -15,10 +15,7 @@ import {
 
 import {
   Button,
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+  SectionHeader,
   Input,
   Label,
   Sheet,
@@ -240,42 +237,45 @@ export function MyPageEditor({ initial, siteUrl, storageConfigured }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader
-        title="Mi página"
-        description="Lo que ven tus pacientes cuando entran a tu link."
-      >
-        <Button type="button" variant="outline" size="sm" onClick={copyLink}>
-          <Copy /> Copiar link
-        </Button>
-        {canShare ? (
-          <Button type="button" variant="outline" size="sm" onClick={share}>
-            <Share2 /> Compartir
+      <PageHeader title="Mi página">
+        <div className="flex w-full flex-wrap items-center gap-2 md:w-auto">
+          <Button type="button" variant="outline" size="sm" onClick={copyLink}>
+            <Copy /> Copiar link
           </Button>
-        ) : null}
-        <Button asChild variant="ghost" size="sm">
-          <Link href={`/${saved.slug}`} target="_blank" rel="noopener">
-            Ver página <ArrowUpRight />
-          </Link>
-        </Button>
+          {canShare ? (
+            <Button type="button" variant="outline" size="sm" onClick={share}>
+              <Share2 /> Compartir
+            </Button>
+          ) : null}
+          <Button asChild variant="ghost" size="sm">
+            <Link href={`/${saved.slug}`} target="_blank" rel="noopener">
+              Ver página <ArrowUpRight />
+            </Link>
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="lg:hidden"
+            onClick={() => setPreviewOpen(true)}
+          >
+            Vista previa
+          </Button>
+        </div>
       </PageHeader>
 
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
         {/* ------------------------------ Form ------------------------------ */}
         <form
-          className="flex min-w-0 flex-col gap-4"
+          className="flex min-w-0 flex-col gap-8"
           onSubmit={(e) => {
             e.preventDefault();
             save();
           }}
         >
           {/* Perfil */}
-          <Card className="gap-5">
-            <CardHeader>
-              <CardTitle>Perfil</CardTitle>
-              <CardDescription>
-                Tu nombre, tu link y cómo te presentas.
-              </CardDescription>
-            </CardHeader>
+          <section className="grid gap-4 border-t border-border pt-6">
+            <SectionHeader title="Perfil" />
 
             <AvatarUploader
               name={draft.displayName}
@@ -311,7 +311,7 @@ export function MyPageEditor({ initial, siteUrl, storageConfigured }: Props) {
               hint={slugHint.tone !== "error" ? slugHint.text : undefined}
               hintTone={slugHint.tone}
             >
-              <div className="flex items-center overflow-hidden rounded-xl border border-input bg-card focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/25">
+              <div className="flex items-center overflow-hidden rounded-md border border-input bg-card focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/40">
                 <span className="shrink-0 pl-4 text-sm text-muted-foreground select-none">
                   {prettyUrl.split("/")[0]}/@
                 </span>
@@ -338,7 +338,7 @@ export function MyPageEditor({ initial, siteUrl, storageConfigured }: Props) {
                     <Check className="size-4 text-primary" aria-hidden />
                   ) : slugHint.tone === "error" ? (
                     <CircleAlert
-                      className="size-4 text-destructive"
+                      className="size-4 text-destructive-ink"
                       aria-hidden
                     />
                   ) : null}
@@ -368,7 +368,7 @@ export function MyPageEditor({ initial, siteUrl, storageConfigured }: Props) {
                 label="Cédula profesional"
                 htmlFor="cedula"
                 error={errors.cedula?.[0]}
-                hint="Opcional. Se muestra con una palomita."
+                hint="Opcional"
               >
                 <Input
                   id="cedula"
@@ -384,10 +384,10 @@ export function MyPageEditor({ initial, siteUrl, storageConfigured }: Props) {
                 label="WhatsApp"
                 htmlFor="phoneWa"
                 error={errors.phoneWa?.[0]}
-                hint="Escribe tu número de WhatsApp de México."
+                hint="Número de México"
               >
                 <div className="flex items-center gap-2">
-                  <span className="flex h-11 items-center rounded-xl border border-border px-3 text-sm">
+                  <span className="flex h-11 items-center rounded-md border border-border px-3 text-sm">
                     +52
                   </span>
                   <Input
@@ -407,43 +407,32 @@ export function MyPageEditor({ initial, siteUrl, storageConfigured }: Props) {
                 </div>
               </Field>
             </div>
-          </Card>
+          </section>
 
           {/* Links */}
-          <Card className="gap-5">
-            <CardHeader>
-              <CardTitle>Links</CardTitle>
-              <CardDescription>
-                Tus redes y lo que quieras destacar. El orden aquí es el orden
-                en tu página.
-              </CardDescription>
-            </CardHeader>
+          <section className="grid gap-4 border-t border-border pt-6">
+            <SectionHeader title="Enlaces" />
             <LinksEditor
               links={draft.links}
               onChange={(links) => patch({ links })}
               errors={errors.links}
             />
-          </Card>
+          </section>
 
           {/* Apariencia */}
-          <Card className="gap-5">
-            <CardHeader>
-              <CardTitle>Apariencia</CardTitle>
-              <CardDescription>
-                Colores y forma de los botones. Se aplica a toda tu página.
-              </CardDescription>
-            </CardHeader>
+          <section className="grid gap-4 border-t border-border pt-6">
+            <SectionHeader title="Apariencia" />
             <AppearanceEditor
               theme={draft.theme}
               hasPhone={hasPhone}
               onChange={(theme) => patch({ theme })}
             />
-          </Card>
+          </section>
 
           {/* Barra de guardado (pegajosa; en móvil queda sobre la tab bar) */}
           <div
             className={cn(
-              "sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-30 flex items-center justify-between gap-3 rounded-2xl border border-border bg-card/95 p-3 shadow-float backdrop-blur-md transition-all md:bottom-4",
+              "sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 flex items-center justify-between gap-3 rounded-xl border border-border bg-card/95 p-3 shadow-float backdrop-blur-md transition-all duration-150 md:bottom-4",
               dirty
                 ? "translate-y-0 opacity-100"
                 : "pointer-events-none translate-y-2 opacity-0 lg:pointer-events-auto lg:translate-y-0 lg:opacity-100",
@@ -490,8 +479,8 @@ export function MyPageEditor({ initial, siteUrl, storageConfigured }: Props) {
 
         {/* --------------------------- Preview (desktop) --------------------------- */}
         <aside className="sticky top-6 hidden lg:block">
-          <p className="mb-3 text-center text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-            Vista previa en vivo
+          <p className="mb-3 text-sm font-medium text-muted-foreground">
+            Vista previa
           </p>
           <PhonePreview profile={previewProfile} />
         </aside>
@@ -502,9 +491,7 @@ export function MyPageEditor({ initial, siteUrl, storageConfigured }: Props) {
         <SheetContent side="bottom" className="items-center gap-3">
           <SheetHeader className="items-center text-center">
             <SheetTitle>Vista previa</SheetTitle>
-            <SheetDescription>
-              Así ve tu página una paciente desde su celular.
-            </SheetDescription>
+            <SheetDescription>Tu página en el celular.</SheetDescription>
           </SheetHeader>
           <PhonePreview profile={previewProfile} className="max-h-[70dvh]" />
         </SheetContent>
@@ -539,13 +526,13 @@ function Field({
       <Label htmlFor={htmlFor}>{label}</Label>
       {children}
       {error ? (
-        <p className="text-xs text-destructive">{error}</p>
+        <p className="text-sm text-destructive-ink">{error}</p>
       ) : hint ? (
         <p
           className={cn(
-            "text-xs",
+            "text-sm",
             hintTone === "ok" && "text-primary",
-            hintTone === "error" && "text-destructive",
+            hintTone === "error" && "text-destructive-ink",
             hintTone === "muted" && "text-muted-foreground",
           )}
         >
@@ -577,7 +564,7 @@ function slugStatusHint(
       return { text: "Verificando disponibilidad…", tone: "muted" };
     default:
       return {
-        text: "Es el que compartes en tu bio de Instagram y TikTok.",
+        text: "",
         tone: "muted",
       };
   }

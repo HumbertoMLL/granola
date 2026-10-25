@@ -5,7 +5,11 @@ import { getInbodyEvolution } from "@/app/(panel)/app/pacientes/document-actions
 import { apiResult } from "./api-result";
 import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
+import { ArrowLeft, CalendarDays, ClipboardList } from "lucide-react";
 import {
+  Avatar,
+  AvatarFallback,
+  Badge,
   Button,
   Card,
   Tabs,
@@ -14,6 +18,7 @@ import {
   TabsTrigger,
   Textarea,
   Skeleton,
+  SkeletonRow,
   EmptyState,
   Sheet,
   SheetContent,
@@ -27,6 +32,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@granola/ui";
+import { initialsOf } from "@/components/panel/nav";
 import {
   calculateBmi,
   waistHeightRatio,
@@ -37,7 +43,11 @@ import {
   deleteMeasurement,
   getPatientRecord,
 } from "@/app/(panel)/app/pacientes/actions";
-import { STATUS_LABEL } from "@/components/booking/format";
+import {
+  STATUS_BADGE_VARIANT,
+  STATUS_LABEL,
+} from "@/components/booking/format";
+import { StatusBadge } from "@/components/cobros/method-icon";
 import { MeasurementChart } from "./measurement-chart";
 import { MeasurementEditor, measurementFields } from "./measurement-editor";
 import { NutritionCalculator } from "./nutrition-calculator";
@@ -76,9 +86,12 @@ export function PatientRecord({
     setResult(await apiResult(getPatientRecord({ patientId, appointmentId })));
   };
   return (
-    <div className="mx-auto grid max-w-4xl gap-5">
-      <Link href="/app/pacientes" className="text-sm font-medium text-primary">
-        ← Pacientes
+    <div className="grid gap-6">
+      <Link
+        href="/app/pacientes"
+        className="inline-flex w-fit items-center gap-2 text-sm font-medium text-primary"
+      >
+        <ArrowLeft className="size-4" aria-hidden /> Pacientes
       </Link>
       {!result ? (
         <div
@@ -87,8 +100,9 @@ export function PatientRecord({
           className="grid gap-3"
         >
           <Skeleton className="h-12 w-64" />
-          <Skeleton className="h-44 w-full" />
-          <Skeleton className="h-44 w-full" />
+          <SkeletonRow />
+          <SkeletonRow />
+          <SkeletonRow />
         </div>
       ) : !result.ok ? (
         <Card>
@@ -136,8 +150,14 @@ function RecordContent({
   const date = (d: Date) =>
     new Intl.DateTimeFormat("es-MX", {
       timeZone: timezone,
-      dateStyle: "medium",
-      timeStyle: "short",
+      day: "numeric",
+      month: "short",
+      ...(d.getFullYear() !== new Date().getFullYear()
+        ? { year: "numeric" as const }
+        : {}),
+      hour: "numeric",
+      minute: "2-digit",
+      hourCycle: "h23",
     }).format(d);
   const now = new Date();
   const today = new Intl.DateTimeFormat("en-CA", {
@@ -164,22 +184,27 @@ function RecordContent({
   const past = visits.filter((v) => v.startsAt < now).slice(0, 5);
   const visitList = (items: typeof visits) =>
     items.length ? (
-      <ul className="grid gap-2">
+      <ul className="divide-y divide-border">
         {items.map((v) => (
           <li key={v.id}>
             <Link
               href={`/app/agenda/${v.id}`}
-              className="text-sm text-primary underline"
+              className="flex min-h-12 items-center justify-between gap-3 py-3 text-sm text-foreground hover:text-primary"
             >
-              {date(v.startsAt)} · {STATUS_LABEL[v.status]}
+              <time dateTime={v.startsAt.toISOString()}>
+                {date(v.startsAt)}
+              </time>
+              <Badge variant={STATUS_BADGE_VARIANT[v.status]}>
+                {STATUS_LABEL[v.status]}
+              </Badge>
             </Link>
           </li>
         ))}
       </ul>
     ) : (
       <EmptyState
+        icon={<CalendarDays aria-hidden />}
         title="Sin citas"
-        description="Las consultas de este paciente aparecerán aquí."
         action={
           <Button variant="outline" asChild>
             <Link href="/app/agenda">Ver agenda</Link>
@@ -189,14 +214,31 @@ function RecordContent({
     );
   return (
     <>
-      <header>
-        <h1 className="text-3xl font-extrabold">{patient.name}</h1>
-        <p className="text-sm text-muted-foreground">
-          Expediente básico · zona horaria: {timezone}
-        </p>
+      <header className="flex items-center gap-4">
+        <Avatar className="size-14">
+          <AvatarFallback className="text-lg">
+            {initialsOf(patient.name)}
+          </AvatarFallback>
+        </Avatar>
+        <div className="min-w-0">
+          <h1 className="truncate text-xl font-semibold">{patient.name}</h1>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {age !== undefined ? (
+              <Badge variant="secondary">{age} años</Badge>
+            ) : null}
+            {patient.sex ? (
+              <Badge variant="secondary">{sexLabels[patient.sex]}</Badge>
+            ) : null}
+            {patient.phoneWa ? (
+              <span className="text-sm text-muted-foreground">
+                {patient.phoneWa}
+              </span>
+            ) : null}
+          </div>
+        </div>
       </header>
       <Tabs defaultValue={appointmentId ? "history" : "summary"}>
-        <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-4">
+        <TabsList className="w-full">
           <TabsTrigger value="summary">Resumen</TabsTrigger>
           <TabsTrigger value="measurements">Antropometría</TabsTrigger>
           <TabsTrigger value="history">Historial</TabsTrigger>
@@ -206,8 +248,8 @@ function RecordContent({
           <DocumentsTab patientId={patient.id} onChange={refreshEvolution} />
         </TabsContent>
         <TabsContent value="summary" className="grid gap-4">
-          <Card>
-            <h2 className="text-lg font-bold">Datos del paciente</h2>
+          <section className="grid gap-4 py-4">
+            <h2 className="text-lg font-semibold">Datos del paciente</h2>
             <dl className="grid gap-3 text-sm sm:grid-cols-2">
               {[
                 ["WhatsApp", patient.phoneWa],
@@ -226,23 +268,25 @@ function RecordContent({
             <p className="whitespace-pre-wrap text-sm">
               {patient.notes || "Sin notas generales."}
             </p>
-            <p className="text-xs text-muted-foreground">
-              Consentimiento expreso: {date(patient.consentAt)} · IP:{" "}
-              {patient.consentIp}
-            </p>
-          </Card>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Card>
-              <h2 className="font-bold">Próximas citas</h2>
+            <details className="text-sm text-muted-foreground">
+              <summary className="w-fit cursor-pointer">
+                Consentimiento registrado · {date(patient.consentAt)}
+              </summary>
+              <p className="mt-2">IP: {patient.consentIp}</p>
+            </details>
+          </section>
+          <div className="grid gap-6 border-t border-border py-6 sm:grid-cols-2">
+            <section className="grid content-start gap-3">
+              <h2 className="text-lg font-semibold">Próximas citas</h2>
               {visitList(upcoming)}
-            </Card>
-            <Card>
-              <h2 className="font-bold">Últimas citas</h2>
+            </section>
+            <section className="grid content-start gap-3">
+              <h2 className="text-lg font-semibold">Últimas citas</h2>
               {visitList(past)}
-            </Card>
+            </section>
           </div>
-          <Card>
-            <h2 className="font-bold">Pagos</h2>
+          <section className="grid gap-3 border-t border-border pt-6">
+            <h2 className="text-lg font-semibold">Pagos</h2>
             {charges.length ? (
               <ul className="grid gap-2">
                 {charges.map((p) => (
@@ -251,21 +295,14 @@ function RecordContent({
                     className="flex flex-wrap justify-between gap-2 text-sm"
                   >
                     <span>{date(p.createdAt)}</span>
-                    <span>
+                    <span className="flex items-center gap-2">
                       {new Intl.NumberFormat("es-MX", {
                         style: "currency",
                         currency: p.currency,
+                        minimumFractionDigits: p.amountCents % 100 ? 2 : 0,
+                        maximumFractionDigits: 2,
                       }).format(p.amountCents / 100)}{" "}
-                      ·{" "}
-                      {
-                        {
-                          paid: "Pagado",
-                          pending: "Pendiente",
-                          failed: "Fallido",
-                          expired: "Expirado",
-                          refunded: "Reembolsado",
-                        }[p.status]
-                      }
+                      <StatusBadge status={p.status} />
                     </span>
                   </li>
                 ))}
@@ -273,7 +310,6 @@ function RecordContent({
             ) : (
               <EmptyState
                 title="Sin pagos registrados"
-                description="Aquí verás los pagos de las consultas de este paciente."
                 action={
                   <Button variant="outline" asChild>
                     <Link href="/app/cobros">Ver cobros</Link>
@@ -281,12 +317,12 @@ function RecordContent({
                 }
               />
             )}
-          </Card>
+          </section>
         </TabsContent>
         <TabsContent value="measurements" className="grid gap-4">
-          <Card>
+          <section className="grid gap-4 py-4">
             <div className="flex items-center justify-between gap-3">
-              <h2 className="text-lg font-bold">Antropometría</h2>
+              <h2 className="text-lg font-semibold">Antropometría</h2>
               <Button onClick={() => setEditor("new")}>Nueva medición</Button>
             </div>
             <MeasurementChart
@@ -334,7 +370,7 @@ function RecordContent({
                 </strong>
               </p>
             </div>
-          </Card>
+          </section>
           <Sheet
             open={!!editor}
             onOpenChange={(open) => !open && setEditor(null)}
@@ -363,15 +399,15 @@ function RecordContent({
             </SheetContent>
           </Sheet>
           {error && (
-            <p role="alert" className="text-destructive">
+            <p role="alert" className="text-destructive-ink">
               {error}
             </p>
           )}
-          <ul className="grid gap-3">
+          <ul className="divide-y divide-border border-y border-border">
             {[...rows].reverse().map((r) => (
               <li key={r.id}>
-                <Card className="gap-3">
-                  <h3 className="font-bold">{date(r.measuredAt)}</h3>
+                <section className="grid gap-3 py-4">
+                  <h3 className="font-semibold">{date(r.measuredAt)}</h3>
                   <dl className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">
                     {measurementFields.map(([name, label]) => (
                       <div key={name}>
@@ -394,7 +430,7 @@ function RecordContent({
                     <details className="relative">
                       <summary
                         aria-label="Más acciones de la medición"
-                        className="cursor-pointer rounded-xl border border-border px-3 py-2 text-sm"
+                        className="flex size-11 cursor-pointer items-center justify-center rounded-md border border-border text-sm md:size-8"
                       >
                         ⋯
                       </summary>
@@ -402,7 +438,7 @@ function RecordContent({
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="text-destructive"
+                          className="text-destructive-ink"
                           onClick={() => setDeleting(r.id)}
                         >
                           Borrar
@@ -410,7 +446,7 @@ function RecordContent({
                       </div>
                     </details>
                   </div>
-                </Card>
+                </section>
               </li>
             ))}
           </ul>
@@ -425,7 +461,7 @@ function RecordContent({
               }
             />
           )}
-          <Card>
+          <section className="border-t border-border pt-6">
             <NutritionCalculator
               key={`${latest?.id}-${latest?.weightKg}-${latest?.heightCm}`}
               weight={latest?.weightKg}
@@ -433,23 +469,25 @@ function RecordContent({
               age={age}
               sex={patient.sex}
             />
-          </Card>
+          </section>
         </TabsContent>
         <TabsContent value="history" className="grid gap-4">
-          <Card>
-            <h2 className="text-lg font-bold">Agregar nota clínica</h2>
+          <section className="grid gap-4 py-4">
+            <h2 className="text-lg font-semibold">Agregar nota clínica</h2>
             <ClinicalNoteForm
               patientId={patient.id}
               appointmentId={appointmentId}
               refresh={refresh}
             />
-          </Card>
-          <h2 className="font-bold">Historial · más reciente primero</h2>
+          </section>
+          <h2 className="border-t border-border pt-6 text-lg font-semibold">
+            Historial
+          </h2>
           {notes.length ? (
             <ul className="grid gap-3">
               {notes.map((n) => (
                 <li key={n.id}>
-                  <Card className="gap-2">
+                  <section className="grid gap-2 border-b border-border py-4">
                     <div className="flex flex-wrap justify-between gap-2 text-sm">
                       <strong className="capitalize">{n.kind}</strong>
                       <time dateTime={n.createdAt.toISOString()}>
@@ -467,12 +505,13 @@ function RecordContent({
                         Ver cita vinculada
                       </Link>
                     )}
-                  </Card>
+                  </section>
                 </li>
               ))}
             </ul>
           ) : (
             <EmptyState
+              icon={<ClipboardList aria-hidden />}
               title="Sin notas clínicas"
               description="Escribe la primera nota de este paciente en el formulario."
               action={
@@ -588,7 +627,7 @@ function ClinicalNoteForm({
         <select
           name="kind"
           defaultValue={appointmentId ? "consulta" : "nota"}
-          className="h-11 rounded-xl border bg-card px-3"
+          className="h-11 rounded-md border border-input bg-card px-3"
         >
           <option value="consulta">Consulta</option>
           <option value="nota">Nota</option>
@@ -606,12 +645,12 @@ function ClinicalNoteForm({
         />
       </label>
       {error && (
-        <p role="alert" className="text-destructive">
+        <p role="alert" className="text-destructive-ink">
           {error}
         </p>
       )}
       {saved && (
-        <p role="status" className="text-primary">
+        <p role="status" className="text-status-confirmed-foreground">
           Nota guardada.
         </p>
       )}

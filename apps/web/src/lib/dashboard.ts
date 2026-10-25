@@ -117,6 +117,23 @@ export async function getDashboardNewPatients(
   return row?.total ?? 0;
 }
 
+/** Comparación del mes anterior en la misma zona, con las lecturas y tenant existentes. */
+export async function getDashboardPreviousMonth(
+  nutritionistId: string,
+  now: Date,
+  timezone: string,
+) {
+  const previous = new Date(
+    dashboardPeriods(now, timezone).monthStart.getTime() - 1,
+  );
+  const [income, newPatients, noShows] = await Promise.all([
+    getDashboardIncome(nutritionistId, previous, timezone),
+    getDashboardNewPatients(nutritionistId, previous, timezone),
+    getDashboardNoShows(nutritionistId, previous, timezone),
+  ]);
+  return { income, newPatients, noShows };
+}
+
 export async function getDashboardNoShows(
   nutritionistId: string,
   now: Date,

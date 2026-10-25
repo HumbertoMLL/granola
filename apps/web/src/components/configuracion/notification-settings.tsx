@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Card, Label, Switch, toast } from "@granola/ui";
+import { Label, SectionHeader, Switch, toast } from "@granola/ui";
 import { saveNotifications } from "@/app/(panel)/app/configuracion/actions";
 
 export function NotificationSettings({ notifyNewBooking }: { notifyNewBooking: boolean }) {
@@ -28,12 +28,17 @@ export function NotificationSettings({ notifyNewBooking }: { notifyNewBooking: b
   }
 
   return (
-    <Card>
-      <h2 className="text-lg font-semibold">Notificaciones</h2>
-      <div className="flex items-center justify-between gap-4">
-        <Label htmlFor="notify-new-booking" className="leading-relaxed">
-          Avisarme por WhatsApp cuando agenden
-        </Label>
+    <section className="grid gap-3">
+      <SectionHeader title="Notificaciones" />
+      <div className="flex items-center justify-between gap-4 border-y border-border py-4">
+        <div className="min-w-0 flex-1">
+          <Label htmlFor="notify-new-booking" className="font-medium">
+            Avisarme por WhatsApp cuando agenden
+          </Label>
+          <p id="notify-new-booking-help" className="text-sm text-muted-foreground">
+            Recibe un aviso en tu número de WhatsApp cuando un paciente confirme una cita.
+          </p>
+        </div>
         <Switch
           id="notify-new-booking"
           checked={enabled}
@@ -43,9 +48,6 @@ export function NotificationSettings({ notifyNewBooking }: { notifyNewBooking: b
           aria-describedby="notify-new-booking-help"
         />
       </div>
-      <p id="notify-new-booking-help" className="text-sm text-muted-foreground">
-        Recibe un aviso en tu número de WhatsApp cuando un paciente confirme una cita.
-      </p>
-    </Card>
+    </section>
   );
 }

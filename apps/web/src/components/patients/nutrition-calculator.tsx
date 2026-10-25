@@ -28,7 +28,7 @@ export function NutritionCalculator({
   const [error, setError] = useState("");
   return (
     <section className="grid gap-3">
-      <h3 className="font-bold">Requerimiento energético (adultos)</h3>
+      <h3 className="font-semibold">Requerimiento energético (adultos)</h3>
       <form
         className="grid gap-3 sm:grid-cols-2"
         onSubmit={(event) => {
@@ -113,7 +113,7 @@ export function NutritionCalculator({
         <label className="grid gap-1 text-sm">
           Sexo para la ecuación
           <select
-            className="h-11 rounded-xl border bg-card px-3"
+            className="h-11 rounded-md border bg-card px-3"
             name="sex"
             defaultValue={sex === "m" || sex === "f" ? sex : ""}
             required
@@ -138,7 +138,7 @@ export function NutritionCalculator({
         <label className="grid gap-1 text-sm">
           Objetivo
           <select
-            className="h-11 rounded-xl border bg-card px-3"
+            className="h-11 rounded-md border bg-card px-3"
             name="goal"
             defaultValue="maintenance"
           >
@@ -169,7 +169,7 @@ export function NutritionCalculator({
         GET.
       </p>
       {error && (
-        <p role="alert" className="text-destructive">
+        <p role="alert" className="text-destructive-ink">
           {error}
         </p>
       )}

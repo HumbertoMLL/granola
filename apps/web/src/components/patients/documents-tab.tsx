@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Badge,
   Button,
-  Card,
   EmptyState,
   FormField,
   Input,
@@ -46,6 +45,11 @@ const statusLabels = {
   ok: "Datos extraídos · por revisar",
   failed: "Captura manual disponible",
 };
+const statusVariants = {
+  pending: "pending",
+  ok: "confirmed",
+  failed: "done",
+} as const;
 async function post(url: string, body: FormData | { id: string }) {
   const response = await fetch(
     url,
@@ -103,12 +107,8 @@ export function DocumentsTab({
   }
   return (
     <div className="grid gap-4">
-      <Card>
-        <h2 className="text-lg font-bold">Documentos y reportes</h2>
-        <p className="text-sm text-muted-foreground">
-          Sube el estudio, revisa los indicadores y prepara un reporte con tu
-          interpretación y tu marca.
-        </p>
+      <section className="grid gap-4 py-4">
+        <h2 className="text-lg font-semibold">Documentos y reportes</h2>
         {error && (
           <p role="alert" className="text-sm text-destructive">
             {error}
@@ -126,13 +126,13 @@ export function DocumentsTab({
                 className="grid gap-3 py-4 sm:grid-cols-[1fr_auto]"
               >
                 <div>
-                  <h3 className="font-semibold">{kindLabels[d.kind]}</h3>
+                  <h3 className="font-medium">{kindLabels[d.kind]}</h3>
                   <p className="text-xs text-muted-foreground">
                     {new Date(d.uploadedAt).toLocaleDateString("es-MX", {
                       timeZone: "UTC",
                     })}
                   </p>
-                  <Badge variant="secondary">
+                  <Badge variant={statusVariants[d.parsedStatus]}>
                     {statusLabels[d.parsedStatus]}
                   </Badge>
                   {d.parseError && (
@@ -190,7 +190,7 @@ export function DocumentsTab({
             Reintentar
           </Button>
         )}
-        <div className="sticky bottom-0 bg-card pt-3">
+        <div className="sticky bottom-0 bg-background pt-3">
           <Button
             className="w-full sm:w-auto"
             onClick={() => setUploadOpen(true)}
@@ -198,7 +198,7 @@ export function DocumentsTab({
             Subir documento
           </Button>
         </div>
-      </Card>
+      </section>
       <Sheet open={uploadOpen} onOpenChange={setUploadOpen}>
         <SheetContent
           side="bottom"
@@ -430,7 +430,7 @@ function ReportEditor({
             unidad, el contexto y la referencia del laboratorio.
           </p>
           <div>
-            <h3 className="mb-2 font-bold">Indicadores</h3>
+            <h3 className="mb-2 font-semibold">Indicadores</h3>
             <table className="w-full text-sm">
               <caption className="sr-only">
                 Valores y comentarios del reporte
@@ -583,7 +583,7 @@ function ReportEditor({
             />
           </FormField>
           <fieldset className="grid gap-3">
-            <legend className="mb-2 font-bold">Mi marca</legend>
+            <legend className="mb-2 font-semibold">Mi marca</legend>
             <FormField label="Firma profesional">
               <Input
                 value={report.brand.firma}
@@ -622,7 +622,7 @@ function ReportEditor({
       )}
       {step === 1 && (
         <section
-          className="rounded-xl border bg-white p-5 text-[#2B2118]"
+          className="rounded-xl border border-border bg-white p-5 text-foreground"
           aria-label="Vista previa del reporte"
         >
           <h3
@@ -634,7 +634,7 @@ function ReportEditor({
               : "Análisis de laboratorio"}
           </h3>
           <p className="mb-5 text-sm">{report.brand.firma}</p>
-          <ul className="divide-y">
+          <ul className="divide-y divide-border">
             {report.content
               .filter((i) => i.visible)
               .map((i) => (
@@ -656,15 +656,15 @@ function ReportEditor({
                 </li>
               ))}
           </ul>
-          <h4 className="mt-5 font-bold">Mi interpretación</h4>
+          <h4 className="mt-5 font-semibold">Mi interpretación</h4>
           <p className="whitespace-pre-wrap">
             {report.interpretation || "Sin interpretación registrada."}
           </p>
         </section>
       )}
       {step === 2 && (
-        <Card>
-          <h3 className="font-bold">Enviar al paciente</h3>
+        <section className="grid gap-4">
+          <h3 className="font-semibold">Enviar al paciente</h3>
           <p className="text-sm text-muted-foreground">
             El enlace privado del PDF vence en 7 días. Si editas o regeneras el
             reporte, el enlace anterior deja de funcionar.
@@ -695,9 +695,9 @@ function ReportEditor({
               resultado del envío abajo.
             </p>
           )}
-        </Card>
+        </section>
       )}
-      <div className="sticky bottom-0 -mx-4 flex flex-wrap items-center justify-between gap-3 border-t bg-background p-4 sm:-mx-6">
+      <div className="sticky bottom-0 -mx-4 flex flex-wrap items-center justify-between gap-3 border-t border-border bg-background p-4 sm:-mx-6">
         <Button
           variant="outline"
           disabled={busy || step === 0}

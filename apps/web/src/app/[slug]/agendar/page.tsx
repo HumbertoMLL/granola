@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 
-import { Skeleton } from "@granola/ui";
+import { Skeleton, SkeletonRow } from "@granola/ui";
 
 import { BookingFlow } from "@/components/booking/booking-flow";
 import { PublicShell } from "@/components/booking/public-shell";
@@ -52,11 +52,16 @@ async function AgendarContent({ params, searchParams }: Props) {
 
 function AgendarSkeleton() {
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-col gap-4 px-4 py-6">
-      <Skeleton className="h-10 w-48" />
+    <div
+      role="status"
+      aria-label="Cargando reserva"
+      className="mx-auto w-full max-w-[480px] space-y-6 px-5 py-6"
+    >
+      <Skeleton className="h-4 w-48" />
+      <Skeleton className="h-1 w-full" />
       <Skeleton className="h-6 w-64" />
-      <Skeleton className="h-24 w-full rounded-2xl" />
-      <Skeleton className="h-24 w-full rounded-2xl" />
+      <SkeletonRow avatar={false} />
+      <SkeletonRow avatar={false} />
     </div>
   );
 }

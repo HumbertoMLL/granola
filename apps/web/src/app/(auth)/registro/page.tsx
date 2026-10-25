@@ -1,20 +1,34 @@
 import Link from "next/link";
+import { Card } from "@granola/ui";
+import { Logo } from "@/components/logo";
 import { RegistroForm } from "./registro-form";
 
 export const metadata = { title: "Crear cuenta" };
-
-// Formulario mínimo funcional; el design system (packages/ui) lo pule después.
 export default function RegistroPage() {
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-sm flex-col justify-center gap-6 px-4 py-12">
-      <h1 className="text-2xl font-semibold">Crea tu cuenta en Granola</h1>
-      <RegistroForm />
-      <p className="text-sm">
-        ¿Ya tienes cuenta?{" "}
-        <Link href="/login" className="underline">
-          Entrar
+    <main className="mx-auto flex min-h-dvh w-full max-w-[432px] items-center px-4 py-8">
+      <Card className="w-full gap-6 p-6 md:p-8">
+        <Link
+          href="/"
+          aria-label="Granola, inicio"
+          className="w-fit rounded-md"
+        >
+          <Logo size={24} />
         </Link>
-      </p>
+        <h1 className="text-xl font-semibold tracking-tight">
+          Crea tu cuenta en Granola
+        </h1>
+        <RegistroForm />
+        <p className="text-sm text-muted-foreground">
+          ¿Ya tienes cuenta?{" "}
+          <Link
+            href="/login"
+            className="font-medium text-primary hover:underline"
+          >
+            Entrar
+          </Link>
+        </p>
+      </Card>
     </main>
   );
 }

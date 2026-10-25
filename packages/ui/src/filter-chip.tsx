@@ -1,5 +1,4 @@
 "use client";
-
 import * as React from "react";
 import { X } from "lucide-react";
 import { Button } from "./button";
@@ -22,18 +21,17 @@ export function FilterChip({
       aria-pressed={pressed}
       onClick={() => onPressedChange(!pressed)}
       className={cn(
-        "min-h-11 rounded-full border px-4 text-sm font-medium",
+        "relative inline-flex min-h-11 items-center justify-center px-3 text-sm font-medium transition-colors duration-150 before:absolute before:inset-x-0 before:inset-y-2 before:rounded-md before:border before:content-[''] md:min-h-7 md:before:inset-y-0",
         pressed
-          ? "border-primary bg-primary-soft text-primary"
-          : "border-border bg-card",
+          ? "text-foreground before:border-foreground/20 before:bg-secondary"
+          : "text-muted-foreground before:border-border before:bg-transparent hover:text-foreground",
         className,
       )}
     >
-      {children}
+      <span className="relative">{children}</span>
     </button>
   );
 }
-
 export function AppliedFilters({
   filters,
   onRemove,
@@ -48,12 +46,12 @@ export function AppliedFilters({
   return (
     <section
       aria-label="Filtros aplicados"
-      className="flex flex-wrap items-center gap-2"
+      className="flex flex-wrap items-center gap-x-3 gap-y-1"
     >
       <p
         role="status"
         aria-live="polite"
-        className="text-sm text-muted-foreground"
+        className="text-sm text-muted-foreground tabular-nums"
       >
         {count} {count === 1 ? "resultado" : "resultados"}
       </p>
@@ -63,20 +61,26 @@ export function AppliedFilters({
             <Button
               variant="outline"
               size="sm"
+              className="md:h-7"
               onClick={() => onRemove(filter.id)}
               aria-label={`Quitar filtro ${filter.label}`}
             >
               {filter.label}
-              <X aria-hidden className="size-3.5" />
+              <X aria-hidden className="size-3" />
             </Button>
           </li>
         ))}
       </ul>
-      {filters.length > 0 && (
-        <Button variant="ghost" size="sm" onClick={onClear}>
+      {filters.length > 0 ? (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-muted-foreground md:h-7"
+          onClick={onClear}
+        >
           Limpiar todo
         </Button>
-      )}
+      ) : null}
     </section>
   );
 }

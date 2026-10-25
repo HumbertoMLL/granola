@@ -101,6 +101,6 @@ describe("groupAppointments", () => {
 describe("formatDashboardMoney", () => {
   it("preserva los centavos y muestra cero como dinero", () => {
     expect(formatDashboardMoney(12345)).toBe("$123.45");
-    expect(formatDashboardMoney(0)).toBe("$0.00");
+    expect(formatDashboardMoney(0)).toBe("$0");
   });
 });

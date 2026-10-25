@@ -10,6 +10,7 @@ export type TimelineBlock = {
   label: string;
   content: ReactNode;
   className?: string;
+  status?: "confirmed" | "pending" | "done" | "cancelled";
 };
 export type TimelineRange = { startMinute: number; endMinute: number };
 const time = (minute: number) =>
@@ -60,7 +61,7 @@ export function Timeline({
           className="absolute inset-x-0 border-t border-border"
           style={{ top: (minute - startMinute) * pixelsPerMinute }}
         >
-          <span className="absolute -left-12 -top-2 w-10 text-right text-xs text-muted-foreground">
+          <span className="absolute -left-12 -top-2 w-10 text-right font-mono text-xs text-muted-foreground">
             {time(minute)}
           </span>
         </div>
@@ -77,11 +78,10 @@ export function Timeline({
                 type="button"
                 aria-label={`Libre ${time(range.startMinute)}–${time(range.endMinute)}`}
                 onClick={() => onFreeClick(range)}
-                className="absolute inset-x-1 overflow-hidden rounded-md border border-dashed border-border bg-card px-2 text-left text-xs text-muted-foreground hover:border-primary hover:text-primary"
+                className="absolute inset-x-1 overflow-hidden rounded-md border border-dashed border-border bg-transparent px-3 text-left text-sm text-muted-foreground transition-colors duration-150 hover:bg-secondary"
                 style={position(range.startMinute, range.endMinute)}
               >
                 Libre {time(range.startMinute)}–{time(range.endMinute)}{" "}
-                <span aria-hidden>＋</span>
               </button>
             </li>
           ))}
@@ -97,7 +97,11 @@ export function Timeline({
                 aria-label={block.label}
                 onClick={() => onBlockClick(block.id)}
                 className={cn(
-                  "absolute inset-x-1 overflow-hidden rounded-md border-l-4 border-primary bg-primary-soft px-2 text-left text-sm hover:ring-2 hover:ring-ring",
+                  "absolute inset-x-1 overflow-hidden rounded-md border border-border border-l-[3px] border-l-status-confirmed bg-card px-3 text-left text-base transition-colors duration-150 hover:bg-secondary",
+                  block.status === "pending" &&
+                    "border-l-status-pending bg-status-pending-soft/40",
+                  block.status === "done" && "border-l-status-done",
+                  block.status === "cancelled" && "border-l-status-cancelled",
                   block.className,
                 )}
                 style={position(block.startMinute, block.endMinute)}
@@ -116,7 +120,7 @@ export function Timeline({
             className="pointer-events-none absolute inset-x-0 z-10 border-t-2 border-destructive"
             style={{ top: (nowMinute - startMinute) * pixelsPerMinute }}
           >
-            <span className="absolute -left-1 -top-1 size-2 rounded-full bg-destructive" />
+            <span className="absolute -left-1 -top-1 size-2 rounded-md bg-destructive" />
           </div>
         )}
     </section>

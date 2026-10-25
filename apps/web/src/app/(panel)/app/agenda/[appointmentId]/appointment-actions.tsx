@@ -107,7 +107,7 @@ export function AppointmentActions({
         ) : null}
         <Button
           variant="ghost"
-          className="text-destructive"
+          className="text-destructive-ink"
           disabled={pending}
           onClick={() => setCancelOpen(true)}
         >

@@ -1,7 +1,6 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { CalendarDays, Clock, Sparkles } from "lucide-react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@granola/ui";
 
@@ -50,17 +49,11 @@ export function AgendaTabs({ data }: { data: AgendaData }) {
   }
 
   return (
-    <Tabs value={tab} onValueChange={onChange} className="gap-5">
+    <Tabs value={tab} onValueChange={onChange} className="gap-4">
       <TabsList className="w-full sm:w-fit">
-        <TabsTrigger value="citas">
-          <CalendarDays /> Citas
-        </TabsTrigger>
-        <TabsTrigger value="servicios">
-          <Sparkles /> Servicios
-        </TabsTrigger>
-        <TabsTrigger value="disponibilidad">
-          <Clock /> Disponibilidad
-        </TabsTrigger>
+        <TabsTrigger value="citas">Citas</TabsTrigger>
+        <TabsTrigger value="servicios">Servicios</TabsTrigger>
+        <TabsTrigger value="disponibilidad">Disponibilidad</TabsTrigger>
       </TabsList>
 
       <TabsContent value="citas">

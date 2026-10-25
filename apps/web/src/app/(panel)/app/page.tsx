@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { Skeleton } from "@granola/ui";
+import { Skeleton, SkeletonKPI, SkeletonRow } from "@granola/ui";
 import {
   AppointmentSection,
   AvailabilityNotice,
@@ -26,26 +26,26 @@ export default function DashboardPage() {
       <Suspense fallback={<Skeleton className="h-28 w-full" />}>
         <AvailabilityNotice />
       </Suspense>
-      <div className="grid items-start gap-4 md:grid-cols-3">
-        <Suspense fallback={<Skeleton className="h-64 w-full" />}>
+      <div className="grid grid-cols-2 items-start gap-6 border-b border-border pb-6 sm:grid-cols-3">
+        <Suspense fallback={<SkeletonKPI />}>
           <IncomeSection />
         </Suspense>
-        <Suspense fallback={<Skeleton className="h-44 w-full" />}>
+        <Suspense fallback={<SkeletonKPI />}>
           <NewPatientsSection />
         </Suspense>
-        <Suspense fallback={<Skeleton className="h-44 w-full" />}>
+        <Suspense fallback={<SkeletonKPI />}>
           <NoShowSection />
         </Suspense>
       </div>
-      <div className="grid items-start gap-4 lg:grid-cols-2">
-        <Suspense fallback={<Skeleton className="h-64 w-full" />}>
+      <div className="grid items-start gap-8 lg:grid-cols-2">
+        <Suspense fallback={<SkeletonRow />}>
           <AppointmentSection period="today" />
         </Suspense>
-        <Suspense fallback={<Skeleton className="h-64 w-full" />}>
+        <Suspense fallback={<SkeletonRow />}>
           <AppointmentSection period="week" />
         </Suspense>
       </div>
-      <Suspense fallback={<Skeleton className="h-48 w-full" />}>
+      <Suspense fallback={<SkeletonRow />}>
         <ConnectionSection />
       </Suspense>
     </div>

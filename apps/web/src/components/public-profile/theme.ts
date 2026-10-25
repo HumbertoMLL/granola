@@ -70,7 +70,7 @@ export const PRESETS: Record<ThemePreset, PresetTokens> = {
     bg: "#FBF7F0",
     surface: "#FFFFFF",
     fg: "#2B2118",
-    muted: "#7A6E63",
+    muted: "#74685E",
     primary: "#4A7A2B",
     primaryFg: "#FFFFFF",
     accent: "#E8A93B",
@@ -82,8 +82,8 @@ export const PRESETS: Record<ThemePreset, PresetTokens> = {
     bg: "#EEF7F2",
     surface: "#FFFFFF",
     fg: "#12322A",
-    muted: "#5E7A70",
-    primary: "#178F6A",
+    muted: "#4D6F61",
+    primary: "#147456",
     primaryFg: "#FFFFFF",
     accent: "#FFD166",
     border: "#D4E8DE",
@@ -94,7 +94,7 @@ export const PRESETS: Record<ThemePreset, PresetTokens> = {
     bg: "#F4F1FA",
     surface: "#FFFFFF",
     fg: "#2A2340",
-    muted: "#726A8A",
+    muted: "#6D6287",
     primary: "#6B4FD8",
     primaryFg: "#FFFFFF",
     accent: "#F2A7C3",
@@ -106,8 +106,8 @@ export const PRESETS: Record<ThemePreset, PresetTokens> = {
     bg: "#FFF3EC",
     surface: "#FFFFFF",
     fg: "#3A2419",
-    muted: "#8A6B5E",
-    primary: "#E2694B",
+    muted: "#7F5E51",
+    primary: "#B4482D",
     primaryFg: "#FFFFFF",
     accent: "#F9C97C",
     border: "#F3DCCF",
@@ -129,9 +129,9 @@ export const PRESETS: Record<ThemePreset, PresetTokens> = {
 };
 
 export const BUTTON_RADIUS: Record<ButtonStyle, string> = {
-  pill: "9999px",
-  rounded: "0.875rem",
-  square: "0.25rem",
+  pill: "999px",
+  rounded: "6px",
+  square: "6px",
 };
 
 export const BUTTON_STYLE_LABELS: Record<ButtonStyle, string> = {
@@ -185,23 +185,18 @@ export function themeStyle(theme: ResolvedTheme): CSSProperties {
   return {
     "--pp-bg": t.bg,
     "--pp-surface": t.surface,
+    "--pp-secondary": `color-mix(in srgb, ${t.fg} 4%, ${t.bg})`,
     "--pp-fg": t.fg,
     "--pp-muted": t.muted,
     "--pp-primary": t.primary,
-    // CTA de reserva negro o verde según el preset; los demás acentos se conservan.
-    "--pp-booking-primary":
-      theme.preset === "lavanda" || theme.preset === "durazno"
-        ? "var(--foreground)"
-        : t.primary,
-    "--pp-booking-fg":
-      theme.preset === "lavanda" || theme.preset === "durazno"
-        ? "var(--primary-foreground)"
-        : t.primaryFg,
+    "--pp-primary-hover": `color-mix(in srgb, ${t.primary} 90%, ${t.fg})`,
+    "--pp-booking-primary": t.primary,
+    "--pp-booking-fg": t.primaryFg,
     "--pp-primary-fg": t.primaryFg,
     "--pp-accent": t.accent,
-    "--pp-border": t.border,
-    "--pp-glow": t.glow,
-    "--pp-radius": BUTTON_RADIUS[theme.buttonStyle],
+    "--pp-border": `color-mix(in srgb, ${t.fg} 8%, transparent)`,
+    "--pp-glow": "none",
+    "--pp-radius": "6px",
     colorScheme: t.dark ? "dark" : "light",
   } as CSSProperties;
 }

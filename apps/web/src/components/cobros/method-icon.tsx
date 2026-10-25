@@ -1,4 +1,10 @@
-import { Banknote, CreditCard, Landmark, Store, type LucideIcon } from "lucide-react";
+import {
+  Banknote,
+  CreditCard,
+  Landmark,
+  Store,
+  type LucideIcon,
+} from "lucide-react";
 
 import { Badge, cn } from "@granola/ui";
 
@@ -14,7 +20,13 @@ const ICON: Record<Method, LucideIcon> = {
   cash: Banknote,
 };
 
-export function MethodIcon({ method, className }: { method: Method; className?: string }) {
+export function MethodIcon({
+  method,
+  className,
+}: {
+  method: Method;
+  className?: string;
+}) {
   const Icon = ICON[method];
   return (
     <span className={cn("inline-flex items-center gap-1.5 text-sm", className)}>
@@ -24,11 +36,14 @@ export function MethodIcon({ method, className }: { method: Method; className?: 
   );
 }
 
-const STATUS_VARIANT: Record<Status, "default" | "accent" | "destructive" | "secondary" | "outline"> = {
-  paid: "default",
-  pending: "accent",
-  failed: "destructive",
-  expired: "secondary",
+const STATUS_VARIANT: Record<
+  Status,
+  "confirmed" | "pending" | "cancelled" | "done" | "outline"
+> = {
+  paid: "confirmed",
+  pending: "pending",
+  failed: "cancelled",
+  expired: "done",
   refunded: "outline",
 };
 

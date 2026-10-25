@@ -51,6 +51,10 @@ describe("Perfil público y preview", () => {
         html.indexOf("Instagram"),
       );
       expect(html).toContain("--pp-booking-primary");
+      expect(html).toContain('aria-label="Enlaces"');
+      expect(html).toContain('class="sr-only">Instagram');
+      expect(html).not.toContain("shadow-");
+      expect(html).not.toContain("pp-glow)");
     });
   }
   it("el preview no navega ni inventa una disponibilidad", () => {
@@ -59,5 +63,8 @@ describe("Perfil público y preview", () => {
     );
     expect(html).not.toContain("href=");
     expect(html).toContain("El próximo horario disponible aparecerá aquí.");
+  });
+  it("normaliza temas legacy al preset visual por defecto", () => {
+    expect(resolveTheme({})).toMatchObject({ preset: "avena" });
   });
 });

@@ -1,89 +1,77 @@
-/*
- * Granola — design tokens.
- * Se importa desde apps/web/src/app/globals.css DESPUÉS de `@import "tailwindcss"`.
- * Paleta cálida y clara: base avena, tinta café, verde hoja como primario,
- * miel como acento, coral suave para errores.
- */
-
+/* Granola: tokens compartidos del sistema visual (ADR 0017). */
 :root {
-  /* Superficies */
-  --background: #fbf7f0; /* avena */
-  --foreground: #2b2118; /* café oscuro */
+  /* Superficies: fondo, superficie principal y un único nivel secundario. */
+  --background: #fbf7f0;
+  --foreground: #2b2118;
   --card: #ffffff;
   --card-foreground: #2b2118;
   --popover: #ffffff;
   --popover-foreground: #2b2118;
+  --secondary: #f5f0e6;
+  --secondary-foreground: #2b2118;
+  --muted: #f5f0e6;
+  /* Tinta ajustada para AA también sobre la superficie secundaria. */
+  --muted-foreground: #74685e;
+  --border: rgb(43 33 24 / 0.08);
+  --input: rgb(43 33 24 / 0.08);
 
-  /* Marca */
-  --primary: #4a7a2b; /* verde hoja */
+  /* Marca: acciones, enlaces y navegación activa. */
+  --primary: #4a7a2b;
   --primary-hover: #3e6723;
   --primary-foreground: #ffffff;
-  --primary-soft: #e9f2e0; /* fondo suave para badges/iconos */
-
-  --accent: #e8a93b; /* miel */
+  --primary-soft: #e9f2e0;
+  --ring: #4a7a2b;
+  --accent: #e8a93b;
   --accent-foreground: #2b2118;
   --accent-soft: #fbefd6;
 
-  /* Neutros cálidos */
-  --secondary: #f3ede2;
-  --secondary-foreground: #2b2118;
-  --muted: #f3ede2;
-  --muted-foreground: #7a6e63;
-  --border: #e8e0d2;
-  --input: #e8e0d2;
-  --ring: #4a7a2b;
-
-  /* Estados */
-  --destructive: #d9644e; /* coral */
+  /* Color identifica el estado; foreground es la tinta legible en su fondo. */
+  --status-confirmed: #2f855a;
+  --status-confirmed-soft: #e8f3ed;
+  --status-confirmed-foreground: #266c49;
+  --status-pending: #e8a93b;
+  --status-pending-soft: #fbefd6;
+  --status-pending-foreground: #80520b;
+  --status-done: #7a6e63;
+  --status-done-soft: #f5f0e6;
+  --status-done-foreground: #665c53;
+  --status-cancelled: #d9644e;
+  --status-cancelled-soft: #fbe6e1;
+  --status-cancelled-foreground: #ac4334;
+  --destructive: #d9644e;
+  --destructive-ink: #ac4334;
   --destructive-foreground: #ffffff;
   --destructive-soft: #fbe6e1;
-  --success: #4a7a2b;
-  --warning: #e8a93b;
+  --success: var(--status-confirmed);
+  --warning: var(--status-pending);
 
-  /* Forma */
-  --radius: 1rem;
+  /* Forma y elevación: 6 controles, 12 superficies, 999 avatares y CTA público. */
+  --radius: 0.75rem;
+  --radius-control: 0.375rem;
+  --radius-surface: 0.75rem;
+  --radius-avatar: 999px;
+  --elevation: 0 1px 2px rgb(43 33 24 / 0.06), 0 4px 12px rgb(43 33 24 / 0.04);
+  --shadow-soft: var(--elevation);
+  --shadow-float: var(--elevation);
 
-  /* Sombras ligeras */
-  --shadow-soft: 0 1px 2px rgb(43 33 24 / 0.04), 0 4px 16px rgb(43 33 24 / 0.05);
-  --shadow-float: 0 2px 4px rgb(43 33 24 / 0.05), 0 12px 32px rgb(43 33 24 / 0.08);
-}
-
-/* Modo oscuro opcional (no prioritario). Se activa con <html data-theme="dark">. */
-[data-theme="dark"] {
-  --background: #1b1711;
-  --foreground: #f3ede2;
-  --card: #241f18;
-  --card-foreground: #f3ede2;
-  --popover: #241f18;
-  --popover-foreground: #f3ede2;
-
-  --primary: #7fb35c;
-  --primary-hover: #91c26e;
-  --primary-foreground: #14200c;
-  --primary-soft: #263620;
-
-  --accent: #e8a93b;
-  --accent-foreground: #2b2118;
-  --accent-soft: #3a2e18;
-
-  --secondary: #2e2821;
-  --secondary-foreground: #f3ede2;
-  --muted: #2e2821;
-  --muted-foreground: #a99d90;
-  --border: #3a322a;
-  --input: #3a322a;
-  --ring: #7fb35c;
-
-  --destructive: #e0745f;
-  --destructive-foreground: #ffffff;
-  --destructive-soft: #3d241f;
-
-  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 16px rgb(0 0 0 / 0.3);
-  --shadow-float: 0 2px 4px rgb(0 0 0 / 0.35), 0 12px 32px rgb(0 0 0 / 0.4);
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --gutter-mobile: 16px;
+  --gutter-panel: 32px;
+  --gutter-public: 20px;
+  --sidebar-width: 240px;
+  --content-panel: 1120px;
+  --content-booking: 480px;
+  --content-profile: 560px;
 }
 
 @theme inline {
-  /* Colores semánticos (bg-background, text-foreground, border-border, etc.) */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -105,35 +93,65 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-destructive: var(--destructive);
+  --color-destructive-ink: var(--destructive-ink);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-destructive-soft: var(--destructive-soft);
   --color-success: var(--success);
   --color-warning: var(--warning);
+  --color-status-confirmed: var(--status-confirmed);
+  --color-status-confirmed-soft: var(--status-confirmed-soft);
+  --color-status-confirmed-foreground: var(--status-confirmed-foreground);
+  --color-status-pending: var(--status-pending);
+  --color-status-pending-soft: var(--status-pending-soft);
+  --color-status-pending-foreground: var(--status-pending-foreground);
+  --color-status-done: var(--status-done);
+  --color-status-done-soft: var(--status-done-soft);
+  --color-status-done-foreground: var(--status-done-foreground);
+  --color-status-cancelled: var(--status-cancelled);
+  --color-status-cancelled-soft: var(--status-cancelled-soft);
+  --color-status-cancelled-foreground: var(--status-cancelled-foreground);
 
-  /* Radios generosos */
-  --radius-sm: calc(var(--radius) - 0.5rem); /* 8px */
-  --radius-md: calc(var(--radius) - 0.25rem); /* 12px */
-  --radius-lg: var(--radius); /* 16px */
-  --radius-xl: calc(var(--radius) + 0.25rem); /* 20px */
-  --radius-2xl: calc(var(--radius) + 0.5rem); /* 24px */
-  --radius-3xl: calc(var(--radius) + 1rem); /* 32px */
+  --radius-sm: var(--radius-control);
+  --radius-md: var(--radius-control);
+  --radius-lg: var(--radius-surface);
+  --radius-xl: var(--radius-surface);
+  --radius-2xl: var(--radius-surface);
+  --radius-3xl: var(--radius-surface);
+  --shadow-soft: var(--elevation);
+  --shadow-float: var(--elevation);
 
-  /* Sombras */
-  --shadow-soft: var(--shadow-soft);
-  --shadow-float: var(--shadow-float);
-
-  /* Fuentes: las variables --font-sans-var / --font-display-var las define next/font en layout.tsx */
-  --font-sans: var(--font-sans-var), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-sans:
+    var(--font-sans-var), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    sans-serif;
   --font-display: var(--font-display-var), Georgia, "Times New Roman", serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-weight-bold: 600;
+  --font-weight-extrabold: 600;
+  --font-weight-black: 600;
+  --text-xs: 0.6875rem;
+  --text-xs--line-height: 1.4;
+  --text-sm: 0.8125rem;
+  --text-sm--line-height: 1.4;
+  --text-base: 0.9375rem;
+  --text-base--line-height: 1.5;
+  --text-lg: 1.0625rem;
+  --text-lg--line-height: 1.4;
+  --text-xl: 1.375rem;
+  --text-xl--line-height: 1.2;
+  --text-2xl: 1.75rem;
+  --text-2xl--line-height: 1.2;
+  --text-3xl: 2.25rem;
+  --text-3xl--line-height: 1.2;
+  --text-4xl: 2.75rem;
+  --text-4xl--line-height: 1.2;
 
-  /* Animaciones */
-  --animate-fade-up: fade-up 0.5s ease-out both;
   --animate-fade-in: fade-in 0.2s ease-out both;
-  --animate-slide-in-right: slide-in-right 0.25s cubic-bezier(0.32, 0.72, 0, 1) both;
-  --animate-slide-in-left: slide-in-left 0.25s cubic-bezier(0.32, 0.72, 0, 1) both;
-  --animate-slide-in-top: slide-in-top 0.25s cubic-bezier(0.32, 0.72, 0, 1) both;
-  --animate-slide-in-bottom: slide-in-bottom 0.25s cubic-bezier(0.32, 0.72, 0, 1) both;
-
+  /* Compatibilidad: las pantallas antiguas no desplazan el contenido al entrar. */
+  --animate-fade-up: fade-in 0.2s ease-out both;
+  --animate-slide-in-right: slide-in-right 0.25s ease-out both;
+  --animate-slide-in-left: slide-in-left 0.25s ease-out both;
+  --animate-slide-in-top: slide-in-top 0.25s ease-out both;
+  --animate-slide-in-bottom: slide-in-bottom 0.25s ease-out both;
   @keyframes slide-in-right {
     from {
       transform: translateX(100%);
@@ -166,17 +184,6 @@
       transform: translateY(0);
     }
   }
-
-  @keyframes fade-up {
-    from {
-      opacity: 0;
-      transform: translateY(12px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
   @keyframes fade-in {
     from {
       opacity: 0;
@@ -199,23 +206,29 @@
     background-color: var(--background);
     color: var(--foreground);
     font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.5;
+    font-variant-numeric: tabular-nums;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+  .lucide {
+    stroke-width: 1.75;
   }
   ::selection {
     background-color: var(--accent-soft);
     color: var(--foreground);
   }
   :focus-visible {
-    outline: 2px solid var(--ring);
+    outline: 2px solid color-mix(in srgb, var(--ring) 40%, transparent);
     outline-offset: 2px;
   }
-  /* Las animaciones de entrada son un extra: sin movimiento, el contenido se ve de inmediato. */
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
     *::after {
       animation-duration: 0.01ms !important;
+      animation-delay: 0ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
     }

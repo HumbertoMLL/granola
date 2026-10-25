@@ -3,76 +3,359 @@
 import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ChevronRight } from "lucide-react";
 import { authClient } from "@granola/auth/client";
-import { Button, Card, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, toast } from "@granola/ui";
-import { exportAccount, saveAccount } from "@/app/(panel)/app/configuracion/actions";
+import {
+  Button,
+  DataList,
+  DataRow,
+  FormField,
+  Input,
+  SectionHeader,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  toast,
+} from "@granola/ui";
+import {
+  exportAccount,
+  saveAccount,
+} from "@/app/(panel)/app/configuracion/actions";
 import { updateTimezone } from "@/app/(panel)/app/agenda/actions";
 import { LATAM_TIMEZONES } from "@/components/agenda/timezones";
 import { accountSchema, passwordSchema } from "./schemas";
 
-export function SettingsForms(props: { name: string; email: string; timezone: string }) {
+type Setting = "profile" | "password" | "timezone" | "export";
+const TITLES: Record<Setting, string> = {
+  profile: "Perfil de cuenta",
+  password: "Cambiar contraseña",
+  timezone: "Zona horaria",
+  export: "Exportar mis datos",
+};
+const DESCRIPTIONS: Record<Setting, string> = {
+  profile: "El nombre de tu cuenta en Granola.",
+  password: "Usa al menos 8 caracteres.",
+  timezone: "La zona que usa tu agenda.",
+  export: "Descarga una copia de tu información.",
+};
+
+function SettingRow({
+  label,
+  value,
+  onClick,
+  disabled,
+}: {
+  label: string;
+  value?: string;
+  onClick?: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <DataRow className="py-0">
+      {onClick ? (
+        <button
+          type="button"
+          onClick={onClick}
+          disabled={disabled}
+          className="flex min-h-16 w-full items-center justify-between gap-4 py-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring/40 md:min-h-12 md:py-3"
+        >
+          <span className="min-w-0 flex-1 md:flex md:items-center md:gap-4">
+            <span className="block text-base font-medium md:w-40 md:shrink-0">
+              {label}
+            </span>
+            {value ? (
+              <span className="mt-1 block truncate text-sm text-muted-foreground md:mt-0">
+                {value}
+              </span>
+            ) : null}
+          </span>
+          <ChevronRight
+            className="size-4 shrink-0 text-muted-foreground"
+            aria-hidden
+          />
+        </button>
+      ) : (
+        <div className="flex min-h-16 w-full flex-wrap items-center justify-between gap-2 py-3 md:min-h-12">
+          <span className="font-medium">{label}</span>
+          <span className="text-sm text-muted-foreground">{value}</span>
+        </div>
+      )}
+    </DataRow>
+  );
+}
+
+export function SettingsForms(props: {
+  name: string;
+  email: string;
+  timezone: string;
+}) {
   const router = useRouter();
   const passwordForm = useRef<HTMLFormElement>(null);
   const [pending, startTransition] = useTransition();
   const [timezone, setTimezone] = useState(props.timezone);
+  const [name, setName] = useState(props.name);
+  const [editing, setEditing] = useState<Setting | null>(null);
+  const zoneName =
+    LATAM_TIMEZONES.find((zone) => zone.value === timezone)?.label ??
+    timezone.split("/").at(-1)?.replace(/_/g, " ") ??
+    timezone;
   function run(work: () => Promise<void>) {
-    startTransition(async () => { try { await work(); } catch { toast.error("No se pudo completar. Intenta de nuevo."); } });
+    startTransition(async () => {
+      try {
+        await work();
+      } catch {
+        toast.error("No se pudo completar. Intenta de nuevo.");
+      }
+    });
   }
-  return <div className="grid gap-6">
-    <Card>
-      <h2 className="text-lg font-semibold">Perfil de cuenta</h2>
-      <form className="grid gap-3" action={(form) => run(async () => {
-        const parsed = accountSchema.safeParse(Object.fromEntries(form));
-        if (!parsed.success) { toast.error(parsed.error.issues[0]!.message); return; }
-        const result = await saveAccount(parsed.data);
-        if (result.ok) toast.success("Nombre actualizado"); else toast.error(result.error);
-      })}>
-        <Label htmlFor="account-name">Nombre</Label><Input id="account-name" name="name" defaultValue={props.name} required minLength={2} maxLength={60} />
-        <Label htmlFor="account-email">Correo electrónico</Label><Input id="account-email" value={props.email} readOnly type="email" />
-        <Button type="submit" disabled={pending}>Guardar nombre</Button>
-      </form>
-      <form className="grid gap-3 border-t border-border pt-4" action={(form) => run(async () => {
-        const parsed = passwordSchema.safeParse(Object.fromEntries(form));
-        if (!parsed.success) { toast.error(parsed.error.issues[0]!.message); return; }
-        const result = await authClient.changePassword({ currentPassword: parsed.data.currentPassword, newPassword: parsed.data.newPassword, revokeOtherSessions: true });
-        if (result.error) { toast.error("No se pudo cambiar la contraseña. Revisa tu contraseña actual."); return; }
-        toast.success("Contraseña actualizada");
-        passwordForm.current?.reset();
-      })} ref={passwordForm}>
-        <h3 className="font-medium">Cambiar contraseña</h3>
-        <Label htmlFor="current-password">Contraseña actual</Label><Input id="current-password" name="currentPassword" type="password" autoComplete="current-password" required />
-        <Label htmlFor="new-password">Nueva contraseña</Label><Input id="new-password" name="newPassword" type="password" autoComplete="new-password" minLength={8} maxLength={128} required />
-        <Label htmlFor="confirm-password">Confirma tu nueva contraseña</Label><Input id="confirm-password" name="confirmPassword" type="password" autoComplete="new-password" required />
-        <Button type="submit" variant="outline" disabled={pending}>Cambiar contraseña</Button>
-      </form>
-      <Button variant="ghost" disabled={pending} onClick={() => run(async () => {
-        const result = await authClient.signOut();
-        if (result.error) { toast.error("No se pudo cerrar sesión"); return; }
-        router.replace("/login"); router.refresh();
-      })}>Cerrar sesión</Button>
-    </Card>
-    <Card>
-      <h2 className="text-lg font-semibold">Preferencias</h2>
-      <Label htmlFor="settings-timezone">Zona horaria</Label>
-      <Select value={timezone} disabled={pending} onValueChange={(value) => run(async () => {
-        const result = await updateTimezone(value);
-        if (result.ok) { setTimezone(value); toast.success("Zona horaria actualizada"); } else toast.error(result.error);
-      })}>
-        <SelectTrigger id="settings-timezone"><SelectValue /></SelectTrigger>
-        <SelectContent>{!LATAM_TIMEZONES.some((t) => t.value === timezone) ? <SelectItem value={timezone}>{timezone}</SelectItem> : null}{LATAM_TIMEZONES.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
-      </Select>
-      <Label htmlFor="settings-language">Idioma</Label><Input id="settings-language" readOnly value="Español (México) · es-MX" />
-    </Card>
-    <Card>
-      <h2 className="text-lg font-semibold">Datos y privacidad</h2>
-      <Link className="text-primary underline" href="/privacidad">Leer aviso de privacidad</Link>
-      <p className="text-sm text-muted-foreground">Descarga en JSON tu perfil, servicios, disponibilidad, pacientes, citas y pagos. Incluye datos de salud de tus pacientes: guárdalo en un lugar seguro. Cada descarga queda registrada.</p>
-      <Button variant="outline" disabled={pending} onClick={() => run(async () => {
-        const json = await exportAccount();
-        const url = URL.createObjectURL(new Blob([json], { type: "application/json" }));
-        const link = document.createElement("a"); link.href = url; link.download = "granola-mis-datos.json"; link.click();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-      })}>Exportar mis datos</Button>
-    </Card>
-  </div>;
+  return (
+    <div className="grid gap-8">
+      <section className="grid gap-3">
+        <SectionHeader title="Cuenta" />
+        <DataList>
+          <SettingRow
+            label="Perfil"
+            value={`${name} · ${props.email}`}
+            onClick={() => setEditing("profile")}
+          />
+          <SettingRow
+            label="Contraseña"
+            value="Cambiar contraseña"
+            onClick={() => setEditing("password")}
+          />
+          <SettingRow
+            label="Cerrar sesión"
+            disabled={pending}
+            onClick={() =>
+              run(async () => {
+                const result = await authClient.signOut();
+                if (result.error) {
+                  toast.error("No se pudo cerrar sesión");
+                  return;
+                }
+                router.replace("/login");
+                router.refresh();
+              })
+            }
+          />
+        </DataList>
+      </section>
+      <section className="grid gap-3">
+        <SectionHeader title="Preferencias" />
+        <DataList>
+          <SettingRow
+            label="Zona horaria"
+            value={zoneName}
+            onClick={() => setEditing("timezone")}
+          />
+          <SettingRow label="Idioma" value="Español (México)" />
+        </DataList>
+      </section>
+      <section className="grid gap-3">
+        <SectionHeader title="Datos y privacidad" />
+        <DataList>
+          <DataRow className="py-0">
+            <Link
+              className="flex min-h-16 w-full items-center justify-between gap-4 py-3 font-medium md:min-h-12"
+              href="/privacidad"
+            >
+              Aviso de privacidad
+              <ChevronRight
+                className="size-4 text-muted-foreground"
+                aria-hidden
+              />
+            </Link>
+          </DataRow>
+          <SettingRow
+            label="Exportar mis datos"
+            value="Copia en JSON"
+            onClick={() => setEditing("export")}
+          />
+        </DataList>
+      </section>
+      <Sheet
+        open={editing !== null}
+        onOpenChange={(open) => {
+          if (!open) setEditing(null);
+        }}
+      >
+        <SheetContent side="bottom" className="mx-auto max-w-lg">
+          <SheetHeader>
+            <SheetTitle>
+              {editing ? TITLES[editing] : "Configuración"}
+            </SheetTitle>
+            <SheetDescription>
+              {editing ? DESCRIPTIONS[editing] : ""}
+            </SheetDescription>
+          </SheetHeader>
+          {editing === "profile" ? (
+            <form
+              className="grid gap-4"
+              action={(form) =>
+                run(async () => {
+                  const parsed = accountSchema.safeParse(
+                    Object.fromEntries(form),
+                  );
+                  if (!parsed.success) {
+                    toast.error(parsed.error.issues[0]!.message);
+                    return;
+                  }
+                  const result = await saveAccount(parsed.data);
+                  if (result.ok) {
+                    setName(parsed.data.name);
+                    setEditing(null);
+                    toast.success("Nombre actualizado");
+                    router.refresh();
+                  } else toast.error(result.error);
+                })
+              }
+            >
+              <FormField label="Nombre">
+                <Input
+                  name="name"
+                  defaultValue={name}
+                  required
+                  minLength={2}
+                  maxLength={60}
+                />
+              </FormField>
+              <FormField label="Correo electrónico">
+                <Input value={props.email} readOnly type="email" />
+              </FormField>
+              <Button type="submit" disabled={pending}>
+                Guardar
+              </Button>
+            </form>
+          ) : null}
+          {editing === "password" ? (
+            <form
+              className="grid gap-4"
+              action={(form) =>
+                run(async () => {
+                  const parsed = passwordSchema.safeParse(
+                    Object.fromEntries(form),
+                  );
+                  if (!parsed.success) {
+                    toast.error(parsed.error.issues[0]!.message);
+                    return;
+                  }
+                  const result = await authClient.changePassword({
+                    currentPassword: parsed.data.currentPassword,
+                    newPassword: parsed.data.newPassword,
+                    revokeOtherSessions: true,
+                  });
+                  if (result.error) {
+                    toast.error(
+                      "No se pudo cambiar la contraseña. Revisa tu contraseña actual.",
+                    );
+                    return;
+                  }
+                  toast.success("Contraseña actualizada");
+                  passwordForm.current?.reset();
+                  setEditing(null);
+                })
+              }
+              ref={passwordForm}
+            >
+              <FormField label="Contraseña actual">
+                <Input
+                  name="currentPassword"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                />
+              </FormField>
+              <FormField label="Nueva contraseña">
+                <Input
+                  name="newPassword"
+                  type="password"
+                  autoComplete="new-password"
+                  minLength={8}
+                  maxLength={128}
+                  required
+                />
+              </FormField>
+              <FormField label="Confirma tu nueva contraseña">
+                <Input
+                  name="confirmPassword"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                />
+              </FormField>
+              <Button type="submit" disabled={pending}>
+                Cambiar contraseña
+              </Button>
+            </form>
+          ) : null}
+          {editing === "timezone" ? (
+            <FormField label="Zona horaria">
+              <Select
+                value={timezone}
+                disabled={pending}
+                onValueChange={(value) =>
+                  run(async () => {
+                    const result = await updateTimezone(value);
+                    if (result.ok) {
+                      setTimezone(value);
+                      setEditing(null);
+                      toast.success("Zona horaria actualizada");
+                    } else toast.error(result.error);
+                  })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {!LATAM_TIMEZONES.some((zone) => zone.value === timezone) ? (
+                    <SelectItem value={timezone}>{zoneName}</SelectItem>
+                  ) : null}
+                  {LATAM_TIMEZONES.map((zone) => (
+                    <SelectItem key={zone.value} value={zone.value}>
+                      {zone.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormField>
+          ) : null}
+          {editing === "export" ? (
+            <div className="grid gap-4">
+              <p className="text-sm text-muted-foreground">
+                Incluye tu perfil, servicios, disponibilidad, pacientes, citas y
+                pagos. Contiene datos de salud: guarda el archivo en un lugar
+                seguro. La descarga queda registrada.
+              </p>
+              <Button
+                disabled={pending}
+                onClick={() =>
+                  run(async () => {
+                    const json = await exportAccount();
+                    const url = URL.createObjectURL(
+                      new Blob([json], { type: "application/json" }),
+                    );
+                    const link = document.createElement("a");
+                    link.href = url;
+                    link.download = "granola-mis-datos.json";
+                    link.click();
+                    setTimeout(() => URL.revokeObjectURL(url), 1000);
+                  })
+                }
+              >
+                Descargar JSON
+              </Button>
+            </div>
+          ) : null}
+        </SheetContent>
+      </Sheet>
+    </div>
+  );
 }

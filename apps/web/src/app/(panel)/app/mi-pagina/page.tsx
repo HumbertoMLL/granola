@@ -50,7 +50,9 @@ async function MiPaginaPageContent() {
   };
 
   const siteUrl =
-    process.env.NEXT_PUBLIC_APP_URL ?? process.env.BETTER_AUTH_URL ?? "https://granola.app";
+    process.env.NEXT_PUBLIC_APP_URL ??
+    process.env.BETTER_AUTH_URL ??
+    "https://granola.app";
 
   return (
     <MyPageEditor
@@ -65,12 +67,12 @@ function EditorSkeleton() {
   return (
     <div className="flex flex-col gap-6">
       <Skeleton className="h-10 w-56" />
-      <div className="grid gap-4 lg:grid-cols-[1fr_360px]">
+      <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
         <div className="flex flex-col gap-4">
-          <Skeleton className="h-64 w-full rounded-2xl" />
-          <Skeleton className="h-48 w-full rounded-2xl" />
+          <Skeleton className="h-64 w-full rounded-xl" />
+          <Skeleton className="h-48 w-full rounded-xl" />
         </div>
-        <Skeleton className="hidden h-[640px] w-full rounded-[2.5rem] lg:block" />
+        <Skeleton className="hidden h-[640px] w-full rounded-xl lg:block" />
       </div>
     </div>
   );

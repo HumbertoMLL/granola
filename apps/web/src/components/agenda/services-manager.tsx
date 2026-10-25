@@ -7,7 +7,6 @@ import {
   Clock,
   MapPin,
   Pencil,
-  Plus,
   Trash2,
   Video,
 } from "lucide-react";
@@ -130,11 +129,11 @@ export function ServicesManager({ services }: { services: ServiceRow[] }) {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">
-          Lo que tus pacientes pueden agendar desde tu página.
+          {sorted.length} {sorted.length === 1 ? "servicio" : "servicios"}
         </p>
         {sorted.length > 0 && (
           <Button size="sm" onClick={() => setEditing("new")}>
-            <Plus /> Nuevo servicio
+            Nuevo servicio
           </Button>
         )}
       </div>
@@ -145,7 +144,7 @@ export function ServicesManager({ services }: { services: ServiceRow[] }) {
           description="Crea tu primera consulta y después define tu horario en Disponibilidad."
           action={
             <Button onClick={() => setEditing("new")}>
-              <Plus /> Crear primer servicio
+              Crear primer servicio
             </Button>
           }
         />
@@ -175,7 +174,7 @@ export function ServicesManager({ services }: { services: ServiceRow[] }) {
                       </span>
                     </p>
                   </div>
-                  <Badge variant={s.isActive ? "default" : "secondary"}>
+                  <Badge variant="done">
                     {s.isActive ? "Activo" : "Oculto"}
                   </Badge>
                 </div>
@@ -347,7 +346,7 @@ function ServiceSheet({
               </SheetDescription>
             </SheetHeader>
 
-            <div className="flex flex-1 flex-col gap-5 p-6 pt-4">
+            <div className="flex flex-1 flex-col gap-4 p-6 pt-4">
               <Field label="Nombre" error={errors.name}>
                 <Input
                   value={form.name}
@@ -476,7 +475,7 @@ function ServiceSheet({
                 <Button
                   type="button"
                   variant="ghost"
-                  className="text-destructive"
+                  className="text-destructive-ink"
                   onClick={() => setConfirmDelete(true)}
                   disabled={pending}
                 >

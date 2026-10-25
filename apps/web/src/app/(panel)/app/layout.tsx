@@ -45,7 +45,7 @@ async function PanelShell({ children }: { children: React.ReactNode }) {
         <div className="flex min-w-0 flex-1 flex-col">
           <MobileHeader user={user} />
           {/* pb extra en móvil para que el contenido no quede bajo la tab bar */}
-          <main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-5 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:px-6 md:px-8 md:pt-8 md:pb-10">
+          <main className="mx-auto w-full max-w-[1184px] flex-1 px-4 pt-4 pb-[calc(6rem+env(safe-area-inset-bottom))] md:px-8 md:pt-8 md:pb-12">
             {children}
           </main>
         </div>
@@ -57,7 +57,7 @@ async function PanelShell({ children }: { children: React.ReactNode }) {
 function PanelShellSkeleton() {
   return (
     <div className="flex min-h-full flex-1">
-      <aside className="hidden w-64 shrink-0 border-r border-border bg-card p-5 md:block">
+      <aside className="hidden w-[240px] shrink-0 border-r border-border bg-background p-8 md:block">
         <Skeleton className="h-8 w-28" />
       </aside>
       <main className="flex-1 p-6">

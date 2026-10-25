@@ -38,6 +38,7 @@
     "zod": "^4.1.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.11.1",
     "@playwright/test": "1.56.1",
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^20",

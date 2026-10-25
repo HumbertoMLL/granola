@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { cn } from "@granola/ui";
+import { PageHeader as Header, cn } from "@granola/ui";
 
 type PageHeaderProps = {
   title: string;
@@ -12,17 +12,15 @@ type PageHeaderProps = {
 
 export function PageHeader({ title, description, children, className }: PageHeaderProps) {
   return (
-    <div
+    <Header
+      title={title}
+      description={description}
       className={cn(
-        "flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between",
+        "[&_h1]:sr-only md:[&_h1]:not-sr-only [&>div:first-child]:max-md:hidden",
         className,
       )}
     >
-      <div>
-        <h1 className="text-2xl font-extrabold tracking-tight md:text-3xl">{title}</h1>
-        {description ? <p className="mt-1 text-sm text-muted-foreground">{description}</p> : null}
-      </div>
-      {children ? <div className="flex items-center gap-2">{children}</div> : null}
-    </div>
+      {children}
+    </Header>
   );
 }

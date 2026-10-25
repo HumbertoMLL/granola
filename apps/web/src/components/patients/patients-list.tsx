@@ -3,9 +3,14 @@
 import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ChevronRight, Search, Users } from "lucide-react";
 import {
   AppliedFilters,
+  Avatar,
+  AvatarFallback,
   Button,
+  DataList,
+  DataRow,
   EmptyState,
   FilterChip,
   FormField,
@@ -15,9 +20,11 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-  Skeleton,
+  SkeletonRow,
   Textarea,
 } from "@granola/ui";
+import { PageHeader } from "@/components/panel/page-header";
+import { initialsOf } from "@/components/panel/nav";
 import {
   createPatient,
   listPatients,
@@ -76,25 +83,32 @@ export function PatientsList() {
   }
 
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-5">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-extrabold">Pacientes</h1>
-          <p className="text-muted-foreground">
-            Tu consulta, paciente por paciente.
-          </p>
+    <div className="flex flex-col gap-6">
+      <PageHeader title="Pacientes" className="hidden md:flex" />
+      <div className="flex items-end gap-3">
+        <div className="min-w-0 flex-1">
+          <FormField label="Buscar por nombre o WhatsApp">
+            <div className="relative">
+              <Search
+                className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+                aria-hidden
+              />
+              <Input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                maxLength={100}
+                placeholder="Nombre o WhatsApp"
+                className="pl-9"
+              />
+            </div>
+          </FormField>
         </div>
         <Button onClick={() => setShowForm(true)}>Nuevo paciente</Button>
-      </header>
-      <FormField label="Buscar por nombre o WhatsApp">
-        <Input
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          maxLength={100}
-          placeholder="Nombre o +52…"
-        />
-      </FormField>
-      <div className="flex flex-wrap gap-2" aria-label="Filtrar pacientes">
+      </div>
+      <div
+        className="-mt-2 flex flex-wrap gap-2"
+        aria-label="Filtrar pacientes"
+      >
         {FACETS.map((facet) => (
           <FilterChip
             key={facet.id}
@@ -137,12 +151,12 @@ export function PatientsList() {
             className="grid gap-3"
           >
             {[0, 1, 2].map((id) => (
-              <Skeleton key={id} className="h-20 w-full" />
+              <SkeletonRow key={id} />
             ))}
           </div>
         ) : !result.ok ? (
           <>
-            <p role="alert" className="text-destructive">
+            <p role="alert" className="text-destructive-ink">
               {result.error}
             </p>
             <Button
@@ -166,6 +180,7 @@ export function PatientsList() {
             )}
             {!rows.length ? (
               <EmptyState
+                icon={<Users aria-hidden />}
                 title={
                   applied.length
                     ? "No se encontraron pacientes"
@@ -188,29 +203,37 @@ export function PatientsList() {
                 }
               />
             ) : (
-              <ul
+              <DataList
                 aria-label="Pacientes"
-                className="divide-y divide-border rounded-2xl border border-border bg-card px-4"
+                className="border-y border-border"
               >
                 {rows.map((patient) => (
-                  <li key={patient.id} className="flex items-center gap-3 py-4">
-                    <div className="min-w-0 flex-1">
-                      <h2 className="truncate font-semibold">{patient.name}</h2>
-                      <p className="text-sm text-muted-foreground">
-                        {patient.phoneWa ?? "Sin WhatsApp"}
+                  <DataRow
+                    key={patient.id}
+                    leading={
+                      <Avatar className="size-9">
+                        <AvatarFallback>
+                          {initialsOf(patient.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                    }
+                    title={<h2 className="truncate">{patient.name}</h2>}
+                    description={
+                      <p className="truncate">
+                        {patient.phoneWa ?? patient.email ?? "Sin contacto"}
                       </p>
-                      <p className="truncate text-xs text-muted-foreground">
-                        {patient.email ?? "Sin correo"}
-                      </p>
-                    </div>
-                    <Button variant="outline" size="sm" asChild>
-                      <Link href={`/app/pacientes/${patient.id}`}>
-                        Ver expediente
-                      </Link>
-                    </Button>
-                  </li>
+                    }
+                    trailing={
+                      <Button variant="ghost" size="icon" asChild>
+                        <Link href={`/app/pacientes/${patient.id}`}>
+                          <span className="sr-only">Ver expediente</span>
+                          <ChevronRight aria-hidden />
+                        </Link>
+                      </Button>
+                    }
+                  />
                 ))}
-              </ul>
+              </DataList>
             )}
           </>
         )}
@@ -260,7 +283,7 @@ export function PatientsList() {
               hint="Número de México sin lada."
             >
               <div className="flex gap-2">
-                <span className="flex h-11 items-center rounded-xl border border-border px-3">
+                <span className="flex h-11 items-center rounded-md border border-border px-3">
                   +52
                 </span>
                 <Input
@@ -285,7 +308,7 @@ export function PatientsList() {
             <FormField label="Sexo (opcional)" error={fieldErrors.sex}>
               <select
                 name="sex"
-                className="h-11 rounded-xl border border-input bg-card px-3"
+                className="h-11 rounded-md border border-input bg-card px-3"
               >
                 <option value="">Sin especificar</option>
                 <option value="f">Femenino</option>
@@ -320,13 +343,13 @@ export function PatientsList() {
               <p
                 id="patient-consent-error"
                 role="alert"
-                className="text-sm text-destructive"
+                className="text-sm text-destructive-ink"
               >
                 {fieldErrors.consent}
               </p>
             )}
             {error && (
-              <p role="alert" className="text-sm text-destructive">
+              <p role="alert" className="text-sm text-destructive-ink">
                 {error}
               </p>
             )}

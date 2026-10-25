@@ -1,14 +1,17 @@
 import Link from "next/link";
-import {
-  ArrowUpRight,
-  BadgeCheck,
-  CalendarCheck2,
-  Clock,
-  MessageCircle,
-  Star,
-} from "lucide-react";
+import { BadgeCheck, ChevronRight, Star } from "lucide-react";
 
-import { Avatar, AvatarFallback, AvatarImage, cn } from "@granola/ui";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  buttonVariants,
+  cn,
+} from "@granola/ui";
+import {
+  formatPrice as price,
+  formatShortDate,
+} from "@/components/booking/format";
 
 import { LinkIcon } from "./link-icon";
 import { themeStyle } from "./theme";
@@ -16,28 +19,13 @@ import type { PublicProfile, PublicReview, PublicService } from "./types";
 
 type ProfileViewProps = {
   profile: PublicProfile;
-  /**
-   * Modo vista previa (editor): mismo markup, pero los enlaces no navegan y no
-   * se renderiza como página completa (sin min-h-dvh).
-   */
+  /** El editor usa el mismo markup, sin navegación ni altura de página. */
   preview?: boolean;
   className?: string;
   nextAvailable?: React.ReactNode;
 };
 
-const mxn = new Intl.NumberFormat("es-MX", {
-  style: "currency",
-  currency: "MXN",
-  maximumFractionDigits: 0,
-});
-
-export function formatPrice(cents: number, currency = "MXN"): string {
-  if (cents === 0) return "Gratis";
-  if (currency === "MXN") return mxn.format(cents / 100);
-  return new Intl.NumberFormat("es-MX", { style: "currency", currency }).format(
-    cents / 100,
-  );
-}
+export const formatPrice = price;
 
 export function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -62,7 +50,6 @@ export function ProfileView({
   nextAvailable,
 }: ProfileViewProps) {
   const { theme } = profile;
-  const agendarHref = `/${profile.slug}/agendar`;
   const showReviews = theme.showReviews && profile.reviews.length > 0;
   const showWa = theme.showWhatsApp && !!profile.phoneWa;
 
@@ -71,73 +58,65 @@ export function ProfileView({
       data-preset={theme.preset}
       style={themeStyle(theme)}
       className={cn(
-        "relative w-full bg-(--pp-bg) font-sans text-(--pp-fg) antialiased",
+        "w-full bg-(--pp-bg) font-sans text-(--pp-fg) antialiased",
         preview ? "min-h-full pointer-events-none select-none" : "min-h-dvh",
         className,
       )}
     >
-      {/* Glow decorativo del header */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-72"
-        style={{ background: "var(--pp-glow)" }}
-      />
-
       <div
         className={cn(
-          "relative mx-auto flex w-full max-w-md flex-col gap-7 px-5 pb-10",
-          preview ? "pt-10" : "pt-[max(2.5rem,env(safe-area-inset-top))]",
+          "mx-auto flex w-full max-w-[560px] flex-col gap-8 px-5 pb-8",
+          preview ? "pt-8" : "pt-[max(2rem,env(safe-area-inset-top))] sm:pt-12",
         )}
       >
-        {/* Header */}
         <header className="flex flex-col items-center text-center">
-          <Avatar className="size-24 ring-4 ring-(--pp-surface) shadow-[0_8px_24px_rgb(0_0_0/0.08)]">
+          <Avatar className="size-24">
             {profile.avatarUrl ? (
               <AvatarImage src={profile.avatarUrl} alt={profile.displayName} />
             ) : null}
-            <AvatarFallback className="bg-(--pp-primary) text-xl text-(--pp-primary-fg)">
+            <AvatarFallback className="bg-(--pp-secondary) text-xl text-(--pp-fg)">
               {initials(profile.displayName)}
             </AvatarFallback>
           </Avatar>
-
-          <h1 className="mt-4 text-2xl font-extrabold tracking-tight">
+          <h1 className="mt-4 font-display text-[32px] leading-[1.2] tracking-tight">
             {profile.displayName}
           </h1>
-
           {profile.cedula ? (
-            <p className="mt-1 inline-flex items-center gap-1 text-sm text-(--pp-muted)">
-              <BadgeCheck className="size-4 text-(--pp-primary)" aria-hidden />
-              Céd. prof. {profile.cedula}
+            <p className="mt-2 text-sm text-(--pp-muted)">
+              Cédula profesional {profile.cedula}
             </p>
           ) : null}
-
+          {theme.showReviews && profile.reviewStats ? (
+            <p className="mt-3 inline-flex items-center gap-2 text-sm text-(--pp-muted)">
+              <Star
+                className="size-4 fill-current text-(--pp-fg)"
+                aria-hidden
+              />
+              <span>
+                <span className="font-medium text-(--pp-fg)">
+                  {profile.reviewStats.average.toFixed(1)}
+                </span>{" "}
+                · {profile.reviewStats.count}{" "}
+                {profile.reviewStats.count === 1
+                  ? "reseña verificada"
+                  : "reseñas verificadas"}
+              </span>
+            </p>
+          ) : null}
           {profile.bio ? (
-            <p className="mt-3 max-w-sm text-[15px] leading-relaxed text-(--pp-muted) whitespace-pre-line">
+            <p className="mt-4 max-w-md text-base leading-normal text-(--pp-muted) whitespace-pre-line">
               {profile.bio}
             </p>
           ) : null}
-
-          {theme.showReviews && profile.reviewStats ? (
-            <span className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-(--pp-border) bg-(--pp-surface) px-3 py-1 text-xs font-semibold">
-              <Star
-                className="size-3.5 fill-(--pp-accent) text-(--pp-accent)"
-                aria-hidden
-              />
-              Reseñas verificadas · {profile.reviewStats.average.toFixed(1)} (
-              {profile.reviewStats.count})
-            </span>
-          ) : null}
         </header>
 
-        {/* CTA principal */}
-        <div className="flex flex-col gap-2.5">
-          <PPButton href={agendarHref} preview={preview} variant="primary">
-            <CalendarCheck2 className="size-5" aria-hidden />
+        <div className="flex flex-col gap-3">
+          <PPButton href={`/${profile.slug}/agendar`} preview={preview}>
             Agendar consulta
           </PPButton>
           {nextAvailable ??
             (preview ? (
-              <p className="text-center text-xs text-(--pp-muted)">
+              <p className="text-center text-sm text-(--pp-muted)">
                 El próximo horario disponible aparecerá aquí.
               </p>
             ) : null)}
@@ -148,21 +127,25 @@ export function ProfileView({
               variant="outline"
               external
             >
-              <MessageCircle className="size-5" aria-hidden />
               Escríbeme por WhatsApp
             </PPButton>
           ) : null}
         </div>
 
-        {/* Servicios */}
         {profile.services.length > 0 ? (
-          <section className="flex flex-col gap-3">
-            <SectionTitle>Servicios</SectionTitle>
-            <ul className="flex flex-col gap-2.5">
-              {profile.services.map((s) => (
-                <li key={s.id}>
-                  <ServiceCard
-                    service={s}
+          <section
+            aria-labelledby={preview ? "preview-services" : "profile-services"}
+          >
+            <SectionTitle
+              id={preview ? "preview-services" : "profile-services"}
+            >
+              Servicios
+            </SectionTitle>
+            <ul className="mt-3 divide-y divide-(--pp-border) border-y border-(--pp-border)">
+              {profile.services.map((service) => (
+                <li key={service.id}>
+                  <ServiceRow
+                    service={service}
                     slug={profile.slug}
                     preview={preview}
                   />
@@ -172,55 +155,51 @@ export function ProfileView({
           </section>
         ) : null}
 
-        {/* Reseñas */}
         {showReviews ? (
-          <section className="flex flex-col gap-3">
-            <SectionTitle>Lo que dicen sus pacientes</SectionTitle>
-            <div className="flex flex-col gap-2.5">
-              {profile.reviews.map((r) => (
-                <ReviewCard key={r.id} review={r} />
+          <section
+            aria-labelledby={preview ? "preview-reviews" : "profile-reviews"}
+          >
+            <SectionTitle id={preview ? "preview-reviews" : "profile-reviews"}>
+              Reseñas
+            </SectionTitle>
+            <div className="mt-4 flex flex-col gap-6">
+              {profile.reviews.map((review) => (
+                <ReviewQuote key={review.id} review={review} />
               ))}
             </div>
           </section>
         ) : null}
 
-        {/* Links */}
         {profile.links.length > 0 ? (
-          <section aria-label="Enlaces" className="flex flex-col gap-2.5">
-            {profile.links.map((l) => (
-              <PPLink key={l.id} href={l.url} preview={preview} external>
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-(--pp-bg) text-(--pp-primary)">
-                  <LinkIcon kind={l.icon} className="size-[18px]" />
-                </span>
-                <span className="min-w-0 flex-1 truncate text-left font-semibold">
-                  {l.label}
-                </span>
-                <ArrowUpRight
-                  className="size-4 shrink-0 text-(--pp-muted)"
-                  aria-hidden
-                />
-              </PPLink>
+          <nav
+            aria-label="Enlaces"
+            className="flex flex-wrap justify-center gap-3 border-t border-(--pp-border) pt-6"
+          >
+            {profile.links.map((link) => (
+              <PPAnchor
+                key={link.id}
+                href={link.url}
+                preview={preview}
+                external
+                label={link.label}
+                className="inline-flex size-12 items-center justify-center rounded-md text-(--pp-muted) transition-colors hover:bg-(--pp-secondary) hover:text-(--pp-fg) focus-visible:outline-(--pp-primary)"
+              >
+                <LinkIcon kind={link.icon} className="size-5" />
+                <span className="sr-only">{link.label}</span>
+              </PPAnchor>
             ))}
-          </section>
+          </nav>
         ) : null}
 
-        {/* Footer */}
-        <footer className="mt-4 flex flex-col items-center gap-2 text-center text-xs text-(--pp-muted)">
-          <PPAnchor
-            href="/"
-            preview={preview}
-            className="inline-flex items-center gap-1.5 rounded-full border border-(--pp-border) bg-(--pp-surface) px-3 py-1.5 font-semibold text-(--pp-fg) transition-opacity hover:opacity-80"
-          >
-            <span
-              aria-hidden
-              className="inline-block size-2 rounded-full bg-(--pp-primary)"
-            />
+        <footer className="flex items-center justify-center gap-3 text-center text-xs text-(--pp-muted)">
+          <PPAnchor href="/" preview={preview} className="py-3 hover:underline">
             Hecho con Granola
           </PPAnchor>
+          <span aria-hidden>·</span>
           <PPAnchor
             href="/privacidad"
             preview={preview}
-            className="underline-offset-2 hover:underline"
+            className="py-3 hover:underline"
           >
             Aviso de privacidad
           </PPAnchor>
@@ -230,16 +209,22 @@ export function ProfileView({
   );
 }
 
-function SectionTitle({ children }: { children: React.ReactNode }) {
+function SectionTitle({
+  children,
+  id,
+}: {
+  children: React.ReactNode;
+  id: string;
+}) {
   return (
-    <h2 className="px-1 text-xs font-bold tracking-wider text-(--pp-muted)">
+    <h2 id={id} className="text-lg font-semibold text-(--pp-fg)">
       {children}
     </h2>
   );
 }
 
-function ServiceCard({
-  service: s,
+function ServiceRow({
+  service,
   slug,
   preview,
 }: {
@@ -248,75 +233,77 @@ function ServiceCard({
   preview: boolean;
 }) {
   const meta = [
-    `${s.durationMin} min`,
-    modalityLabel[s.modality],
-    s.packageSessions ? `Paquete de ${s.packageSessions}` : null,
+    `${service.durationMin} min`,
+    modalityLabel[service.modality],
+    service.packageSessions ? `${service.packageSessions} sesiones` : null,
   ].filter(Boolean);
-
   return (
-    <PPButton
-      href={`/${slug}/agendar?paso=2&servicio=${encodeURIComponent(s.id)}`}
+    <PPAnchor
+      href={`/${slug}/agendar?paso=2&servicio=${encodeURIComponent(service.id)}`}
       preview={preview}
-      variant="outline"
-      className="h-auto! flex-col! gap-1! py-3"
+      className="group flex min-h-16 items-center gap-3 py-4 transition-colors hover:text-(--pp-primary) focus-visible:outline-(--pp-primary)"
     >
-      <span>
-        {s.name} · {formatPrice(s.priceCents, s.currency)}
+      <span className="min-w-0 flex-1">
+        <span className="block text-base font-semibold">{service.name}</span>
+        <span className="mt-1 block text-sm text-(--pp-muted)">
+          {meta.join(" · ")}
+        </span>
       </span>
-      <span className="inline-flex items-center gap-1 text-xs font-normal text-(--pp-muted)">
-        <Clock className="size-3.5" aria-hidden />
-        {meta.join(" · ")}
+      <span className="shrink-0 text-base font-medium tabular-nums">
+        {formatPrice(service.priceCents, service.currency)}
       </span>
-    </PPButton>
+      <ChevronRight className="size-4 shrink-0 text-(--pp-muted)" aria-hidden />
+    </PPAnchor>
   );
 }
 
-function ReviewCard({ review: r }: { review: PublicReview }) {
+function ReviewQuote({ review }: { review: PublicReview }) {
   return (
-    <article className="flex flex-col gap-2 rounded-2xl border border-(--pp-border) bg-(--pp-surface) p-4">
-      <div className="flex items-center justify-between gap-2">
-        <Stars rating={r.rating} />
-        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-(--pp-primary)">
-          <BadgeCheck className="size-3.5" aria-hidden /> Verificada
+    <figure className="border-l border-(--pp-border) pl-4">
+      <div className="mb-2 flex items-center gap-3">
+        <Stars rating={review.rating} />
+        <span className="inline-flex items-center gap-1 text-xs text-(--pp-muted)">
+          <BadgeCheck className="size-3" aria-hidden />
+          Verificada
         </span>
       </div>
-      {r.text ? <p className="text-sm leading-relaxed">{r.text}</p> : null}
-      <p className="text-xs text-(--pp-muted)">
-        {r.authorName} ·{" "}
-        <time dateTime={r.createdAt}>
-          {new Date(r.createdAt).toLocaleDateString("es-MX", {
-            month: "short",
-            year: "numeric",
-          })}
+      {review.text ? (
+        <blockquote className="text-base leading-normal">
+          “{review.text}”
+        </blockquote>
+      ) : null}
+      <figcaption className="mt-3 text-sm text-(--pp-muted)">
+        {review.authorName} ·{" "}
+        <time dateTime={review.createdAt}>
+          {formatShortDate(
+            new Date(review.createdAt),
+            "America/Mexico_City",
+            new Date(),
+            { weekday: false, relative: false },
+          )}
         </time>
-      </p>
-    </article>
+      </figcaption>
+    </figure>
   );
 }
 
 function Stars({ rating }: { rating: number }) {
   return (
     <span
-      className="inline-flex gap-0.5"
+      className="inline-flex gap-1 text-(--pp-fg)"
+      role="img"
       aria-label={`${rating} de 5 estrellas`}
     >
       {[1, 2, 3, 4, 5].map((i) => (
         <Star
           key={i}
           aria-hidden
-          className={cn(
-            "size-3.5",
-            i <= rating
-              ? "fill-(--pp-accent) text-(--pp-accent)"
-              : "text-(--pp-border)",
-          )}
+          className={cn("size-3", i <= rating ? "fill-current" : "opacity-25")}
         />
       ))}
     </span>
   );
 }
-
-/* ---------- Primitivas con el tema (radio de botón configurable) ---------- */
 
 type AnchorProps = {
   href: string;
@@ -324,74 +311,53 @@ type AnchorProps = {
   external?: boolean;
   className?: string;
   children: React.ReactNode;
+  label?: string;
 };
-
-/** <a>/<Link> que en vista previa no navega. */
 function PPAnchor({
   href,
   preview,
   external,
   className,
   children,
+  label,
 }: AnchorProps) {
-  if (preview) {
+  if (preview)
     return (
-      <span className={className} aria-disabled>
+      <span className={className} aria-disabled title={label}>
         {children}
       </span>
     );
-  }
-  if (external) {
+  if (external)
     return (
       <a
         href={href}
         target="_blank"
         rel="noopener noreferrer"
         className={className}
+        title={label}
       >
         {children}
       </a>
     );
-  }
   return (
-    <Link href={href} className={className}>
+    <Link href={href} className={className} title={label}>
       {children}
     </Link>
   );
 }
-
-function PPLink(props: AnchorProps) {
-  return (
-    <PPAnchor
-      {...props}
-      className={cn(
-        "flex items-center gap-3 rounded-(--pp-radius) border border-(--pp-border) bg-(--pp-surface) p-3 pr-4 text-sm shadow-[0_1px_2px_rgb(0_0_0/0.03)] transition-transform hover:-translate-y-px active:scale-[0.99]",
-        props.className,
-      )}
-    />
-  );
-}
-
 function PPButton({
   variant = "primary",
-  size = "md",
   ...props
-}: AnchorProps & {
-  variant?: "primary" | "outline" | "soft";
-  size?: "sm" | "md";
-}) {
+}: AnchorProps & { variant?: "primary" | "outline" }) {
   return (
     <PPAnchor
       {...props}
       className={cn(
-        "inline-flex w-full items-center justify-center gap-2 rounded-(--pp-radius) font-semibold transition-all hover:brightness-95 active:scale-[0.99]",
-        size === "md" ? "h-13 px-6 text-base" : "h-10 px-4 text-sm",
-        variant === "primary" &&
-          "bg-(--pp-booking-primary) text-(--pp-booking-fg) shadow-[0_6px_20px_rgb(0_0_0/0.10)]",
-        variant === "outline" &&
-          "border border-(--pp-border) bg-(--pp-surface) text-(--pp-fg)",
-        variant === "soft" &&
-          "bg-(--pp-bg) text-(--pp-primary) ring-1 ring-(--pp-border) ring-inset",
+        buttonVariants({ variant, size: "lg" }),
+        "w-full focus-visible:ring-(--pp-primary)",
+        variant === "primary"
+          ? "h-13 rounded-full bg-(--pp-booking-primary) text-(--pp-booking-fg) hover:bg-(--pp-primary-hover)"
+          : "border-(--pp-border) text-(--pp-fg) hover:bg-(--pp-secondary)",
         props.className,
       )}
     />

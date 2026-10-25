@@ -4,15 +4,12 @@ import { useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { z } from "zod";
 import { authClient } from "@granola/auth/client";
+import { Button, FormField, Input } from "@granola/ui";
 
 const schema = z.object({
   email: z.email("Escribe un correo válido"),
   password: z.string().min(8, "Mínimo 8 caracteres"),
 });
-
-const inputClass = "w-full rounded-md border border-neutral-300 px-3 py-2 text-base";
-const buttonClass = "w-full rounded-md bg-neutral-900 px-3 py-2 font-medium text-white disabled:opacity-50";
-const secondaryClass = "w-full rounded-md border border-neutral-300 px-3 py-2 font-medium disabled:opacity-50";
 
 export function LoginForm() {
   const router = useRouter();
@@ -35,7 +32,10 @@ export function LoginForm() {
       return;
     }
     setPending(true);
-    const { error: err } = await authClient.signIn.email({ ...parsed.data, callbackURL: next });
+    const { error: err } = await authClient.signIn.email({
+      ...parsed.data,
+      callbackURL: next,
+    });
     setPending(false);
     if (err) {
       setError(err.message ?? "No pudimos iniciar sesión");
@@ -62,13 +62,16 @@ export function LoginForm() {
       setError(err.message ?? "No pudimos mandar el link");
       return;
     }
-    setInfo("Te mandamos un link para entrar. Revisa tu correo (en dev sale en la consola del server).");
+    setInfo("Revisa tu correo. Te mandamos un enlace para entrar.");
   }
 
   async function onGoogle() {
     setError(null);
     setPending(true);
-    const { error: err } = await authClient.signIn.social({ provider: "google", callbackURL: next });
+    const { error: err } = await authClient.signIn.social({
+      provider: "google",
+      callbackURL: next,
+    });
     if (err) {
       setPending(false);
       setError(err.message ?? "Google no está configurado todavía");
@@ -76,11 +79,9 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-3">
-      <label className="flex flex-col gap-1 text-sm">
-        Correo
-        <input
-          className={inputClass}
+    <form onSubmit={onSubmit} className="flex flex-col gap-4">
+      <FormField label="Correo">
+        <Input
           type="email"
           name="email"
           autoComplete="email"
@@ -88,31 +89,47 @@ export function LoginForm() {
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-      </label>
-      <label className="flex flex-col gap-1 text-sm">
-        Contraseña
-        <input
-          className={inputClass}
+      </FormField>
+      <FormField label="Contraseña">
+        <Input
           type="password"
           name="password"
           autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-      </label>
-
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      {info && <p className="text-sm text-green-700">{info}</p>}
-
-      <button type="submit" className={buttonClass} disabled={pending}>
+      </FormField>
+      {error ? (
+        <p role="alert" className="text-sm text-destructive-ink">
+          {error}
+        </p>
+      ) : null}
+      {info ? (
+        <p role="status" className="text-sm text-status-confirmed-foreground">
+          {info}
+        </p>
+      ) : null}
+      <Button type="submit" loading={pending} className="w-full">
         Entrar
-      </button>
-      <button type="button" className={secondaryClass} disabled={pending} onClick={onMagicLink}>
-        Mandarme un link por correo
-      </button>
-      <button type="button" className={secondaryClass} disabled={pending} onClick={onGoogle}>
-        Continuar con Google
-      </button>
+      </Button>
+      <div className="flex flex-col gap-2 border-t border-border pt-4">
+        <Button
+          type="button"
+          variant="outline"
+          disabled={pending}
+          onClick={onMagicLink}
+        >
+          Mandarme un link por correo
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={pending}
+          onClick={onGoogle}
+        >
+          Continuar con Google
+        </Button>
+      </div>
     </form>
   );
 }

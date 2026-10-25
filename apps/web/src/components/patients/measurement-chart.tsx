@@ -18,21 +18,31 @@ export function MeasurementChart({
   includeComposition?: boolean;
 }) {
   const series = [
-    { key: "weightKg", label: "Peso", unit: "kg", color: "#4a7a2b" },
-    { key: "waistCm", label: "Cintura", unit: "cm", color: "#a86710" },
+    {
+      key: "weightKg",
+      label: "Peso",
+      unit: "kg",
+      color: "var(--status-confirmed)",
+    },
+    {
+      key: "waistCm",
+      label: "Cintura",
+      unit: "cm",
+      color: "var(--status-pending-foreground)",
+    },
     ...(includeComposition
       ? ([
           {
             key: "bodyFatPct",
             label: "Grasa corporal",
             unit: "%",
-            color: "#c15e43",
+            color: "var(--status-cancelled-foreground)",
           },
           {
             key: "muscleKg",
             label: "Masa muscular",
             unit: "kg",
-            color: "#6b4fd8",
+            color: "var(--status-done-foreground)",
           },
         ] as const)
       : []),
@@ -65,7 +75,11 @@ export function MeasurementChart({
             timeZone: timezone,
             day: "numeric",
             month: "short",
-            year: "2-digit",
+            ...(points.some(
+              (p) => p.measuredAt.getFullYear() !== new Date().getFullYear(),
+            )
+              ? { year: "numeric" as const }
+              : {}),
           }).format(d);
         return (
           <figure key={s.key} className="min-w-0">
@@ -103,14 +117,14 @@ export function MeasurementChart({
                   </title>
                 </circle>
               ))}
-              <text x="38" y="151" fontSize="10" fill="currentColor">
+              <text x="38" y="151" fontSize="11" fill="currentColor">
                 {date(points[0]!.measuredAt)}
               </text>
               <text
                 x="282"
                 y="151"
                 textAnchor="end"
-                fontSize="10"
+                fontSize="11"
                 fill="currentColor"
               >
                 {date(points[points.length - 1]!.measuredAt)}
