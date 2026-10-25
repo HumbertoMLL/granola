@@ -181,6 +181,11 @@ async function DetailContent({ params }: Props) {
         />
       </Card>
 
+      <div className="flex flex-wrap gap-2">
+        <Button asChild variant="outline"><Link href={`/app/pacientes/${appt.patient.id}`}>Ver expediente</Link></Button>
+        <Button asChild><Link href={`/app/pacientes/${appt.patient.id}?appointmentId=${appt.id}`}>Agregar nota de consulta</Link></Button>
+      </div>
+
       <Section title="Paciente">
         <Card className="gap-2 text-sm">
           {appt.patient.phoneWa && waDigits ? (
