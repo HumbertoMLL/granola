@@ -13,6 +13,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1156.0",
     "@aws-sdk/s3-request-presigner": "^3.1156.0",
+    "@granola/api": "workspace:*",
     "@granola/auth": "workspace:*",
     "@granola/core": "workspace:*",
     "@granola/db": "workspace:*",
@@ -20,6 +21,8 @@
     "@granola/payments": "workspace:*",
     "@granola/ui": "workspace:*",
     "@granola/whatsapp": "workspace:*",
+    "@hono/vercel": "^1.0.1",
+    "hono": "^4.13.9",
     "inngest": "^3.40.0",
     "lucide-react": "^0.550.0",
     "next": "16.4.3",
