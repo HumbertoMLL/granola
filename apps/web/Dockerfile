@@ -1,8 +1,10 @@
 # syntax=docker/dockerfile:1
-FROM node:22-alpine AS base
+# Node 25, igual que CI (.github/workflows/ci.yml) y CLAUDE.md.
+FROM node:25-alpine AS base
 ENV PNPM_HOME=/pnpm
 ENV PATH=$PNPM_HOME:$PATH
-RUN corepack enable
+# Node 25 ya no trae corepack: se instala fijo y respeta `packageManager` (pnpm@11) de package.json.
+RUN npm install -g corepack@0.36.0 && corepack enable
 WORKDIR /app
 
 FROM base AS deps
@@ -22,7 +24,7 @@ ARG NEXT_PUBLIC_APP_URL=http://localhost:3100
 ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
 RUN mkdir -p apps/web/public && pnpm --filter @granola/web exec next build
 
-FROM node:22-alpine AS runner
+FROM node:25-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 HOSTNAME=0.0.0.0 PORT=3100
 RUN addgroup -S -g 1001 nodejs && adduser -S -u 1001 -G nodejs nextjs
