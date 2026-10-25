@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ChevronLeft, ChevronRight, Globe } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import {
   Select,
@@ -20,13 +20,13 @@ import {
   formatYmdLong,
   groupSlotsByDay,
   parseYmd,
-  timeZoneLabel,
   weekdayOfYmd,
   ymdInTz,
   type Slot,
 } from "@granola/core/scheduling";
 
 import { LATAM_TIMEZONES } from "@/components/agenda/timezones";
+import { formatCalendarDate, formatTimezone } from "./format";
 
 export type SlotIso = { startsAt: string; endsAt: string };
 
@@ -104,7 +104,7 @@ export function SlotPicker({
   const { year, month } = parseYmd(monthStart);
   const monthLabel = new Intl.DateTimeFormat("es-MX", {
     month: "long",
-    year: "numeric",
+    year: year === Number(today.slice(0, 4)) ? undefined : "numeric",
     timeZone: "UTC",
   }).format(new Date(Date.UTC(year, month - 1, 1)));
   const firstWeekday = (weekdayOfYmd(monthStart) + 6) % 7; // lunes = 0
@@ -128,28 +128,28 @@ export function SlotPicker({
   const tzKnown = LATAM_TIMEZONES.some((t) => t.value === timezone);
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
       {mode !== "time" && (
-        <div className="rounded-2xl border border-border bg-card p-4">
+        <div>
           <div className="mb-3 flex items-center justify-between">
             <button
               type="button"
-              className="rounded-full p-1.5 text-muted-foreground hover:bg-secondary disabled:opacity-30"
+              className="flex size-11 items-center justify-center rounded-md text-muted-foreground hover:bg-secondary disabled:opacity-30"
               onClick={() => shiftMonth(-1)}
               disabled={!canPrev}
               aria-label="Mes anterior"
             >
-              <ChevronLeft className="size-5" />
+              <ChevronLeft className="size-4" />
             </button>
             <p className="font-semibold capitalize">{monthLabel}</p>
             <button
               type="button"
-              className="rounded-full p-1.5 text-muted-foreground hover:bg-secondary disabled:opacity-30"
+              className="flex size-11 items-center justify-center rounded-md text-muted-foreground hover:bg-secondary disabled:opacity-30"
               onClick={() => shiftMonth(1)}
               disabled={!canNext}
               aria-label="Mes siguiente"
             >
-              <ChevronRight className="size-5" />
+              <ChevronRight className="size-4" />
             </button>
           </div>
 
@@ -164,7 +164,9 @@ export function SlotPicker({
             {cells.map((ymd, i) => {
               if (!ymd) return <span key={`e${i}`} />;
               const has = available.has(ymd);
-              const isSel = ymd === selectedDay;
+              const isSel =
+                ymd === selectedDay &&
+                (mode !== "date" || !!selectedDate || !!pickedDay);
               const isToday = ymd === today;
               return (
                 <button
@@ -175,10 +177,10 @@ export function SlotPicker({
                   disabled={!has || slots === null}
                   onClick={() => setSelectedDay(ymd)}
                   className={cn(
-                    "relative mx-auto flex size-10 items-center justify-center rounded-full text-sm tabular-nums transition-colors",
+                    "relative mx-auto flex size-11 items-center justify-center rounded-md text-base tabular-nums transition-colors duration-150",
                     has
                       ? "font-semibold text-foreground hover:bg-primary-soft"
-                      : "text-muted-foreground/50",
+                      : "text-foreground/35",
                     isSel &&
                       "bg-primary text-primary-foreground hover:bg-primary",
                     isToday && !isSel && "ring-1 ring-border",
@@ -187,7 +189,7 @@ export function SlotPicker({
                   {parseYmd(ymd).day}
                   {has && !isSel ? (
                     <span
-                      className="absolute bottom-1 size-1 rounded-full bg-primary"
+                      className="absolute bottom-1 size-1 rounded-md bg-current"
                       aria-hidden
                     />
                   ) : null}
@@ -198,32 +200,31 @@ export function SlotPicker({
           {slots === null ? (
             <div className="mt-3 grid grid-cols-7 gap-1">
               {Array.from({ length: 7 }, (_, i) => (
-                <Skeleton key={i} className="mx-auto size-10 rounded-full" />
+                <Skeleton key={i} className="mx-auto size-11 rounded-md" />
               ))}
             </div>
           ) : null}
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-        <Globe className="size-4 shrink-0" />
-        <span className="shrink-0">Horarios en</span>
+      <div className="flex flex-wrap items-center gap-3 border-t border-border pt-3 text-sm text-muted-foreground">
+        <span>Zona horaria</span>
         <Select value={timezone} onValueChange={onTimezoneChange}>
           <SelectTrigger
             aria-label="Zona horaria"
-            className="h-11 min-w-0 basis-full rounded-xl text-sm [&_[data-slot=select-value]]:min-w-0 [&_[data-slot=select-value]]:truncate"
+            className="h-11 min-w-0 max-w-full flex-1 border-0 bg-transparent px-0 text-sm font-normal shadow-none [&_[data-slot=select-value]]:min-w-0 [&_[data-slot=select-value]]:truncate"
           >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             {!tzKnown ? (
               <SelectItem value={timezone}>
-                {timezone.replace(/_/g, " ")} ({timeZoneLabel(timezone)})
+                {formatTimezone(timezone)}
               </SelectItem>
             ) : null}
-            {LATAM_TIMEZONES.map((t) => (
-              <SelectItem key={t.value} value={t.value}>
-                {t.label} ({timeZoneLabel(t.value)})
+            {LATAM_TIMEZONES.map((zone) => (
+              <SelectItem key={zone.value} value={zone.value}>
+                {formatTimezone(zone.value)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -233,8 +234,8 @@ export function SlotPicker({
       {mode !== "date" && (
         <div className="flex flex-col gap-3">
           {selectedDay && (
-            <p className="text-sm font-semibold capitalize">
-              {formatYmdLong(selectedDay)}
+            <p className="text-sm font-semibold">
+              {formatCalendarDate(selectedDay)}
             </p>
           )}
           {slots === null && (
@@ -269,9 +270,9 @@ export function SlotPicker({
                 return (
                   <div key={group.label}>
                     <h2 className="mb-2 text-sm font-semibold">
-                      {group.label} · {groupSlots.length} libres
+                      {group.label}
                     </h2>
-                    <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                    <div className="grid grid-cols-3 gap-2">
                       {groupSlots.map((s) => {
                         const iso = s.startsAt.toISOString();
                         return (
@@ -289,7 +290,7 @@ export function SlotPicker({
                                 })
                               }
                             />
-                            <span className="flex h-11 items-center justify-center rounded-xl border border-border bg-card text-sm font-semibold tabular-nums peer-checked:border-primary peer-checked:bg-primary-soft peer-checked:text-primary peer-focus-visible:outline-2 peer-focus-visible:outline-ring">
+                            <span className="flex h-11 items-center justify-center rounded-md border border-border bg-card text-base font-medium tabular-nums transition-colors duration-150 hover:border-primary peer-checked:border-primary peer-checked:bg-primary peer-checked:text-primary-foreground peer-focus-visible:outline-2 peer-focus-visible:outline-ring">
                               {formatTimeInTz(s.startsAt, timezone)}
                             </span>
                           </label>

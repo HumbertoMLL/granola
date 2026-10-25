@@ -3,12 +3,11 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
-import { Clock, CreditCard, MapPin, ShieldCheck, Video } from "lucide-react";
+import { MapPin, ShieldCheck } from "lucide-react";
 
 import {
   Badge,
   Button,
-  Card,
   Input,
   FormField as Field,
   Stepper,
@@ -18,12 +17,7 @@ import {
   cn,
   toast,
 } from "@granola/ui";
-import {
-  formatDateInTz,
-  formatTimeInTz,
-  timeZoneLabel,
-  ymdInTz,
-} from "@granola/core/scheduling";
+import { formatTimeInTz, ymdInTz } from "@granola/core/scheduling";
 
 import { createBooking, fetchSlots } from "@/app/[slug]/agendar/actions";
 import { bookingSchema } from "@/components/booking/booking-schema";
@@ -32,6 +26,9 @@ import {
   PAYMENT_MODE_LABEL,
   formatDuration,
   formatPrice,
+  formatCalendarDate,
+  formatShortDate,
+  formatTimezone,
   type Modality,
   type PaymentMode,
 } from "@/components/booking/format";
@@ -178,129 +175,158 @@ export function BookingFlow({
       />
     );
 
+  const summary = [
+    service?.name,
+    date ? formatCalendarDate(date) : null,
+    slot ? formatTimeInTz(new Date(slot.startsAt), timezone) : null,
+    service ? formatPrice(service.priceCents, service.currency) : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
   return (
-    <div className="flex flex-col gap-5 pb-28">
-      <Stepper
-        steps={["Servicio", "Fecha", "Hora", "Tus datos"]}
-        currentStep={step - 1}
-      />
+    <div
+      data-booking-flow
+      className="grid gap-8 pb-32 lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-12 lg:pb-8"
+    >
       <aside
         aria-label="Resumen de tu cita"
-        className="sticky top-0 z-20 rounded-xl border border-border bg-card p-3 text-sm shadow-soft"
+        className="hidden self-start border-r border-border pr-8 lg:sticky lg:top-24 lg:block"
       >
-        <p className="font-semibold">
-          {service?.name ?? "Elige tu consulta"}
-          {service
-            ? ` · ${formatPrice(service.priceCents, service.currency)}`
-            : ""}
-        </p>
-        {date && (
-          <p className="text-muted-foreground">
-            {date}
-            {slot
-              ? ` · ${formatTimeInTz(new Date(slot.startsAt), timezone)} (${timeZoneLabel(timezone)})`
-              : ""}
-          </p>
-        )}
+        <p className="text-sm text-muted-foreground">Tu consulta</p>
+        <h2 className="mt-2 text-xl font-semibold">
+          {service?.name ?? "Servicio por elegir"}
+        </h2>
+        {service ? (
+          <>
+            <p className="mt-3 text-xl font-medium tabular-nums">
+              {formatPrice(service.priceCents, service.currency)}
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {formatDuration(service.durationMin)} ·{" "}
+              {MODALITY_LABEL[service.modality]}
+            </p>
+            {service.description ? (
+              <p className="mt-4 text-sm text-muted-foreground">
+                {service.description}
+              </p>
+            ) : null}
+          </>
+        ) : null}
+        {date ? (
+          <div className="mt-6 border-t border-border pt-6">
+            <p className="font-medium">{formatCalendarDate(date)}</p>
+            {slot ? (
+              <p className="mt-1 tabular-nums">
+                {formatTimeInTz(new Date(slot.startsAt), timezone)}
+              </p>
+            ) : null}
+            <p className="mt-2 text-sm text-muted-foreground">
+              {formatTimezone(timezone)}
+            </p>
+          </div>
+        ) : null}
       </aside>
-      {message && (
-        <p
-          role="alert"
-          className="rounded-xl bg-destructive-soft p-3 text-sm text-destructive"
-        >
-          {message}
-        </p>
-      )}
-      {step === 1 && (
-        <>
-          <h1 className="text-xl font-extrabold">¿Qué consulta necesitas?</h1>
-          <fieldset className="flex flex-col gap-3">
-            <legend className="sr-only">Servicio</legend>
-            {services.map((s) => (
-              <label
-                key={s.id}
-                className={cn(
-                  "flex cursor-pointer items-start gap-3 rounded-2xl border bg-card p-4",
-                  service?.id === s.id ? "border-primary" : "border-border",
-                )}
-              >
-                <input
-                  type="radio"
-                  name="service"
-                  value={s.id}
-                  checked={service?.id === s.id}
-                  className="mt-1 size-4 accent-primary"
-                  onChange={() => {
-                    setForm((f) => ({
-                      ...f,
-                      modality:
-                        s.modality === "presencial" ? "presencial" : "online",
-                    }));
-                    setMessage("");
-                    navigate(1, { servicio: s.id, fecha: null, hora: null });
-                  }}
-                />
-                <span className="min-w-0 flex-1">
+      <div className="flex min-w-0 flex-col gap-6">
+        <Stepper
+          steps={["Servicio", "Fecha", "Hora", "Tus datos"]}
+          currentStep={step - 1}
+        />
+        {message ? (
+          <p
+            role="alert"
+            className="rounded-md bg-destructive-soft p-3 text-sm text-destructive-ink"
+          >
+            {message}
+          </p>
+        ) : null}
+        {step === 1 ? (
+          <>
+            <h1 className="text-xl font-semibold">¿Qué consulta necesitas?</h1>
+            <fieldset className="divide-y divide-border border-y border-border">
+              <legend className="sr-only">Servicio</legend>
+              {services.map((s) => (
+                <label
+                  key={s.id}
+                  className={cn(
+                    "flex min-h-16 cursor-pointer items-start gap-3 py-4 transition-colors hover:bg-secondary/40",
+                    service?.id === s.id && "bg-primary-soft/30",
+                  )}
+                >
+                  <input
+                    type="radio"
+                    name="service"
+                    value={s.id}
+                    checked={service?.id === s.id}
+                    className="mt-1 size-4 shrink-0 accent-primary"
+                    onChange={() => {
+                      setForm((f) => ({
+                        ...f,
+                        modality:
+                          s.modality === "presencial" ? "presencial" : "online",
+                      }));
+                      setMessage("");
+                      navigate(1, { servicio: s.id, fecha: null, hora: null });
+                    }}
+                  />
                   <ServiceSummary service={s} />
-                </span>
-              </label>
-            ))}
-          </fieldset>
-        </>
-      )}
-      {(step === 2 || step === 3) && service && (
-        <>
-          <h1 className="text-xl font-extrabold">
-            {step === 2 ? "¿Qué día te queda?" : "¿A qué hora?"}
-          </h1>
-          <SlotPicker
-            slots={slots}
+                </label>
+              ))}
+            </fieldset>
+          </>
+        ) : null}
+        {(step === 2 || step === 3) && service ? (
+          <>
+            <h1 className="text-xl font-semibold">
+              {step === 2 ? "¿Qué día te queda?" : "¿A qué hora?"}
+            </h1>
+            <SlotPicker
+              slots={slots}
+              timezone={timezone}
+              nowIso={nowIso}
+              selected={slot?.startsAt ?? null}
+              mode={step === 2 ? "date" : "time"}
+              selectedDate={date}
+              onDateSelect={(fecha) => navigate(2, { fecha, hora: null }, true)}
+              onTimezoneChange={(tz) => {
+                setTzOverride(tz);
+                navigate(2, { fecha: null, hora: null });
+              }}
+              onSelect={(s) => {
+                setMessage("");
+                navigate(3, { hora: s.startsAt }, true);
+              }}
+            />
+            {slots?.length === 0 ? (
+              <Button variant="outline" onClick={() => refreshSlots()}>
+                Reintentar horarios
+              </Button>
+            ) : null}
+          </>
+        ) : null}
+        {step === 4 && service && slot ? (
+          <BookingForm
+            slug={slug}
+            service={service}
+            slot={slot}
             timezone={timezone}
-            nowIso={nowIso}
-            selected={slot?.startsAt ?? null}
-            mode={step === 2 ? "date" : "time"}
-            selectedDate={date}
-            onDateSelect={(fecha) => navigate(2, { fecha, hora: null }, true)}
-            onTimezoneChange={(tz) => {
-              setTzOverride(tz);
-              navigate(2, { fecha: null, hora: null });
-            }}
-            onSelect={(s) => {
-              setMessage("");
-              navigate(3, { hora: s.startsAt }, true);
+            nutritionistTimezone={nutritionistTimezone}
+            form={form}
+            setForm={setForm}
+            onBack={() => navigate(3)}
+            onConflict={(error) => {
+              setMessage(error);
+              setLoaded(null);
+              refreshSlots();
+              navigate(3, { hora: null }, true);
             }}
           />
-          {slots?.length === 0 && (
-            <Button variant="outline" onClick={() => refreshSlots()}>
-              Reintentar horarios
-            </Button>
-          )}
-        </>
-      )}
-      {step === 4 && service && slot && (
-        <BookingForm
-          slug={slug}
-          service={service}
-          slot={slot}
-          timezone={timezone}
-          nutritionistTimezone={nutritionistTimezone}
-          form={form}
-          setForm={setForm}
-          onBack={() => navigate(3)}
-          onConflict={(error) => {
-            setMessage(error);
-            setLoaded(null);
-            refreshSlots();
-            navigate(3, { hora: null }, true);
-          }}
-        />
-      )}
-      {step < 4 && (
-        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-          <div className="mx-auto flex max-w-lg gap-3">
+        ) : null}
+        {step < 4 ? (
+          <BookingActions summary={summary}>
             <Button
-              variant="outline"
-              className="flex-1"
+              variant="ghost"
+              size="lg"
               onClick={() =>
                 step === 1 ? router.push(`/${slug}`) : navigate(step - 1)
               }
@@ -308,57 +334,61 @@ export function BookingFlow({
               Atrás
             </Button>
             <Button
-              className="flex-[2]"
+              size="lg"
+              className="flex-1"
               disabled={step === 1 ? !service : step === 2 ? !validDate : !slot}
               onClick={() => navigate(step + 1)}
             >
               Continuar
             </Button>
-          </div>
-        </div>
-      )}
+          </BookingActions>
+        ) : null}
+      </div>
     </div>
   );
 }
 
-function ServiceSummary({
-  service,
-  compact = false,
+function BookingActions({
+  summary,
+  children,
 }: {
-  service: BookingService;
-  compact?: boolean;
+  summary: string;
+  children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <div className="flex items-start justify-between gap-3">
-        <p className="font-semibold">{service.name}</p>
-        <p className="shrink-0 font-bold text-primary">
-          {formatPrice(service.priceCents, service.currency)}
-        </p>
-      </div>
-      {!compact && service.description ? (
-        <p className="text-sm text-muted-foreground">{service.description}</p>
-      ) : null}
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-        <span className="inline-flex items-center gap-1">
-          <Clock className="size-3.5" /> {formatDuration(service.durationMin)}
-        </span>
-        <span className="inline-flex items-center gap-1">
-          {service.modality === "online" ? (
-            <Video className="size-3.5" />
-          ) : (
-            <MapPin className="size-3.5" />
-          )}
-          {MODALITY_LABEL[service.modality]}
-        </span>
-        {!compact ? (
-          <span className="inline-flex items-center gap-1">
-            <CreditCard className="size-3.5" />{" "}
-            {PAYMENT_MODE_LABEL[service.paymentMode]}
-          </span>
+    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] lg:static lg:mt-2 lg:border-0 lg:bg-transparent lg:p-0">
+      <div className="mx-auto w-full max-w-[480px] space-y-3 lg:max-w-none">
+        {summary ? (
+          <p className="truncate text-sm text-muted-foreground lg:hidden">
+            {summary}
+          </p>
         ) : null}
+        <div className="flex items-center gap-3">{children}</div>
       </div>
     </div>
+  );
+}
+
+function ServiceSummary({ service }: { service: BookingService }) {
+  return (
+    <span className="min-w-0 flex-1">
+      <span className="flex items-start justify-between gap-3">
+        <span className="text-base font-semibold">{service.name}</span>
+        <span className="shrink-0 text-base font-medium tabular-nums">
+          {formatPrice(service.priceCents, service.currency)}
+        </span>
+      </span>
+      {service.description ? (
+        <span className="mt-1 block text-sm text-muted-foreground">
+          {service.description}
+        </span>
+      ) : null}
+      <span className="mt-2 block text-sm text-muted-foreground">
+        {formatDuration(service.durationMin)} ·{" "}
+        {MODALITY_LABEL[service.modality]} ·{" "}
+        {PAYMENT_MODE_LABEL[service.paymentMode]}
+      </span>
+    </span>
   );
 }
 
@@ -403,7 +433,6 @@ function BookingForm({
     setForm((f) => ({ ...f, [k]: v }));
 
   const start = new Date(slot.startsAt);
-  const end = new Date(slot.endsAt);
   const differentTz = timezone !== nutritionistTimezone;
 
   function submit(e: React.FormEvent) {
@@ -455,28 +484,15 @@ function BookingForm({
       id="booking-form"
       noValidate
       onSubmit={submit}
-      className="flex flex-col gap-5"
+      className="flex flex-col gap-6"
     >
-      <Card className="gap-1 p-4">
-        <p className="text-sm text-muted-foreground">{service.name}</p>
-        <p className="text-lg font-bold capitalize">
-          {formatDateInTz(start, timezone)}
+      <h1 className="text-xl font-semibold">Tus datos</h1>
+      {differentTz ? (
+        <p className="text-sm text-muted-foreground">
+          En {formatTimezone(nutritionistTimezone)} serán las{" "}
+          {formatTimeInTz(start, nutritionistTimezone)}.
         </p>
-        <p className="font-semibold tabular-nums">
-          {formatTimeInTz(start, timezone)} – {formatTimeInTz(end, timezone)}{" "}
-          <span className="text-sm font-normal text-muted-foreground">
-            ({timeZoneLabel(timezone)})
-          </span>
-        </p>
-        {differentTz ? (
-          <p className="text-xs text-muted-foreground">
-            Hora de la nutrióloga: {formatTimeInTz(start, nutritionistTimezone)}{" "}
-            ({timeZoneLabel(nutritionistTimezone)}).
-          </p>
-        ) : null}
-      </Card>
-
-      <h1 className="text-xl font-extrabold tracking-tight">Tus datos</h1>
+      ) : null}
 
       <Field label="Nombre completo" error={errors.name}>
         <Input
@@ -495,7 +511,7 @@ function BookingForm({
         hint="Ahí te llega la confirmación y los recordatorios."
       >
         <div className="flex gap-2">
-          <span className="flex h-11 items-center rounded-xl border border-border px-3 text-sm">
+          <span className="flex h-11 items-center rounded-md border border-border px-3 text-sm">
             +52
           </span>
           <Input
@@ -536,7 +552,7 @@ function BookingForm({
       )}
 
       <details>
-        <summary className="cursor-pointer text-sm text-muted-foreground">
+        <summary className="flex min-h-11 cursor-pointer items-center text-sm text-muted-foreground">
           + Agregar nota (opcional)
         </summary>
         <div className="mt-3">
@@ -571,7 +587,7 @@ function BookingForm({
             ]}
           />
           {form.modality === "presencial" && service.location ? (
-            <p className="text-xs text-muted-foreground">{service.location}</p>
+            <p className="text-sm text-muted-foreground">{service.location}</p>
           ) : null}
         </Field>
       ) : service.modality === "presencial" && service.location ? (
@@ -607,7 +623,7 @@ function BookingForm({
 
       <label
         className={cn(
-          "flex items-start gap-3 rounded-xl border p-4 text-sm",
+          "flex cursor-pointer items-start gap-3 border-t pt-4 text-sm",
           errors.consent ? "border-destructive" : "border-border",
         )}
       >
@@ -637,29 +653,30 @@ function BookingForm({
         <p
           id="consent-error"
           role="alert"
-          className="-mt-3 text-xs text-destructive"
+          className="-mt-3 text-sm text-destructive-ink"
         >
           {errors.consent}
         </p>
       ) : null}
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <div className="mx-auto flex max-w-lg gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onBack}
-            disabled={pending}
-          >
-            Atrás
-          </Button>
-          <Button type="submit" size="lg" loading={pending} className="flex-1">
-            {service.paymentMode === "prepaid"
-              ? "Continuar al pago"
-              : "Confirmar cita"}
-          </Button>
-        </div>
-      </div>
+      <BookingActions
+        summary={`${service.name} · ${formatShortDate(start, timezone)} · ${formatTimeInTz(start, timezone)} · ${formatPrice(service.priceCents, service.currency)}`}
+      >
+        <Button
+          type="button"
+          variant="ghost"
+          size="lg"
+          onClick={onBack}
+          disabled={pending}
+        >
+          Atrás
+        </Button>
+        <Button type="submit" size="lg" loading={pending} className="flex-1">
+          {service.paymentMode === "prepaid"
+            ? "Continuar al pago"
+            : "Confirmar cita"}
+        </Button>
+      </BookingActions>
       <p className="inline-flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
         <ShieldCheck className="size-3.5" /> Tus datos solo los ve tu
         nutrióloga.
