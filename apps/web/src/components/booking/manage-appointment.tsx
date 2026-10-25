@@ -2,12 +2,10 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { CalendarClock, CalendarX2, MapPin, Video } from "lucide-react";
 
 import {
   Badge,
   Button,
-  Card,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -16,11 +14,26 @@ import {
   DialogTitle,
   toast,
 } from "@granola/ui";
-import { formatDateInTz, formatTimeInTz, timeZoneLabel } from "@granola/core/scheduling";
+import { formatTimeInTz } from "@granola/core/scheduling";
 
-import { cancelByPatient, fetchRescheduleSlots, rescheduleByPatient } from "@/app/cita/[cancelToken]/actions";
-import { STATUS_BADGE_VARIANT, STATUS_LABEL, type AppointmentModality, type AppointmentStatus } from "@/components/booking/format";
-import { SlotPicker, useDetectedTimezone, type SlotIso } from "@/components/booking/slot-picker";
+import {
+  cancelByPatient,
+  fetchRescheduleSlots,
+  rescheduleByPatient,
+} from "@/app/cita/[cancelToken]/actions";
+import {
+  STATUS_BADGE_VARIANT,
+  STATUS_LABEL,
+  formatShortDate,
+  formatTimezone,
+  type AppointmentModality,
+  type AppointmentStatus,
+} from "@/components/booking/format";
+import {
+  SlotPicker,
+  useDetectedTimezone,
+  type SlotIso,
+} from "@/components/booking/slot-picker";
 
 export type ManageAppointmentData = {
   token: string;
@@ -75,14 +88,17 @@ export function ManageAppointment({ data }: { data: ManageAppointmentData }) {
 
   const start = new Date(data.startsAt);
   const end = new Date(data.endsAt);
-  const isActive = data.status === "confirmed" || data.status === "pending_payment";
+  const isActive =
+    data.status === "confirmed" || data.status === "pending_payment";
 
   function confirmReschedule() {
     if (!selected) return;
     startTransition(async () => {
       const res = await rescheduleByPatient(data.token, selected.startsAt);
       if (res.ok) {
-        toast.success("Cita reagendada. Te llega la confirmación por WhatsApp.");
+        toast.success(
+          "Cita reagendada. Te llega la confirmación por WhatsApp.",
+        );
         setMode("view");
         setSelected(null);
       } else toast.error(res.error);
@@ -100,35 +116,44 @@ export function ManageAppointment({ data }: { data: ManageAppointmentData }) {
   }
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-extrabold tracking-tight">Hola, {data.patientFirstName}</h1>
-        <p className="text-muted-foreground">
-          {isActive ? "Aquí puedes ver, reagendar o cancelar tu cita." : "Esta es tu cita."}
-        </p>
+        <h1 className="text-xl font-semibold tracking-tight">
+          Tu cita, {data.patientFirstName}
+        </h1>
       </div>
 
-      <Card className="gap-3">
+      <div className="flex flex-col gap-4 border-y border-border py-4">
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-sm text-muted-foreground">{data.serviceName}</p>
             <p className="font-semibold">con {data.nutritionistName}</p>
           </div>
-          <Badge variant={STATUS_BADGE_VARIANT[data.status]}>{STATUS_LABEL[data.status]}</Badge>
+          <Badge variant={STATUS_BADGE_VARIANT[data.status]}>
+            {STATUS_LABEL[data.status]}
+          </Badge>
         </div>
         <div>
-          <p className="text-lg font-bold capitalize">{formatDateInTz(start, timezone)}</p>
+          <p className="text-lg font-semibold first-letter:uppercase">
+            {formatShortDate(start, timezone, new Date(data.nowIso))}
+          </p>
           <p className="font-semibold tabular-nums">
             {formatTimeInTz(start, timezone)} – {formatTimeInTz(end, timezone)}{" "}
-            <span className="text-sm font-normal text-muted-foreground">({timeZoneLabel(timezone)})</span>
+            <span className="text-sm font-normal text-muted-foreground">
+              · {formatTimezone(timezone)}
+            </span>
           </p>
         </div>
-        <p className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           {data.modality === "online" ? (
             <>
-              <Video className="size-4" />
               {data.meetUrl ? (
-                <a href={data.meetUrl} className="underline" target="_blank" rel="noreferrer">
+                <a
+                  href={data.meetUrl}
+                  className="text-primary hover:underline"
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   Entrar a la videollamada
                 </a>
               ) : (
@@ -136,40 +161,46 @@ export function ManageAppointment({ data }: { data: ManageAppointmentData }) {
               )}
             </>
           ) : (
-            <>
-              <MapPin className="size-4" /> {data.location ?? "Presencial"}
-            </>
+            <>{data.location ?? "Presencial"}</>
           )}
         </p>
-      </Card>
+      </div>
 
       {isActive && data.canChange && mode === "view" ? (
         <div className="flex flex-col gap-2">
-          <Button variant="outline" size="lg" onClick={openReschedule}>
-            <CalendarClock /> Reagendar
+          <Button size="lg" onClick={openReschedule}>
+            Reagendar
           </Button>
-          <Button variant="ghost" size="lg" className="text-destructive" onClick={() => setCancelOpen(true)}>
-            <CalendarX2 /> Cancelar cita
+          <Button
+            variant="ghost"
+            size="lg"
+            className="text-destructive-ink"
+            onClick={() => setCancelOpen(true)}
+          >
+            Cancelar cita
           </Button>
         </div>
       ) : null}
 
       {isActive && !data.canChange ? (
         <p className="text-sm text-muted-foreground">
-          Faltan menos de 2 horas para tu cita, así que ya no se puede cambiar desde aquí. Si necesitas algo,
-          escríbele directamente a {data.nutritionistName}.
+          Faltan menos de 2 horas para tu cita, así que ya no se puede cambiar
+          desde aquí. Si necesitas algo, escríbele directamente a{" "}
+          {data.nutritionistName}.
         </p>
       ) : null}
 
       {data.status === "cancelled" ? (
         <Button asChild size="lg">
-          <Link href={`/${data.nutritionistSlug}/agendar`}>Agendar una nueva cita</Link>
+          <Link href={`/${data.nutritionistSlug}/agendar`}>
+            Agendar una nueva cita
+          </Link>
         </Button>
       ) : null}
 
       {mode === "reschedule" ? (
         <div className="flex flex-col gap-4">
-          <h2 className="text-lg font-bold">Elige el nuevo horario</h2>
+          <h2 className="text-lg font-semibold">Elige el nuevo horario</h2>
           <SlotPicker
             slots={slots}
             timezone={timezone}
@@ -190,7 +221,12 @@ export function ManageAppointment({ data }: { data: ManageAppointmentData }) {
             >
               Volver
             </Button>
-            <Button className="flex-1" disabled={!selected} loading={pending} onClick={confirmReschedule}>
+            <Button
+              className="flex-1"
+              disabled={!selected}
+              loading={pending}
+              onClick={confirmReschedule}
+            >
               Confirmar cambio
             </Button>
           </div>
@@ -202,14 +238,23 @@ export function ManageAppointment({ data }: { data: ManageAppointmentData }) {
           <DialogHeader>
             <DialogTitle>¿Cancelar tu cita?</DialogTitle>
             <DialogDescription>
-              Le avisaremos a {data.nutritionistName}. Si prefieres, puedes reagendar en lugar de cancelar.
+              Le avisaremos a {data.nutritionistName}. Si prefieres, puedes
+              reagendar en lugar de cancelar.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCancelOpen(false)} disabled={pending}>
+            <Button
+              variant="outline"
+              onClick={() => setCancelOpen(false)}
+              disabled={pending}
+            >
               Volver
             </Button>
-            <Button variant="destructive" loading={pending} onClick={confirmCancel}>
+            <Button
+              variant="destructive"
+              loading={pending}
+              onClick={confirmCancel}
+            >
               Sí, cancelar
             </Button>
           </DialogFooter>
