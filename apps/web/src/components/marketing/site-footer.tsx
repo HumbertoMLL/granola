@@ -30,20 +30,17 @@ const columns = [
 export function SiteFooter() {
   return (
     <footer className="border-t border-border bg-card">
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-[1.4fr_repeat(3,1fr)]">
+      <div className="mx-auto grid max-w-[1120px] gap-8 px-4 py-12 md:px-8 md:grid-cols-[1.4fr_repeat(3,1fr)]">
         <div className="flex flex-col gap-4">
-          <Logo size={28} />
+          <Logo size={24} />
           <p className="max-w-xs text-sm text-muted-foreground">
-            La app que tus pacientes sí usan, y la agenda que te llena la consulta. Hecha en
-            México para nutriólogas que atienden online.
+            Tu consulta, en orden. Hecha en México.
           </p>
         </div>
 
         {columns.map((col) => (
           <div key={col.title} className="flex flex-col gap-3">
-            <h3 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-              {col.title}
-            </h3>
+            <h3 className="text-sm font-medium">{col.title}</h3>
             <ul className="flex flex-col gap-2">
               {col.links.map((l) => (
                 <li key={l.href}>
@@ -60,10 +57,12 @@ export function SiteFooter() {
         ))}
       </div>
       <div className="border-t border-border">
-        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-5 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <div className="mx-auto flex max-w-[1120px] flex-col gap-2 px-4 py-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between md:px-8">
           {/* Año fijo: con cacheComponents, new Date() en prerender rompe el build */}
           <p>© 2026 Granola. Todos los derechos reservados.</p>
-          <p>Tus datos y los de tus pacientes se tratan conforme a la LFPDPPP.</p>
+          <p>
+            Tus datos y los de tus pacientes se tratan conforme a la LFPDPPP.
+          </p>
         </div>
       </div>
     </footer>
