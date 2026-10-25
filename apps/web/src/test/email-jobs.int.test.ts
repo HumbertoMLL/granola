@@ -97,6 +97,16 @@ describe("Cuando se confirma una cita y Resend está mockeado", () => {
     const ids = step.run.mock.calls.map(([id]) => id);
     expect(ids.indexOf("recargar-confirmacion")).toBeGreaterThan(ids.indexOf(pendingMeet ? "calendar-meet-1" : "calendar-confirmed"));
   });
+  it("con notify_new_booking=false omite solo el WhatsApp de nueva cita a la nutrióloga", async () => {
+    const f = await fixture();
+    expect(f.nutritionist.notifyNewBooking).toBe(true);
+    await db.update(nutritionists).set({ notifyNewBooking: false }).where(eq(nutritionists.id, f.nutritionist.id));
+    await handler("appointment-confirmed")({ event: { id: "evt-disabled", data: f.data }, step: steps() });
+    expect(sendEmail).toHaveBeenCalledTimes(2);
+    const messages = await db.select().from(waMessages).where(eq(waMessages.nutritionistId, f.nutritionist.id));
+    expect(messages).toHaveLength(1);
+    expect(messages[0]).toMatchObject({ template: "cita_confirmada", patientId: f.patient.id });
+  });
   it("sin email del paciente envía solo a la nutrióloga", async () => {
     const f = await fixture(null);
     await handler("appointment-confirmed")({ event: { id: "evt-no-email", data: f.data }, step: steps() });

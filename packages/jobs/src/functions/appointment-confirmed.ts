@@ -77,20 +77,25 @@ export const onAppointmentConfirmed = inngest.createFunction(
 
     if (!isReschedule) {
       await step.run("wa-cita-confirmada", () => sendToPatient(ctx, buildCitaConfirmada(common)));
-      await step.run("wa-nueva-cita-nutri", () =>
-        sendToNutritionist(
-          ctx,
+      await step.run("wa-nueva-cita-nutri", async () => {
+        // Releer también la preferencia al reintentar este envío.
+        const fresh = await loadAppointment(appointmentId, event.data.nutritionistId);
+        if (!fresh || fresh.appointment.status !== "confirmed" || !fresh.nutritionist.notifyNewBooking) {
+          return { sent: false };
+        }
+        return sendToNutritionist(
+          fresh,
           buildNuevaCitaNutri({
             appointmentId,
-            patientName: ctx.patient.name,
-            serviceName: ctx.service.name,
-            startsAt: common.startsAt,
-            timeZone: ctx.nutritionist.timezone,
-            modality: ctx.appointment.modality,
-            paymentLabel: paymentLabel(ctx),
+            patientName: fresh.patient.name,
+            serviceName: fresh.service.name,
+            startsAt: new Date(fresh.appointment.startsAt),
+            timeZone: fresh.nutritionist.timezone,
+            modality: fresh.appointment.modality,
+            paymentLabel: paymentLabel(fresh),
           }),
-        ),
-      );
+        );
+      });
 
       const origin = process.env.NEXT_PUBLIC_APP_URL ?? process.env.BETTER_AUTH_URL ?? "http://localhost:3000";
       const fields = appointmentEmailFields(ctx);
