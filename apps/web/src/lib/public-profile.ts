@@ -2,7 +2,7 @@ import "server-only";
 
 import { cacheLife, cacheTag } from "next/cache";
 
-import { and, count, db, desc, eq, nutritionists, reviews, services, sql } from "@/lib/db";
+import { and, count, db, desc, eq, isNull, nutritionists, reviews, services, sql } from "@/lib/db";
 import type { NutritionistTheme } from "@granola/db/schema";
 import { resolveTheme } from "@/components/public-profile/theme";
 import {
@@ -47,6 +47,7 @@ export const RESERVED_SLUGS = [
   "opengraph-image",
   "terminos",
   "ayuda",
+  "cuenta-eliminada",
   "blog",
 ] as const;
 
@@ -76,7 +77,8 @@ export async function getPublicProfile(slugInput: string): Promise<PublicProfile
   if (isReservedSlug(slug) || !SLUG_RE.test(slug)) return null;
 
   const n = await db.query.nutritionists.findFirst({
-    where: eq(nutritionists.slug, slug),
+    // Cuenta en gracia de borrado (ADR 0015): 404, el slug sigue reservado.
+    where: and(eq(nutritionists.slug, slug), isNull(nutritionists.deletedAt)),
     columns: {
       id: true,
       slug: true,

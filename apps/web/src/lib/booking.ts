@@ -21,6 +21,7 @@ import {
   eq,
   gt,
   inArray,
+  isNull,
   lt,
   ne,
   nutritionists,
@@ -79,7 +80,8 @@ const PUBLIC_NUTRITIONIST_COLUMNS = {
 /** Solo campos públicos: nunca phone_wa, tokens ni plan. */
 export async function getPublicNutritionistBySlug(slug: string): Promise<PublicNutritionist | null> {
   const row = await db.query.nutritionists.findFirst({
-    where: eq(nutritionists.slug, slug),
+    // Cuenta en gracia de borrado (ADR 0015) → como si no existiera.
+    where: and(eq(nutritionists.slug, slug), isNull(nutritionists.deletedAt)),
     columns: PUBLIC_NUTRITIONIST_COLUMNS,
   });
   return row ?? null;
@@ -87,7 +89,7 @@ export async function getPublicNutritionistBySlug(slug: string): Promise<PublicN
 
 export async function getPublicNutritionistById(id: string): Promise<PublicNutritionist | null> {
   const row = await db.query.nutritionists.findFirst({
-    where: eq(nutritionists.id, id),
+    where: and(eq(nutritionists.id, id), isNull(nutritionists.deletedAt)),
     columns: PUBLIC_NUTRITIONIST_COLUMNS,
   });
   return row ?? null;

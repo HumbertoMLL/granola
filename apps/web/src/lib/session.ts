@@ -23,8 +23,15 @@ export async function getSession() {
  * sesión redirige a /login.
  *
  * Toda query posterior debe filtrar por `nutritionist.id` (regla dura #1).
+ *
+ * Cuenta con borrado pendiente (`deleted_at`, ADR 0015): redirige a
+ * /cuenta-eliminada, que es lo único que puede ver. Como todas las páginas y
+ * server actions del panel pasan por aquí, ninguna escritura corre en gracia.
+ * Solo esa pantalla y `cancelAccountDeletion` usan `allowPendingDeletion`.
  */
-export async function requireNutritionist(): Promise<NutritionistSession> {
+export async function requireNutritionist(
+  opts: { allowPendingDeletion?: boolean } = {},
+): Promise<NutritionistSession> {
   const session = await getSession();
   if (!session) redirect("/login");
 
@@ -33,8 +40,13 @@ export async function requireNutritionist(): Promise<NutritionistSession> {
     (await db.query.nutritionists.findFirst({ where: eq(nutritionists.userId, user.id) })) ??
     (await createNutritionistFor(user));
 
+  if (nutritionist.deletedAt && !opts.allowPendingDeletion) redirect(PENDING_DELETION_PATH);
+
   return { user, nutritionist };
 }
+
+/** Pantalla única de una cuenta en gracia de borrado. Fuera de /app (su layout pide cuenta activa). */
+export const PENDING_DELETION_PATH = "/cuenta-eliminada";
 
 async function createNutritionistFor(user: SessionUser): Promise<Nutritionist> {
   // Slug provisional: parte local del email + sufijo aleatorio. La nutri lo cambia en onboarding.

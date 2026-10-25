@@ -88,6 +88,13 @@ describe("requireNutritionist", () => {
     expect(findNutritionistByUserId).toHaveBeenCalledWith("u1");
   });
 
+  it("403 si la cuenta tiene el borrado pendiente (deleted_at)", async () => {
+    findNutritionistByUserId.mockResolvedValueOnce({ id: "n1", userId: "u1", deletedAt: new Date() });
+    const res = await buildApp().request("/tenant", { headers: { cookie: COOKIE } });
+    expect(res.status).toBe(403);
+    expect(await res.json()).toEqual({ error: { code: "forbidden", message: expect.stringContaining("eliminación") } });
+  });
+
   it("200 y expone el nutri de la sesión", async () => {
     findNutritionistByUserId.mockResolvedValueOnce({ id: "n1", userId: "u1" });
     const res = await buildApp().request("/tenant", { headers: { authorization: BEARER } });
