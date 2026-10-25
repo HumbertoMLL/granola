@@ -1,0 +1,10 @@
+Inventado para pruebas, sin identificadores.
+Glucose: 5,2 mmol/L 3,9 - 5,5
+Hemoglobina glucosilada: 6,1 %
+Total cholesterol: 5,4 mmol/L
+LDL colesterol: 3,2 mmol/L
+HDL colesterol: 1,5 mmol/L
+Triglycerides: 1,8 mmol/L
+Creatinine: 0,92 mg/dL
+TSH: 3,8 uIU/mL
+25-OH vitamina D: 62 nmol/L

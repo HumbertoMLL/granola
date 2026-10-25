@@ -1,0 +1,10 @@
+LABORATORIO FICTICIO. Sin paciente real.
+Glucosa: 92 mg/dL 70 - 100
+HbA1c: 5.4 % 4.0 - 5.6
+Colesterol total: 184 mg/dL
+LDL: 105 mg/dL 0 - 130
+HDL: 54 mg/dL
+Triglicéridos: 124 mg/dL
+Creatinina sérica: 0.85 mg/dL 0.5 - 1.1
+TSH: 2.1 mIU/L 0.3 - 4.2
+Vitamina D: 28 ng/mL 20 - 50

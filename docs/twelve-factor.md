@@ -47,3 +47,12 @@ no fuente de verdad (VI): otra instancia puede consultar Google de nuevo y los
 cambios externos pueden tardar hasta 60 s en verse. Se invalida localmente al
 sincronizar/desconectar; no garantiza exclusión distribuida con Google.
 Los errores solo emiten operación/status a stdout (XI), sin tokens ni eventos.
+
+## Documentos clínicos (F2)
+
+R2_PRIVATE_BUCKET separado del bucket público de avatares (III/IV). Documentos y
+reportes persistidos en DB + R2; sin caché de salud ni archivos de proceso en producción
+(VI). `.uploads` existe solo en desarrollo como sustituto explícito de R2, nunca como
+almacenamiento de producción. DOCUMENT_LINK_SECRET compartido entre réplicas firma
+enlaces privados (III). Expansión 0005 antes del consumidor y guard de tablas para
+compatibilidad con schema previo (V). Ver [operación y pruebas](inbody.md).

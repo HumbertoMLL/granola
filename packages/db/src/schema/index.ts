@@ -10,3 +10,4 @@ export * from "./reviews";
 export * from "./audit_log";
 export * from "./measurements";
 export * from "./clinical_notes";
+export * from "./documents";

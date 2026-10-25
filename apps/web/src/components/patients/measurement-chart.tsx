@@ -1,15 +1,46 @@
 "use client";
 
-type Point = { id: string; measuredAt: Date; weightKg: string | null; waistCm: string | null };
-export function MeasurementChart({ rows, timezone }: { rows: Point[]; timezone: string }) {
+type Point = {
+  id: string;
+  measuredAt: Date;
+  weightKg: string | null;
+  waistCm: string | null;
+  bodyFatPct?: string | null;
+  muscleKg?: string | null;
+};
+export function MeasurementChart({
+  rows,
+  timezone,
+  includeComposition = false,
+}: {
+  rows: Point[];
+  timezone: string;
+  includeComposition?: boolean;
+}) {
   const series = [
     { key: "weightKg", label: "Peso", unit: "kg", color: "#4a7a2b" },
     { key: "waistCm", label: "Cintura", unit: "cm", color: "#a86710" },
+    ...(includeComposition
+      ? ([
+          {
+            key: "bodyFatPct",
+            label: "Grasa corporal",
+            unit: "%",
+            color: "#c15e43",
+          },
+          {
+            key: "muscleKg",
+            label: "Masa muscular",
+            unit: "kg",
+            color: "#6b4fd8",
+          },
+        ] as const)
+      : []),
   ] as const;
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       {series.map((s) => {
-        const points = rows.filter((r) => r[s.key] !== null);
+        const points = rows.filter((r) => r[s.key] != null);
         if (!points.length)
           return (
             <p key={s.key} className="text-sm text-muted-foreground">
@@ -23,7 +54,10 @@ export function MeasurementChart({ rows, timezone }: { rows: Point[]; timezone: 
           end = points[points.length - 1]!.measuredAt.getTime();
         const coords = points.map((p) => ({
           row: p,
-          x: end === start ? 160 : 38 + ((p.measuredAt.getTime() - start) / (end - start)) * 244,
+          x:
+            end === start
+              ? 160
+              : 38 + ((p.measuredAt.getTime() - start) / (end - start)) * 244,
           y: 120 - ((Number(p[s.key]) - min) / (max - min)) * 90,
         }));
         const date = (d: Date) =>
@@ -50,7 +84,12 @@ export function MeasurementChart({ rows, timezone }: { rows: Point[]; timezone: 
               <text x="0" y="125" fontSize="11" fill="currentColor">
                 {min.toFixed(1)}
               </text>
-              <path d="M38 20 V130 H288" fill="none" stroke="currentColor" opacity="0.2" />
+              <path
+                d="M38 20 V130 H288"
+                fill="none"
+                stroke="currentColor"
+                opacity="0.2"
+              />
               <polyline
                 points={coords.map((p) => `${p.x},${p.y}`).join(" ")}
                 fill="none"
@@ -67,12 +106,19 @@ export function MeasurementChart({ rows, timezone }: { rows: Point[]; timezone: 
               <text x="38" y="151" fontSize="10" fill="currentColor">
                 {date(points[0]!.measuredAt)}
               </text>
-              <text x="282" y="151" textAnchor="end" fontSize="10" fill="currentColor">
+              <text
+                x="282"
+                y="151"
+                textAnchor="end"
+                fontSize="10"
+                fill="currentColor"
+              >
                 {date(points[points.length - 1]!.measuredAt)}
               </text>
             </svg>
             <p className="text-xs text-muted-foreground">
-              {points.length} registros · {values[values.length - 1]} {s.unit} en el más reciente
+              {points.length} registros · {values[values.length - 1]} {s.unit}{" "}
+              en el más reciente
             </p>
           </figure>
         );

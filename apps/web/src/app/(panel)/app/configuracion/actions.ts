@@ -51,6 +51,8 @@ export async function exportAccount(): Promise<string> {
     ip: await getClientIp(),
     meta: {
       patients: data.patients.length,
+      documents: data.documents.length,
+      reports: data.reports.length,
       appointments: data.appointments.length,
       payments: data.payments.length,
     },

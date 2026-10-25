@@ -95,3 +95,12 @@ Comparativa con Supabase y la decisión: ver ADR 0001 y `docs/research/supabase-
 
 - Resend (verificado el 24 oct 2026): [precios](https://resend.com/pricing), [tabla oficial](https://resend.com/pricing.md) y [cuotas gratis](https://resend.com/docs/knowledge-base/account-quotas-and-limits).
 - Upstash Redis: https://upstash.com/pricing/redis (verificado 24 oct 2026: free 500K comandos/mes; no 10K/día).
+
+## Archivos clínicos (F2)
+
+`R2_PRIVATE_BUCKET` es un bucket privado separado de `R2_BUCKET` (avatares), sin
+r2.dev ni dominio público. CORS permite PUT solo desde el origen de la app, con
+Content-Type/Cache-Control. La subida usa PutObject firmado y finalización validada
+en API para soportar 15 MB también en Vercel. `DOCUMENT_LINK_SECRET` firma accesos
+privados (fallback BETTER_AUTH_SECRET). Sin R2 solo hay `.uploads` en desarrollo;
+producción falla cerrado. Ver [documentos clínicos](docs/inbody.md).
