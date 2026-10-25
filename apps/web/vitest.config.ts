@@ -6,7 +6,14 @@ import { defineConfig } from "vitest/config";
 const src = fileURLToPath(new URL("./src", import.meta.url));
 
 /** Solo `.env.test` (nunca `.env.local`): los tests no deben ver llaves reales. */
-const testEnv = parse(readFileSync(fileURLToPath(new URL("./.env.test", import.meta.url))));
+const testEnv = parse(
+  readFileSync(fileURLToPath(new URL("./.env.test", import.meta.url))),
+);
+// Aislamiento opcional por worktree; CI conserva granola_test por defecto.
+if (process.env.GRANOLA_TEST_DATABASE_URL)
+  testEnv.DATABASE_URL = process.env.GRANOLA_TEST_DATABASE_URL;
+if (process.env.GRANOLA_TEST_PROXY)
+  testEnv.NEON_LOCAL_PROXY = process.env.GRANOLA_TEST_PROXY;
 
 /**
  * Dos proyectos:
@@ -17,6 +24,7 @@ const testEnv = parse(readFileSync(fileURLToPath(new URL("./.env.test", import.m
  *   `pnpm test:integration`. Requiere `docker-compose -f docker-compose.local.yml up -d`.
  */
 export default defineConfig({
+  esbuild: { jsx: "automatic" },
   resolve: {
     alias: { "@": src },
   },
@@ -35,7 +43,11 @@ export default defineConfig({
         extends: true,
         resolve: {
           // `server-only` lanza fuera de un bundle de React Server Components.
-          alias: { "server-only": fileURLToPath(new URL("./src/test/empty-module.ts", import.meta.url)) },
+          alias: {
+            "server-only": fileURLToPath(
+              new URL("./src/test/empty-module.ts", import.meta.url),
+            ),
+          },
         },
         test: {
           name: "integration",

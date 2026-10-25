@@ -8,7 +8,13 @@ import { parse } from "dotenv";
  * de vitest, donde `test.env` aún no aplica, así que carga `.env.test` aquí.
  */
 export default async function setup(): Promise<void> {
-  const env = parse(readFileSync(fileURLToPath(new URL("../../.env.test", import.meta.url))));
+  const env = parse(
+    readFileSync(fileURLToPath(new URL("../../.env.test", import.meta.url))),
+  );
+  if (process.env.GRANOLA_TEST_DATABASE_URL)
+    env.DATABASE_URL = process.env.GRANOLA_TEST_DATABASE_URL;
+  if (process.env.GRANOLA_TEST_PROXY)
+    env.NEON_LOCAL_PROXY = process.env.GRANOLA_TEST_PROXY;
   for (const [k, v] of Object.entries(env)) process.env[k] = v;
 
   const { closeTestDb, ensureTestDb } = await import("@granola/db/testing");
