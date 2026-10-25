@@ -5,6 +5,13 @@ import { CalendarOff, CalendarPlus, Plus, Trash2, X } from "lucide-react";
 
 import {
   Badge,
+  EmptyState,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
   Button,
   Card,
   Input,
@@ -29,7 +36,12 @@ import {
 import { Field } from "@/components/agenda/services-manager";
 import { LATAM_TIMEZONES, WEEKDAY_NAMES } from "@/components/agenda/timezones";
 
-export type RuleRow = { id: string; weekday: number; startTime: string; endTime: string };
+export type RuleRow = {
+  id: string;
+  weekday: number;
+  startTime: string;
+  endTime: string;
+};
 export type OverrideRow = {
   id: string;
   date: string;
@@ -38,7 +50,11 @@ export type OverrideRow = {
   isBlocked: boolean;
 };
 
-export type SchedulingSettingsRow = { bufferMin: number; minNoticeMin: number; slotStepMin: number };
+export type SchedulingSettingsRow = {
+  bufferMin: number;
+  minNoticeMin: number;
+  slotStepMin: number;
+};
 
 type Window = { key: string; startTime: string; endTime: string };
 
@@ -83,7 +99,8 @@ function TimezoneCard({ timezone }: { timezone: string }) {
       <div>
         <p className="font-semibold">Zona horaria</p>
         <p className="text-sm text-muted-foreground">
-          Tus horarios se interpretan en esta zona. A cada paciente le mostramos la hora en la suya.
+          Tus horarios se interpretan en esta zona. A cada paciente le mostramos
+          la hora en la suya.
         </p>
       </div>
       <Select
@@ -97,7 +114,7 @@ function TimezoneCard({ timezone }: { timezone: string }) {
           })
         }
       >
-        <SelectTrigger className="sm:max-w-sm">
+        <SelectTrigger aria-label="Zona horaria" className="sm:max-w-sm">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -148,10 +165,16 @@ const STEP_OPTIONS: Option[] = [
 
 /** Si el valor guardado no está en la lista (p. ej. puesto por soporte), se agrega. */
 function withCurrent(options: Option[], value: number): Option[] {
-  return options.some((o) => o.value === value) ? options : [...options, { value, label: `${value} min` }];
+  return options.some((o) => o.value === value)
+    ? options
+    : [...options, { value, label: `${value} min` }];
 }
 
-function SchedulingSettingsCard({ initial }: { initial: SchedulingSettingsRow }) {
+function SchedulingSettingsCard({
+  initial,
+}: {
+  initial: SchedulingSettingsRow;
+}) {
   const [values, setValues] = React.useState<SchedulingSettingsRow>(initial);
   const [pending, startTransition] = React.useTransition();
   const dirty =
@@ -167,7 +190,12 @@ function SchedulingSettingsCard({ initial }: { initial: SchedulingSettingsRow })
     });
   }
 
-  const fields: { key: keyof SchedulingSettingsRow; label: string; hint: string; options: Option[] }[] = [
+  const fields: {
+    key: keyof SchedulingSettingsRow;
+    label: string;
+    hint: string;
+    options: Option[];
+  }[] = [
     {
       key: "minNoticeMin",
       label: "Antelación mínima",
@@ -193,7 +221,9 @@ function SchedulingSettingsCard({ initial }: { initial: SchedulingSettingsRow })
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="font-semibold">Reglas de agenda</p>
-          <p className="text-sm text-muted-foreground">Cómo se calculan los horarios que ven tus pacientes.</p>
+          <p className="text-sm text-muted-foreground">
+            Cómo se calculan los horarios que ven tus pacientes.
+          </p>
         </div>
         {dirty ? <Badge variant="accent">Sin guardar</Badge> : null}
       </div>
@@ -203,7 +233,9 @@ function SchedulingSettingsCard({ initial }: { initial: SchedulingSettingsRow })
             <Select
               value={String(values[f.key])}
               disabled={pending}
-              onValueChange={(v) => setValues((cur) => ({ ...cur, [f.key]: Number(v) }))}
+              onValueChange={(v) =>
+                setValues((cur) => ({ ...cur, [f.key]: Number(v) }))
+              }
             >
               <SelectTrigger>
                 <SelectValue />
@@ -220,10 +252,21 @@ function SchedulingSettingsCard({ initial }: { initial: SchedulingSettingsRow })
         ))}
       </div>
       <div className="flex justify-end gap-2">
-        <Button type="button" variant="outline" disabled={!dirty || pending} onClick={() => setValues(initial)}>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={!dirty || pending}
+          onClick={() => setValues(initial)}
+        >
           Descartar
         </Button>
-        <Button type="button" onClick={save} loading={pending} disabled={!dirty}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={save}
+          loading={pending}
+          disabled={!dirty}
+        >
           Guardar reglas
         </Button>
       </div>
@@ -235,18 +278,26 @@ function WeeklyEditor({ rules }: { rules: RuleRow[] }) {
   const initial = React.useMemo(() => {
     const byDay: Record<number, Window[]> = {};
     for (const d of WEEKDAY_ORDER) byDay[d] = [];
-    for (const r of rules) byDay[r.weekday]?.push({ key: r.id, startTime: hm(r.startTime), endTime: hm(r.endTime) });
+    for (const r of rules)
+      byDay[r.weekday]?.push({
+        key: r.id,
+        startTime: hm(r.startTime),
+        endTime: hm(r.endTime),
+      });
     return byDay;
   }, [rules]);
 
-  const [localDays, setLocalDays] = React.useState<Record<number, Window[]>>(initial);
+  const [localDays, setLocalDays] =
+    React.useState<Record<number, Window[]>>(initial);
   const [dirty, setDirty] = React.useState(false);
   const [pending, startTransition] = React.useTransition();
 
   // Sin cambios locales mostramos lo del servidor (se actualiza solo tras revalidar).
   const days = dirty ? localDays : initial;
 
-  function update(fn: (d: Record<number, Window[]>) => Record<number, Window[]>) {
+  function update(
+    fn: (d: Record<number, Window[]>) => Record<number, Window[]>,
+  ) {
     setLocalDays(fn(structuredClone(days)));
     setDirty(true);
   }
@@ -260,7 +311,11 @@ function WeeklyEditor({ rules }: { rules: RuleRow[] }) {
       const endMin = Math.min(startMin + 4 * 60, 23 * 60 + 30);
       const pad = (n: number) => String(n).padStart(2, "0");
       const toHm = (m: number) => `${pad(Math.floor(m / 60))}:${pad(m % 60)}`;
-      list.push({ key: nextKey(), startTime: toHm(startMin), endTime: toHm(endMin) });
+      list.push({
+        key: nextKey(),
+        startTime: toHm(startMin),
+        endTime: toHm(endMin),
+      });
       d[weekday] = list;
       return d;
     });
@@ -285,9 +340,15 @@ function WeeklyEditor({ rules }: { rules: RuleRow[] }) {
         if (parseTimeToMinutes(w.endTime) <= parseTimeToMinutes(w.startTime))
           return `${WEEKDAY_NAMES[wd]}: la hora de fin debe ser mayor que la de inicio`;
       }
-      const sorted = [...list].sort((a, b) => parseTimeToMinutes(a.startTime) - parseTimeToMinutes(b.startTime));
+      const sorted = [...list].sort(
+        (a, b) =>
+          parseTimeToMinutes(a.startTime) - parseTimeToMinutes(b.startTime),
+      );
       for (let i = 1; i < sorted.length; i++) {
-        if (parseTimeToMinutes(sorted[i]!.startTime) < parseTimeToMinutes(sorted[i - 1]!.endTime))
+        if (
+          parseTimeToMinutes(sorted[i]!.startTime) <
+          parseTimeToMinutes(sorted[i - 1]!.endTime)
+        )
           return `${WEEKDAY_NAMES[wd]}: hay ventanas encimadas`;
       }
     }
@@ -300,7 +361,11 @@ function WeeklyEditor({ rules }: { rules: RuleRow[] }) {
       return;
     }
     const payload = WEEKDAY_ORDER.flatMap((wd) =>
-      (days[wd] ?? []).map((w) => ({ weekday: wd, startTime: w.startTime, endTime: w.endTime })),
+      (days[wd] ?? []).map((w) => ({
+        weekday: wd,
+        startTime: w.startTime,
+        endTime: w.endTime,
+      })),
     );
     startTransition(async () => {
       const res = await saveAvailabilityRules(payload);
@@ -316,7 +381,9 @@ function WeeklyEditor({ rules }: { rules: RuleRow[] }) {
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="font-semibold">Horario semanal</p>
-          <p className="text-sm text-muted-foreground">Puedes tener varias ventanas por día (p. ej. mañana y tarde).</p>
+          <p className="text-sm text-muted-foreground">
+            Puedes tener varias ventanas por día (p. ej. mañana y tarde).
+          </p>
         </div>
         {dirty ? <Badge variant="accent">Sin guardar</Badge> : null}
       </div>
@@ -326,7 +393,10 @@ function WeeklyEditor({ rules }: { rules: RuleRow[] }) {
           const list = days[wd] ?? [];
           const enabled = list.length > 0;
           return (
-            <li key={wd} className="flex flex-col gap-3 py-3 sm:flex-row sm:items-start">
+            <li
+              key={wd}
+              className="flex flex-col gap-3 py-3 sm:flex-row sm:items-start"
+            >
               <div className="flex w-full items-center justify-between sm:w-36 sm:shrink-0 sm:pt-2.5">
                 <Label htmlFor={`day-${wd}`} className="text-sm font-semibold">
                   {WEEKDAY_NAMES[wd]}
@@ -342,35 +412,44 @@ function WeeklyEditor({ rules }: { rules: RuleRow[] }) {
               </div>
               <div className="flex flex-1 flex-col gap-2">
                 {!enabled ? (
-                  <p className="text-sm text-muted-foreground sm:pt-2.5">No atiendes</p>
+                  <p className="text-sm text-muted-foreground sm:pt-2.5">
+                    No atiendes
+                  </p>
                 ) : (
                   list.map((w, i) => (
-                    <div key={w.key} className="flex items-center gap-2">
-                      <Input
-                        type="time"
-                        step={900}
-                        value={w.startTime}
-                        className="w-auto flex-1 tabular-nums sm:max-w-32"
-                        onChange={(e) =>
-                          update((d) => {
-                            d[wd]![i]!.startTime = e.target.value;
-                            return d;
-                          })
-                        }
-                      />
-                      <span className="text-muted-foreground">–</span>
-                      <Input
-                        type="time"
-                        step={900}
-                        value={w.endTime}
-                        className="w-auto flex-1 tabular-nums sm:max-w-32"
-                        onChange={(e) =>
-                          update((d) => {
-                            d[wd]![i]!.endTime = e.target.value;
-                            return d;
-                          })
-                        }
-                      />
+                    <div key={w.key} className="flex items-end gap-2">
+                      <div className="min-w-0 flex-1">
+                        <Label htmlFor={`start-${w.key}`}>Desde</Label>
+                        <Input
+                          type="time"
+                          step={900}
+                          id={`start-${w.key}`}
+                          value={w.startTime}
+                          className="w-auto flex-1 tabular-nums sm:max-w-32"
+                          onChange={(e) =>
+                            update((d) => {
+                              d[wd]![i]!.startTime = e.target.value;
+                              return d;
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <Label htmlFor={`end-${w.key}`}>Hasta</Label>
+                        <Input
+                          type="time"
+                          step={900}
+                          id={`end-${w.key}`}
+                          value={w.endTime}
+                          className="w-auto flex-1 tabular-nums sm:max-w-32"
+                          onChange={(e) =>
+                            update((d) => {
+                              d[wd]![i]!.endTime = e.target.value;
+                              return d;
+                            })
+                          }
+                        />
+                      </div>
                       <Button
                         type="button"
                         size="icon-sm"
@@ -390,11 +469,21 @@ function WeeklyEditor({ rules }: { rules: RuleRow[] }) {
                 )}
                 {enabled ? (
                   <div className="flex flex-wrap gap-1">
-                    <Button type="button" size="sm" variant="ghost" onClick={() => addWindow(wd)}>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => addWindow(wd)}
+                    >
                       <Plus /> Otra ventana
                     </Button>
                     {wd >= 1 && wd <= 5 ? (
-                      <Button type="button" size="sm" variant="ghost" onClick={() => copyToWeekdays(wd)}>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => copyToWeekdays(wd)}
+                      >
                         Copiar a lun–vie
                       </Button>
                     ) : null}
@@ -406,7 +495,9 @@ function WeeklyEditor({ rules }: { rules: RuleRow[] }) {
         })}
       </ul>
 
-      {validation && dirty ? <p className="text-sm text-destructive">{validation}</p> : null}
+      {validation && dirty ? (
+        <p className="text-sm text-destructive">{validation}</p>
+      ) : null}
 
       <div className="flex justify-end gap-2">
         <Button
@@ -420,7 +511,12 @@ function WeeklyEditor({ rules }: { rules: RuleRow[] }) {
         >
           Descartar
         </Button>
-        <Button type="button" onClick={save} loading={pending} disabled={!dirty}>
+        <Button
+          type="button"
+          onClick={save}
+          loading={pending}
+          disabled={!dirty}
+        >
           Guardar horario
         </Button>
       </div>
@@ -431,14 +527,17 @@ function WeeklyEditor({ rules }: { rules: RuleRow[] }) {
 function OverridesEditor({ overrides }: { overrides: OverrideRow[] }) {
   const [pending, startTransition] = React.useTransition();
   const [open, setOpen] = React.useState(false);
+  const [deleting, setDeleting] = React.useState<string | null>(null);
   const [date, setDate] = React.useState("");
   const [fullDay, setFullDay] = React.useState(true);
   const [mode, setMode] = React.useState<"block" | "extra">("block");
   const [startTime, setStartTime] = React.useState("09:00");
   const [endTime, setEndTime] = React.useState("13:00");
 
-  const today = new Date().toISOString().slice(0, 10);
-  const upcoming = [...overrides].filter((o) => o.date >= today).sort((a, b) => (a.date < b.date ? -1 : 1));
+  const today = new Date().toLocaleDateString("en-CA");
+  const upcoming = [...overrides]
+    .filter((o) => o.date >= today)
+    .sort((a, b) => (a.date < b.date ? -1 : 1));
 
   function add() {
     if (!date) {
@@ -454,7 +553,9 @@ function OverridesEditor({ overrides }: { overrides: OverrideRow[] }) {
         isBlocked: mode === "block",
       });
       if (res.ok) {
-        toast.success(mode === "block" ? "Fecha bloqueada" : "Ventana extra agregada");
+        toast.success(
+          mode === "block" ? "Fecha bloqueada" : "Ventana extra agregada",
+        );
         setOpen(false);
         setDate("");
       } else toast.error(res.error);
@@ -466,7 +567,9 @@ function OverridesEditor({ overrides }: { overrides: OverrideRow[] }) {
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="font-semibold">Excepciones</p>
-          <p className="text-sm text-muted-foreground">Vacaciones, días festivos o un sábado que sí vas a atender.</p>
+          <p className="text-sm text-muted-foreground">
+            Vacaciones, días festivos o un sábado que sí vas a atender.
+          </p>
         </div>
         <Button size="sm" variant="outline" onClick={() => setOpen((o) => !o)}>
           <Plus /> Agregar
@@ -477,16 +580,26 @@ function OverridesEditor({ overrides }: { overrides: OverrideRow[] }) {
         <div className="flex flex-col gap-4 rounded-xl border border-border bg-background p-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Fecha">
-              <Input type="date" min={today} value={date} onChange={(e) => setDate(e.target.value)} />
+              <Input
+                type="date"
+                min={today}
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+              />
             </Field>
             <Field label="Tipo">
-              <Select value={mode} onValueChange={(v) => setMode(v as "block" | "extra")}>
+              <Select
+                value={mode}
+                onValueChange={(v) => setMode(v as "block" | "extra")}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="block">Bloquear (no atiendo)</SelectItem>
-                  <SelectItem value="extra">Ventana extra (sí atiendo)</SelectItem>
+                  <SelectItem value="extra">
+                    Ventana extra (sí atiendo)
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </Field>
@@ -494,21 +607,48 @@ function OverridesEditor({ overrides }: { overrides: OverrideRow[] }) {
           {mode === "block" ? (
             <div className="flex items-center justify-between">
               <Label htmlFor="full-day">Todo el día</Label>
-              <Switch id="full-day" checked={fullDay} onCheckedChange={setFullDay} />
+              <Switch
+                id="full-day"
+                checked={fullDay}
+                onCheckedChange={setFullDay}
+              />
             </div>
           ) : null}
           {mode === "extra" || !fullDay ? (
-            <div className="flex items-center gap-2">
-              <Input type="time" step={900} value={startTime} onChange={(e) => setStartTime(e.target.value)} className="tabular-nums" />
-              <span className="text-muted-foreground">–</span>
-              <Input type="time" step={900} value={endTime} onChange={(e) => setEndTime(e.target.value)} className="tabular-nums" />
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label htmlFor="override-start">Desde</Label>
+                <Input
+                  id="override-start"
+                  type="time"
+                  step={900}
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  className="tabular-nums"
+                />
+              </div>
+              <div>
+                <Label htmlFor="override-end">Hasta</Label>
+                <Input
+                  id="override-end"
+                  type="time"
+                  step={900}
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                  className="tabular-nums"
+                />
+              </div>
             </div>
           ) : null}
           <div className="flex justify-end gap-2">
-            <Button variant="ghost" onClick={() => setOpen(false)} disabled={pending}>
+            <Button
+              variant="ghost"
+              onClick={() => setOpen(false)}
+              disabled={pending}
+            >
               Cancelar
             </Button>
-            <Button onClick={add} loading={pending}>
+            <Button variant="outline" onClick={add} loading={pending}>
               Guardar excepción
             </Button>
           </div>
@@ -516,7 +656,15 @@ function OverridesEditor({ overrides }: { overrides: OverrideRow[] }) {
       ) : null}
 
       {upcoming.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No tienes excepciones próximas.</p>
+        <EmptyState
+          title="Sin excepciones próximas"
+          description="Agrega vacaciones, días festivos o ventanas extra."
+          action={
+            <Button variant="outline" onClick={() => setOpen(true)}>
+              Agregar excepción
+            </Button>
+          }
+        />
       ) : (
         <ul className="flex flex-col divide-y divide-border">
           {upcoming.map((o) => (
@@ -527,10 +675,14 @@ function OverridesEditor({ overrides }: { overrides: OverrideRow[] }) {
                 <CalendarPlus className="size-4 shrink-0 text-primary" />
               )}
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium capitalize">{formatYmdLong(o.date, "es-MX", { year: "numeric" })}</p>
+                <p className="text-sm font-medium capitalize">
+                  {formatYmdLong(o.date, "es-MX", { year: "numeric" })}
+                </p>
                 <p className="text-xs text-muted-foreground">
                   {o.isBlocked ? "Bloqueado" : "Ventana extra"}
-                  {o.startTime && o.endTime ? ` · ${hm(o.startTime)}–${hm(o.endTime)}` : " · todo el día"}
+                  {o.startTime && o.endTime
+                    ? ` · ${hm(o.startTime)}–${hm(o.endTime)}`
+                    : " · todo el día"}
                 </p>
               </div>
               <Button
@@ -538,12 +690,7 @@ function OverridesEditor({ overrides }: { overrides: OverrideRow[] }) {
                 variant="ghost"
                 aria-label="Eliminar excepción"
                 disabled={pending}
-                onClick={() =>
-                  startTransition(async () => {
-                    const res = await deleteAvailabilityOverride(o.id);
-                    if (!res.ok) toast.error(res.error);
-                  })
-                }
+                onClick={() => setDeleting(o.id)}
               >
                 <Trash2 />
               </Button>
@@ -551,6 +698,38 @@ function OverridesEditor({ overrides }: { overrides: OverrideRow[] }) {
           ))}
         </ul>
       )}
+      <Dialog
+        open={!!deleting}
+        onOpenChange={(open) => !open && setDeleting(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>¿Eliminar esta excepción?</DialogTitle>
+            <DialogDescription>
+              Se volverá a aplicar tu horario semanal para esa fecha.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleting(null)}>
+              Volver
+            </Button>
+            <Button
+              variant="destructive"
+              loading={pending}
+              onClick={() => {
+                if (!deleting) return;
+                startTransition(async () => {
+                  const res = await deleteAvailabilityOverride(deleting);
+                  if (res.ok) setDeleting(null);
+                  else toast.error(res.error);
+                });
+              }}
+            >
+              Sí, eliminar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

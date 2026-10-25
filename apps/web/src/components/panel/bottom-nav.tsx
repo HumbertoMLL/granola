@@ -28,7 +28,7 @@ export function BottomNav() {
                 aria-current={active ? "page" : undefined}
                 className={cn(
                   "flex flex-1 flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors",
-                  active ? "text-primary" : "text-muted-foreground",
+                  active ? "font-bold text-primary" : "text-muted-foreground",
                 )}
               >
                 <span
@@ -37,7 +37,11 @@ export function BottomNav() {
                     active && "bg-primary-soft",
                   )}
                 >
-                  <item.icon className="size-5" strokeWidth={active ? 2.25 : 2} />
+                  <item.icon
+                    aria-hidden
+                    className="size-5"
+                    strokeWidth={active ? 2.25 : 2}
+                  />
                 </span>
                 {item.label}
               </Link>

@@ -31,11 +31,15 @@ export function Sidebar({ user }: { user: PanelUser }) {
               className={cn(
                 "flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium transition-colors",
                 active
-                  ? "bg-primary-soft text-primary"
+                  ? "bg-primary-soft font-bold text-primary"
                   : "text-muted-foreground hover:bg-secondary hover:text-foreground",
               )}
             >
-              <item.icon className="size-5 shrink-0" strokeWidth={active ? 2.25 : 2} />
+              <item.icon
+                aria-hidden
+                className="size-5 shrink-0"
+                strokeWidth={active ? 2.25 : 2}
+              />
               {item.label}
             </Link>
           );
@@ -52,7 +56,9 @@ export function Sidebar({ user }: { user: PanelUser }) {
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold">{user.name}</p>
           <div className="flex items-center gap-1.5">
-            <p className="truncate text-xs text-muted-foreground">@{user.slug}</p>
+            <p className="truncate text-xs text-muted-foreground">
+              @{user.slug}
+            </p>
             <Badge variant="accent" className="px-1.5 py-0 text-[10px]">
               {user.plan}
             </Badge>
