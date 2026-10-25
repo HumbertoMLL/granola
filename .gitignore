@@ -10,3 +10,6 @@ dist
 .vercel
 coverage
 .env*
+# Excepciones: plantillas y env de tests sin secretos.
+!.env.example
+!apps/web/.env.test
