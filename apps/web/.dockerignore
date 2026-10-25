@@ -1,0 +1,15 @@
+**/node_modules
+**/.next
+**/.turbo
+**/dist
+.git
+.claude
+.neon
+.vercel
+**/.env*
+!**/.env.example
+!**/.env.docker.example
+docs/research
+**/*.md
+**/*.log
+coverage
