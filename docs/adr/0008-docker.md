@@ -8,7 +8,8 @@ Vercel sigue siendo el deploy principal. Docker permite desarrollar y explorar
 Granola sin instalar Node ni pnpm en el host, y hospedar la misma aplicación
 fuera de Vercel. No cambia auth, schema, migraciones ni server actions.
 
-`apps/web/Dockerfile` usa Node 22 Alpine, corepack y el pnpm fijado en el repo.
+`apps/web/Dockerfile` usa Node 25 Alpine (igual que CI), corepack@0.36.0 instalado
+explícitamente (Node 25 ya no lo incluye) y el pnpm fijado en el repo.
 `pnpm fetch` cachea el lockfile antes de copiar fuentes; la instalación offline
 filtra `@granola/web...`. Next compila con `output: "standalone"` y tracing desde
 la raíz del monorepo. La imagen final incluye únicamente el runtime Node y
@@ -22,8 +23,9 @@ SQL en orden, registrar cada archivo en `docker_migrations` dentro de su misma
 transacción y ejecutar el seed existente. El job falla ante errores; web espera
 su salida exitosa. La disponibilidad HTTP del proxy se espera antes del seed.
 El ledger evita reaplicar SQL y el seed actualiza las filas demo de forma idempotente.
-Una base previa migrada manualmente necesita baseline del ledger; no intentamos
-adivinar su estado ni ignorar errores SQL. El compose local original se conserva.
+Si la base ya tiene tablas pero no ledger (migrada a mano), cada migración pendiente
+se intenta aplicar; si falla solo con "already exists" se registra como aplicada
+(baseline) y cualquier otro error tumba el job. El compose local original se conserva.
 
 ## Consecuencias
 
@@ -31,9 +33,13 @@ adivinar su estado ni ignorar errores SQL. El compose local original se conserva
 - El script genera un secreto aleatorio en `.env.docker` ignorado por Git.
 - `docker-compose up` directo usa defaults explícitos de desarrollo; para usar el
   secreto generado se pasa `--env-file .env.docker` (lo hace el script).
-- Postgres usa la configuración y volumen lógico `granola_pg` del compose local;
-  el nombre físico depende del proyecto Compose. No se comparten puertos entre
-  stacks simultáneos; las pruebas usan otro proyecto y puertos configurables.
+- Proyecto Compose `granola-docker` y volumen `granola_docker_pg`, distintos del
+  compose local (proyecto `granola`, volumen `granola_pg`). Puertos publicados solo
+  en 127.0.0.1 y configurables (`POSTGRES_PORT`, `NEON_PROXY_PORT`, `WEB_PORT`,
+  `INNGEST_PORT`); los defaults 5433/4444 coinciden con el compose local.
+- Imágenes fijadas: `postgres:17.11-alpine`, `inngest/inngest:v1.49.0` y el proxy
+  neon-http por digest (no publica tags de versión).
+- CI construye el target `runner` en un job `docker` (sin push, check no requerido).
 - Producción fuera de Vercel usa el target `runner`, orígenes públicos propios,
   secretos e integraciones reales y un proceso de migración administrado.
   El compose con demo e Inngest dev es para uso local.

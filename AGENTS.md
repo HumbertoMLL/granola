@@ -84,8 +84,8 @@ curl -s "localhost:3100/api/v1/me/appointments?from=2026-10-01T00:00:00Z&to=2026
 ## Qué sigue (al 24 oct 2026)
 
 - Probar F1 contra Neon real (migrar + seed + flujo completo). Google Calendar sync aún no existe.
-- F1.5: todo el proyecto en Docker (`docker-compose up` = web + Postgres + proxy Neon + Inngest dev; `Dockerfile` standalone en apps/web). Ver `PLAN.md` sección 6.
 - F2: pacientes, expediente, antropometría, notas IA. Ver `PLAN.md` sección 6.
+- Hecho: F1.5 (Docker completo: `scripts/docker-up.sh`, ver sección Docker y ADR 0008). Pendiente decidir si el job `docker` de CI pasa a ser check requerido.
 
 ## Docker
 
@@ -105,11 +105,14 @@ El job `migrate` aplica los SQL en orden con un ledger transaccional y después
 corre el seed idempotente. `web` espera a que termine; Inngest espera al healthcheck.
 No se necesitan credenciales cloud para explorar la demo.
 
-Se mantienen Postgres 17, el volumen `granola_pg` y los puertos 5433/4444 del
-compose local. No ejecutes ambos stacks a la vez en los mismos puertos.
-Para aislar una prueba: `COMPOSE_PROJECT_NAME=granola-docker-test POSTGRES_PORT=55433 NEON_PROXY_PORT=54444 scripts/docker-up.sh`.
-El ledger se crea con la primera migración Docker sobre una base vacía; una base
-anterior migrada manualmente requiere establecer su baseline antes de usar este job.
+El compose usa su propio proyecto (`granola-docker`) y volumen (`granola_docker_pg`),
+así que no toca los contenedores ni datos de `docker-compose.local.yml`. Los puertos
+escuchan solo en 127.0.0.1 (`POSTGRES_PORT` 5433, `NEON_PROXY_PORT` 4444, `WEB_PORT`
+3100, `INNGEST_PORT` 8288, en `.env.docker`); 5433/4444 coinciden con el compose
+local: cámbialos en `.env.docker` si ambos van a estar arriba.
+Para aislar una prueba: `COMPOSE_PROJECT_NAME=granola-docker-test` + otros puertos en `.env.docker`.
+Si la base ya tiene tablas pero no `docker_migrations` (migrada a mano), el job
+registra como aplicadas las migraciones cuyos objetos ya existen y aplica las nuevas.
 `docker-compose --env-file .env.docker down` conserva los datos; `down -v` los borra.
 
 Imagen portable (contexto = raíz del monorepo):
