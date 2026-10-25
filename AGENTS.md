@@ -25,6 +25,7 @@ Seguimos Twelve-Factor (https://github.com/twelve-factor/twelve-factor). Estado 
 - Sin `any`; zod en toda frontera.
 - UI en español MX; código en inglés.
 - **Todo feature nuevo llega con su test (integración si toca DB, E2E si toca el flujo de reserva). Nada se da por terminado con CI en rojo.**
+- **Migraciones expand/contract:** cada release funciona con el schema anterior y el expandido. Primero agrega columnas/tablas opcionales o con defaults compatibles y migra en un release previo al código que las necesita. Nunca renombres/borres en el mismo PR que deja de usarlas; backfill, retirada del uso y contract van en releases separados, conservando compatibilidad con deploys activos y rollback.
 
 ## Verificación antes de dar algo por terminado
 
