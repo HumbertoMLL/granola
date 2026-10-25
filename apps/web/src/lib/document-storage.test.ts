@@ -8,6 +8,7 @@ vi.mock("@aws-sdk/client-s3", async (original) => ({
   },
 }));
 import {
+  clinicalUploadUrl,
   putClinicalObject,
   readClinicalObject,
   deleteClinicalObject,
@@ -29,6 +30,7 @@ afterEach(() => vi.unstubAllEnvs());
 describe("Al almacenar estudios clínicos", () => {
   it("falla en producción sin R2, nunca escribe un fallback local", async () => {
     vi.stubEnv("NODE_ENV", "production");
+    await expect(clinicalUploadUrl(key, "application/pdf", 15 * 1024 * 1024)).rejects.toThrow("Configura R2");
     await expect(
       putClinicalObject(key, Buffer.from("%PDF-1.7"), "application/pdf"),
     ).rejects.toThrow("Configura R2");

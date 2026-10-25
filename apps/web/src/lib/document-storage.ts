@@ -106,7 +106,10 @@ export async function clinicalUploadUrl(
   mime: DocumentMime,
   sizeBytes: number,
 ) {
-  if (!isStorageConfigured()) return null;
+  if (!isStorageConfigured()) {
+    if (process.env.NODE_ENV !== "development") throw new StorageNotConfiguredError();
+    return null;
+  }
   const { PutObjectCommand } = await import("@aws-sdk/client-s3");
   const { getSignedUrl } = await import("@aws-sdk/s3-request-presigner");
   return getSignedUrl(
