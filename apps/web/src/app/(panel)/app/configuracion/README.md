@@ -29,3 +29,4 @@ Prueba manual con la DB local en 5433:
 - `packages/jobs` todavía no consulta notifyNewBooking: esta entrega guarda la preferencia, sin modificar el envío de WhatsApp.
 - El editor anterior de Mi página reemplaza theme al guardar. Si se usa directamente después de Configuración puede descartar notifyNewBooking. Corregir su persistencia requiere tocar `mi-pagina/actions.ts`, fuera de las rutas autorizadas; los nuevos flujos sí conservan la preferencia.
 - El borrado corresponde a la DB local: no cierra cuentas de Stripe/MP ni borra objetos de R2. No agrega migraciones ni un historial nuevo de auditoría.
+- La apertura adicional de `/karla` en dev mostró `next-request-in-use-cache` en el loader existente `src/lib/public-profile.ts:70` (sin diferencias contra main). La misma página funciona con `next start` sobre el build de producción: perfil, servicios y reseñas renderizados. Se documenta sin modificar ese loader fuera del alcance.
