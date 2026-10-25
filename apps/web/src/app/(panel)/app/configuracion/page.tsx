@@ -17,6 +17,9 @@ import {
 import { ComingSoonCard } from "@/components/panel/coming-soon";
 import { Suspense } from "react";
 
+import { hasPassword } from "@granola/auth/password";
+
+import { AccountDeletionSection } from "@/components/configuracion/account-deletion-section";
 import { initialsOf } from "@/components/panel/nav";
 import { requireNutritionist } from "@/lib/session";
 import { PageHeader } from "@/components/panel/page-header";
@@ -116,6 +119,8 @@ async function ConfiguracionPageContent() {
           </CardHeader>
         </Card>
       </ComingSoonCard>
+
+      <AccountDeletionSection hasPassword={await hasPassword(user.id)} />
 
       <div>
         <Button variant="ghost" className="text-destructive hover:bg-destructive-soft" disabled>
