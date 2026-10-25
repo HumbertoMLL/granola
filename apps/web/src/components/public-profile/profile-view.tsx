@@ -22,6 +22,7 @@ type ProfileViewProps = {
    */
   preview?: boolean;
   className?: string;
+  nextAvailable?: React.ReactNode;
 };
 
 const mxn = new Intl.NumberFormat("es-MX", {
@@ -33,13 +34,19 @@ const mxn = new Intl.NumberFormat("es-MX", {
 export function formatPrice(cents: number, currency = "MXN"): string {
   if (cents === 0) return "Gratis";
   if (currency === "MXN") return mxn.format(cents / 100);
-  return new Intl.NumberFormat("es-MX", { style: "currency", currency }).format(cents / 100);
+  return new Intl.NumberFormat("es-MX", { style: "currency", currency }).format(
+    cents / 100,
+  );
 }
 
 export function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
-  return ((parts[0]?.[0] ?? "") + (parts.length > 1 ? parts[parts.length - 1]?.[0] ?? "" : ""))
-    .toUpperCase() || "N";
+  return (
+    (
+      (parts[0]?.[0] ?? "") +
+      (parts.length > 1 ? (parts[parts.length - 1]?.[0] ?? "") : "")
+    ).toUpperCase() || "N"
+  );
 }
 
 const modalityLabel: Record<PublicService["modality"], string> = {
@@ -48,7 +55,12 @@ const modalityLabel: Record<PublicService["modality"], string> = {
   ambas: "En línea o presencial",
 };
 
-export function ProfileView({ profile, preview = false, className }: ProfileViewProps) {
+export function ProfileView({
+  profile,
+  preview = false,
+  className,
+  nextAvailable,
+}: ProfileViewProps) {
   const { theme } = profile;
   const agendarHref = `/${profile.slug}/agendar`;
   const showReviews = theme.showReviews && profile.reviews.length > 0;
@@ -88,7 +100,9 @@ export function ProfileView({ profile, preview = false, className }: ProfileView
             </AvatarFallback>
           </Avatar>
 
-          <h1 className="mt-4 text-2xl font-extrabold tracking-tight">{profile.displayName}</h1>
+          <h1 className="mt-4 text-2xl font-extrabold tracking-tight">
+            {profile.displayName}
+          </h1>
 
           {profile.cedula ? (
             <p className="mt-1 inline-flex items-center gap-1 text-sm text-(--pp-muted)">
@@ -105,7 +119,10 @@ export function ProfileView({ profile, preview = false, className }: ProfileView
 
           {theme.showReviews && profile.reviewStats ? (
             <span className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-(--pp-border) bg-(--pp-surface) px-3 py-1 text-xs font-semibold">
-              <Star className="size-3.5 fill-(--pp-accent) text-(--pp-accent)" aria-hidden />
+              <Star
+                className="size-3.5 fill-(--pp-accent) text-(--pp-accent)"
+                aria-hidden
+              />
               Reseñas verificadas · {profile.reviewStats.average.toFixed(1)} (
               {profile.reviewStats.count})
             </span>
@@ -118,6 +135,12 @@ export function ProfileView({ profile, preview = false, className }: ProfileView
             <CalendarCheck2 className="size-5" aria-hidden />
             Agendar consulta
           </PPButton>
+          {nextAvailable ??
+            (preview ? (
+              <p className="text-center text-xs text-(--pp-muted)">
+                El próximo horario disponible aparecerá aquí.
+              </p>
+            ) : null)}
           {showWa ? (
             <PPButton
               href={`https://wa.me/${profile.phoneWa}`}
@@ -131,30 +154,21 @@ export function ProfileView({ profile, preview = false, className }: ProfileView
           ) : null}
         </div>
 
-        {/* Links */}
-        {profile.links.length > 0 ? (
-          <section aria-label="Enlaces" className="flex flex-col gap-2.5">
-            {profile.links.map((l) => (
-              <PPLink key={l.id} href={l.url} preview={preview} external>
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-(--pp-bg) text-(--pp-primary)">
-                  <LinkIcon kind={l.icon} className="size-[18px]" />
-                </span>
-                <span className="min-w-0 flex-1 truncate text-left font-semibold">{l.label}</span>
-                <ArrowUpRight className="size-4 shrink-0 text-(--pp-muted)" aria-hidden />
-              </PPLink>
-            ))}
-          </section>
-        ) : null}
-
         {/* Servicios */}
         {profile.services.length > 0 ? (
           <section className="flex flex-col gap-3">
             <SectionTitle>Servicios</SectionTitle>
-            <div className="flex flex-col gap-2.5">
+            <ul className="flex flex-col gap-2.5">
               {profile.services.map((s) => (
-                <ServiceCard key={s.id} service={s} slug={profile.slug} preview={preview} />
+                <li key={s.id}>
+                  <ServiceCard
+                    service={s}
+                    slug={profile.slug}
+                    preview={preview}
+                  />
+                </li>
               ))}
-            </div>
+            </ul>
           </section>
         ) : null}
 
@@ -170,6 +184,26 @@ export function ProfileView({ profile, preview = false, className }: ProfileView
           </section>
         ) : null}
 
+        {/* Links */}
+        {profile.links.length > 0 ? (
+          <section aria-label="Enlaces" className="flex flex-col gap-2.5">
+            {profile.links.map((l) => (
+              <PPLink key={l.id} href={l.url} preview={preview} external>
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-(--pp-bg) text-(--pp-primary)">
+                  <LinkIcon kind={l.icon} className="size-[18px]" />
+                </span>
+                <span className="min-w-0 flex-1 truncate text-left font-semibold">
+                  {l.label}
+                </span>
+                <ArrowUpRight
+                  className="size-4 shrink-0 text-(--pp-muted)"
+                  aria-hidden
+                />
+              </PPLink>
+            ))}
+          </section>
+        ) : null}
+
         {/* Footer */}
         <footer className="mt-4 flex flex-col items-center gap-2 text-center text-xs text-(--pp-muted)">
           <PPAnchor
@@ -177,10 +211,17 @@ export function ProfileView({ profile, preview = false, className }: ProfileView
             preview={preview}
             className="inline-flex items-center gap-1.5 rounded-full border border-(--pp-border) bg-(--pp-surface) px-3 py-1.5 font-semibold text-(--pp-fg) transition-opacity hover:opacity-80"
           >
-            <span aria-hidden className="inline-block size-2 rounded-full bg-(--pp-primary)" />
+            <span
+              aria-hidden
+              className="inline-block size-2 rounded-full bg-(--pp-primary)"
+            />
             Hecho con Granola
           </PPAnchor>
-          <PPAnchor href="/privacidad" preview={preview} className="underline-offset-2 hover:underline">
+          <PPAnchor
+            href="/privacidad"
+            preview={preview}
+            className="underline-offset-2 hover:underline"
+          >
             Aviso de privacidad
           </PPAnchor>
         </footer>
@@ -191,7 +232,9 @@ export function ProfileView({ profile, preview = false, className }: ProfileView
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="px-1 text-xs font-bold tracking-wider text-(--pp-muted) uppercase">{children}</h2>
+    <h2 className="px-1 text-xs font-bold tracking-wider text-(--pp-muted)">
+      {children}
+    </h2>
   );
 }
 
@@ -211,29 +254,20 @@ function ServiceCard({
   ].filter(Boolean);
 
   return (
-    <article className="flex flex-col gap-3 rounded-2xl border border-(--pp-border) bg-(--pp-surface) p-4 shadow-[0_1px_2px_rgb(0_0_0/0.03)]">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h3 className="font-semibold leading-tight">{s.name}</h3>
-          <p className="mt-1 inline-flex flex-wrap items-center gap-x-1.5 text-xs text-(--pp-muted)">
-            <Clock className="size-3.5" aria-hidden />
-            {meta.join(" · ")}
-          </p>
-          {s.description ? (
-            <p className="mt-2 line-clamp-3 text-sm text-(--pp-muted)">{s.description}</p>
-          ) : null}
-        </div>
-        <p className="shrink-0 text-base font-extrabold">{formatPrice(s.priceCents, s.currency)}</p>
-      </div>
-      <PPButton
-        href={`/${slug}/agendar?servicio=${encodeURIComponent(s.id)}`}
-        preview={preview}
-        variant="soft"
-        size="sm"
-      >
-        Agendar
-      </PPButton>
-    </article>
+    <PPButton
+      href={`/${slug}/agendar?paso=2&servicio=${encodeURIComponent(s.id)}`}
+      preview={preview}
+      variant="outline"
+      className="h-auto! flex-col! gap-1! py-3"
+    >
+      <span>
+        {s.name} · {formatPrice(s.priceCents, s.currency)}
+      </span>
+      <span className="inline-flex items-center gap-1 text-xs font-normal text-(--pp-muted)">
+        <Clock className="size-3.5" aria-hidden />
+        {meta.join(" · ")}
+      </span>
+    </PPButton>
   );
 }
 
@@ -250,7 +284,10 @@ function ReviewCard({ review: r }: { review: PublicReview }) {
       <p className="text-xs text-(--pp-muted)">
         {r.authorName} ·{" "}
         <time dateTime={r.createdAt}>
-          {new Date(r.createdAt).toLocaleDateString("es-MX", { month: "short", year: "numeric" })}
+          {new Date(r.createdAt).toLocaleDateString("es-MX", {
+            month: "short",
+            year: "numeric",
+          })}
         </time>
       </p>
     </article>
@@ -259,14 +296,19 @@ function ReviewCard({ review: r }: { review: PublicReview }) {
 
 function Stars({ rating }: { rating: number }) {
   return (
-    <span className="inline-flex gap-0.5" aria-label={`${rating} de 5 estrellas`}>
+    <span
+      className="inline-flex gap-0.5"
+      aria-label={`${rating} de 5 estrellas`}
+    >
       {[1, 2, 3, 4, 5].map((i) => (
         <Star
           key={i}
           aria-hidden
           className={cn(
             "size-3.5",
-            i <= rating ? "fill-(--pp-accent) text-(--pp-accent)" : "text-(--pp-border)",
+            i <= rating
+              ? "fill-(--pp-accent) text-(--pp-accent)"
+              : "text-(--pp-border)",
           )}
         />
       ))}
@@ -285,7 +327,13 @@ type AnchorProps = {
 };
 
 /** <a>/<Link> que en vista previa no navega. */
-function PPAnchor({ href, preview, external, className, children }: AnchorProps) {
+function PPAnchor({
+  href,
+  preview,
+  external,
+  className,
+  children,
+}: AnchorProps) {
   if (preview) {
     return (
       <span className={className} aria-disabled>
@@ -295,7 +343,12 @@ function PPAnchor({ href, preview, external, className, children }: AnchorProps)
   }
   if (external) {
     return (
-      <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={className}
+      >
         {children}
       </a>
     );
@@ -323,7 +376,10 @@ function PPButton({
   variant = "primary",
   size = "md",
   ...props
-}: AnchorProps & { variant?: "primary" | "outline" | "soft"; size?: "sm" | "md" }) {
+}: AnchorProps & {
+  variant?: "primary" | "outline" | "soft";
+  size?: "sm" | "md";
+}) {
   return (
     <PPAnchor
       {...props}
@@ -331,9 +387,11 @@ function PPButton({
         "inline-flex w-full items-center justify-center gap-2 rounded-(--pp-radius) font-semibold transition-all hover:brightness-95 active:scale-[0.99]",
         size === "md" ? "h-13 px-6 text-base" : "h-10 px-4 text-sm",
         variant === "primary" &&
-          "bg-(--pp-primary) text-(--pp-primary-fg) shadow-[0_6px_20px_rgb(0_0_0/0.10)]",
-        variant === "outline" && "border border-(--pp-border) bg-(--pp-surface) text-(--pp-fg)",
-        variant === "soft" && "bg-(--pp-bg) text-(--pp-primary) ring-1 ring-(--pp-border) ring-inset",
+          "bg-(--pp-booking-primary) text-(--pp-booking-fg) shadow-[0_6px_20px_rgb(0_0_0/0.10)]",
+        variant === "outline" &&
+          "border border-(--pp-border) bg-(--pp-surface) text-(--pp-fg)",
+        variant === "soft" &&
+          "bg-(--pp-bg) text-(--pp-primary) ring-1 ring-(--pp-border) ring-inset",
         props.className,
       )}
     />
