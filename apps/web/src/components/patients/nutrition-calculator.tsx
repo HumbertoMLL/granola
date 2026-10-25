@@ -2,7 +2,11 @@
 import { useState } from "react";
 import { Button, Input } from "@granola/ui";
 import { z } from "zod";
-import { energyForGoal, energyInputSchema, totalEnergyExpenditure } from "@granola/core/nutrition";
+import {
+  energyForGoal,
+  energyInputSchema,
+  totalEnergyExpenditure,
+} from "@granola/core/nutrition";
 
 export function NutritionCalculator({
   weight,
@@ -31,7 +35,10 @@ export function NutritionCalculator({
           event.preventDefault();
           const data = new FormData(event.currentTarget);
           const parsed = energyInputSchema
-            .extend({ goal: z.enum(["deficit", "maintenance", "surplus"]), adjustment: z.number().min(0).max(0.5) })
+            .extend({
+              goal: z.enum(["deficit", "maintenance", "surplus"]),
+              adjustment: z.number().min(0).max(0.5),
+            })
             .safeParse({
               weightKg: Number(data.get("weight")),
               heightCm: Number(data.get("height")),
@@ -43,7 +50,9 @@ export function NutritionCalculator({
             });
           if (!parsed.success) {
             setResult(null);
-            setError("Revisa los datos: edad de 18 a 120 años, mediciones positivas y ajuste entre 0 y 50%.");
+            setError(
+              "Revisa los datos: edad de 18 a 120 años, mediciones positivas y ajuste entre 0 y 50%.",
+            );
             return;
           }
           try {
@@ -59,21 +68,47 @@ export function NutritionCalculator({
             setError("");
           } catch {
             setResult(null);
-            setError("Los datos no permiten calcular un gasto energético positivo.");
+            setError(
+              "Los datos no permiten calcular un gasto energético positivo.",
+            );
           }
         }}
       >
         <label className="grid gap-1 text-sm">
           Peso (kg)
-          <Input type="number" name="weight" min="0.01" max="600" step="0.01" required defaultValue={weight ?? ""} />
+          <Input
+            type="number"
+            name="weight"
+            min="0.01"
+            max="600"
+            step="0.01"
+            required
+            defaultValue={weight ?? ""}
+          />
         </label>
         <label className="grid gap-1 text-sm">
           Talla (cm)
-          <Input type="number" name="height" min="0.1" max="250" step="0.1" required defaultValue={height ?? ""} />
+          <Input
+            type="number"
+            name="height"
+            min="0.1"
+            max="250"
+            step="0.1"
+            required
+            defaultValue={height ?? ""}
+          />
         </label>
         <label className="grid gap-1 text-sm">
           Edad (años)
-          <Input type="number" name="age" min="18" max="120" step="1" required defaultValue={age} />
+          <Input
+            type="number"
+            name="age"
+            min="18"
+            max="120"
+            step="1"
+            required
+            defaultValue={age}
+          />
         </label>
         <label className="grid gap-1 text-sm">
           Sexo para la ecuación
@@ -90,11 +125,23 @@ export function NutritionCalculator({
         </label>
         <label className="grid gap-1 text-sm">
           Factor de actividad
-          <Input name="activity" type="number" min="1" max="2.5" step="0.001" defaultValue="1.2" required />
+          <Input
+            name="activity"
+            type="number"
+            min="1"
+            max="2.5"
+            step="0.001"
+            defaultValue="1.2"
+            required
+          />
         </label>
         <label className="grid gap-1 text-sm">
           Objetivo
-          <select className="h-11 rounded-xl border bg-card px-3" name="goal" defaultValue="maintenance">
+          <select
+            className="h-11 rounded-xl border bg-card px-3"
+            name="goal"
+            defaultValue="maintenance"
+          >
             <option value="deficit">Déficit</option>
             <option value="maintenance">Mantenimiento</option>
             <option value="surplus">Superávit</option>
@@ -102,15 +149,24 @@ export function NutritionCalculator({
         </label>
         <label className="grid gap-1 text-sm">
           Ajuste del GET (%)
-          <Input name="adjustment" type="number" min="0" max="50" step="1" defaultValue="20" required />
+          <Input
+            name="adjustment"
+            type="number"
+            min="0"
+            max="50"
+            step="1"
+            defaultValue="20"
+            required
+          />
         </label>
-        <Button className="self-end" type="submit">
+        <Button variant="outline" className="self-end" type="submit">
           Calcular requerimiento
         </Button>
       </form>
       <p className="text-xs text-muted-foreground">
-        GET = gasto en reposo × factor de actividad. Harris-Benedict revisada (1984). El ajuste lo define el
-        profesional; mantenimiento conserva el GET.
+        GET = gasto en reposo × factor de actividad. Harris-Benedict revisada
+        (1984). El ajuste lo define el profesional; mantenimiento conserva el
+        GET.
       </p>
       {error && (
         <p role="alert" className="text-destructive">

@@ -1,0 +1,37 @@
+# Auditoría de patrones de interfaz
+
+Referencia: las 12 reglas de `docs/ux-decisions.md`. Se revisaron las páginas de marketing, auth, panel, perfil, reserva, gestión de cita, pago, privacidad y reseña, así como sus componentes.
+
+| Archivo                                                                                     | Corrección                                                                                                                                                                                         |
+| ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| packages/ui/src/{segmented-control,filter-chip,stepper,timeline,empty-state,form-field}.tsx | Primitivos compartidos, semántica accesible, tokens y radios existentes.                                                                                                                           |
+| components/panel/{bottom-nav,sidebar}.tsx                                                   | Navegación lucide + etiqueta, activo con color/peso; íconos decorativos fuera del nombre accesible.                                                                                                |
+| components/public-profile/profile-view.tsx                                                  | CTA único, servicios secundarios como lista y enlaces sociales al final; elimina títulos en mayúsculas.                                                                                            |
+| app/[slug]/page.tsx y lib/booking.ts                                                        | Próximo horario real con Skeleton y carga independiente del perfil cacheado.                                                                                                                       |
+| components/booking/booking-flow.tsx                                                         | Wizard de cuatro pantallas, Stepper, resumen sticky, acciones inferiores, radios para pago/modalidad, labels/error/ayuda vinculados, +52 fijo, correo colapsado y formulario conservado al volver. |
+| components/booking/slot-picker.tsx                                                          | Fecha y hora separables; horarios en radios agrupados Mañana/Tarde, zona horaria con nombre accesible, Skeleton y EmptyState.                                                                      |
+| components/agenda/{agenda-calendar,calendar-layout}.tsx                                     | Día/Semana con selección única, listas semánticas, filtros aplicados/contador/limpieza, huecos reales y detalle en Sheet; acciones contextuales sin saturar filas.                                 |
+| components/agenda/agenda-tabs.tsx                                                           | Se conservan Tabs, derivando el estado de URL para responder al historial.                                                                                                                         |
+| components/agenda/services-manager.tsx                                                      | EmptyState, un CTA de creación, acciones secundarias en ⋯, FormField asociado, confirmación destructiva en Dialog.                                                                                 |
+| components/agenda/availability-editor.tsx                                                   | Labels de horas y selects, EmptyState de excepciones, confirmación al eliminar, prioridad visual de Guardar horario.                                                                               |
+| app/(panel)/app/agenda/[appointmentId]/appointment-actions.tsx                              | Label del motivo, primario configurable para no competir con Abrir Meet.                                                                                                                           |
+| components/agenda/appointments-list.tsx                                                     | Label del motivo en la lista anterior que queda disponible para reutilización.                                                                                                                     |
+| components/patients/patients-list.tsx                                                       | Filtros Con correo/Sin correo y búsqueda como aplicados, contador y Limpiar todo; filas con acción al final, Skeleton/EmptyState, alta en Sheet y WhatsApp +52.                                    |
+| components/dashboard/sections.tsx                                                           | Tras integrar el dashboard real de main: EmptyState con acciones para citas e ingresos y texto sin mayúsculas; se conservan consultas, métricas y agrupación.                                      |
+| components/cobros/payments-table.tsx                                                        | EmptyState con acción; se elimina role=row huérfano y mayúsculas del encabezado.                                                                                                                   |
+| app/(panel)/app/mi-pagina/sections.tsx                                                      | Labels visibles en links, selección única de tema/estilo con SegmentedControl, confirmación para borrar links.                                                                                     |
+| components/marketing/site-header.tsx y app/(marketing)/page.tsx                             | Una jerarquía primaria: CTA del hero; secundarios para header, precios y cierre; ejemplo de agenda enlaza a perfil demo.                                                                           |
+
+Login y registro ya usan labels visibles y un submit. Reseña ya usa radios nativos y consentimiento real. Pago, privacidad y confirmación de reserva no introducen selección ni nuevos formularios. Los demás estados asíncronos del panel ya usan Suspense/Skeleton.
+
+- `components/cobros/month-filter.tsx`: label visible y vinculado al selector de mes.
+
+## Evidencia y reproducción
+
+Los specs `e2e/agenda.spec.ts` y `e2e/booking.spec.ts` cubren semilla → perfil → wizard → cita persistida → agenda → cancelación, más historial del navegador y filtros. Las capturas de `docs/ux-captures/` usan ancho 390 px: perfil, reserva, agenda Día y Semana con Sheet.
+
+El rebase final incluye el dashboard real integrado por main (#1). Pacientes incorpora F2 real (#2). La página del dashboard se conserva de main; sus estados vacíos se adaptan en components/dashboard/sections.tsx.
+
+- `components/patients/patient-record.tsx`: Skeleton del expediente, EmptyState con acciones, listas semánticas de mediciones/notas, edición en Sheet y borrado confirmado en Dialog.
+- `components/patients/{measurement-editor,nutrition-calculator}.tsx`: acciones inferiores y jerarquía primaria única en Antropometría.
+- `e2e/patients.spec.ts`: filtros aplicados, limpieza, expediente y Sheet de medición contra la semilla real.

@@ -6,7 +6,16 @@ import { Button, Skeleton } from "@granola/ui";
 
 import { AgendaTabs, type AgendaData } from "@/components/agenda/agenda-tabs";
 import { PageHeader } from "@/components/panel/page-header";
-import { and, appointments, availabilityOverrides, availabilityRules, db, eq, gte, services } from "@/lib/db";
+import {
+  and,
+  appointments,
+  availabilityOverrides,
+  availabilityRules,
+  db,
+  eq,
+  gte,
+  services,
+} from "@/lib/db";
 import { requireNutritionist } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Agenda" };
@@ -31,7 +40,10 @@ async function AgendaContent() {
 
   const [apptRows, serviceRows, ruleRows, overrideRows] = await Promise.all([
     db.query.appointments.findMany({
-      where: and(eq(appointments.nutritionistId, nutritionist.id), gte(appointments.endsAt, since)),
+      where: and(
+        eq(appointments.nutritionistId, nutritionist.id),
+        gte(appointments.endsAt, since),
+      ),
       orderBy: (a, { asc }) => [asc(a.startsAt)],
       with: {
         patient: { columns: { name: true, phoneWa: true } },
@@ -53,6 +65,7 @@ async function AgendaContent() {
   ]);
 
   const data: AgendaData = {
+    slug: nutritionist.slug,
     timezone: nutritionist.timezone,
     scheduling: {
       bufferMin: nutritionist.bufferMin,
@@ -85,7 +98,12 @@ async function AgendaContent() {
       paymentMode: s.paymentMode,
       sortOrder: s.sortOrder,
     })),
-    rules: ruleRows.map((r) => ({ id: r.id, weekday: r.weekday, startTime: r.startTime, endTime: r.endTime })),
+    rules: ruleRows.map((r) => ({
+      id: r.id,
+      weekday: r.weekday,
+      startTime: r.startTime,
+      endTime: r.endTime,
+    })),
     overrides: overrideRows.map((o) => ({
       id: o.id,
       date: o.date,
@@ -97,9 +115,21 @@ async function AgendaContent() {
 
   return (
     <>
-      <PageHeader title="Agenda" description="Tus citas, servicios y disponibilidad.">
-        <Button size="sm" variant="outline" asChild>
-          <a href={`/${nutritionist.slug}/agendar`} target="_blank" rel="noreferrer">
+      <PageHeader
+        title="Agenda"
+        description="Tus citas, servicios y disponibilidad."
+      >
+        <Button
+          size="sm"
+          variant="outline"
+          className="hidden sm:inline-flex"
+          asChild
+        >
+          <a
+            href={`/${nutritionist.slug}/agendar`}
+            target="_blank"
+            rel="noreferrer"
+          >
             <ExternalLink /> Ver mi página de citas
           </a>
         </Button>

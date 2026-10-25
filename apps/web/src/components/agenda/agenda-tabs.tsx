@@ -1,12 +1,11 @@
 "use client";
 
-import * as React from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { CalendarDays, Clock, Sparkles } from "lucide-react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@granola/ui";
 
-import { AppointmentsList, type AppointmentRow } from "./appointments-list";
+import { type AppointmentRow } from "./appointments-list";
 import {
   AvailabilityEditor,
   type OverrideRow,
@@ -15,7 +14,10 @@ import {
 } from "./availability-editor";
 import { ServicesManager, type ServiceRow } from "./services-manager";
 
+import { AgendaCalendar } from "./agenda-calendar";
+
 export type AgendaData = {
+  slug: string;
   timezone: string;
   scheduling: SchedulingSettingsRow;
   nowIso: string;
@@ -33,12 +35,13 @@ export function AgendaTabs({ data }: { data: AgendaData }) {
   const pathname = usePathname();
   const params = useSearchParams();
   const fromUrl = params.get("tab");
-  const initial: Tab = TABS.includes(fromUrl as Tab) ? (fromUrl as Tab) : "citas";
-  const [tab, setTab] = React.useState<Tab>(initial);
+  const initial: Tab = TABS.includes(fromUrl as Tab)
+    ? (fromUrl as Tab)
+    : "citas";
+  const tab = initial;
 
   function onChange(v: string) {
     const t = v as Tab;
-    setTab(t);
     const sp = new URLSearchParams(params.toString());
     if (t === "citas") sp.delete("tab");
     else sp.set("tab", t);
@@ -61,7 +64,7 @@ export function AgendaTabs({ data }: { data: AgendaData }) {
       </TabsList>
 
       <TabsContent value="citas">
-        <AppointmentsList appointments={data.appointments} timezone={data.timezone} nowIso={data.nowIso} />
+        <AgendaCalendar data={data} />
       </TabsContent>
       <TabsContent value="servicios">
         <ServicesManager services={data.services} />

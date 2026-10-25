@@ -1,15 +1,30 @@
+import { Suspense } from "react";
+import { connection } from "next/server";
+import { Skeleton } from "@granola/ui";
+import { getFirstAvailableSlot } from "@/lib/booking";
+import {
+  formatDateInTz,
+  formatTimeInTz,
+  timeZoneLabel,
+} from "@granola/core/scheduling";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { ProfileView } from "@/components/public-profile/profile-view";
 import { getPublicProfile, isReservedSlug } from "@/lib/public-profile";
 
-const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? process.env.BETTER_AUTH_URL ?? "https://granola.app";
+const SITE_URL =
+  process.env.NEXT_PUBLIC_APP_URL ??
+  process.env.BETTER_AUTH_URL ??
+  "https://granola.app";
 
-export async function generateMetadata({ params }: PageProps<"/[slug]">): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps<"/[slug]">): Promise<Metadata> {
   const { slug } = await params;
   const profile = isReservedSlug(slug) ? null : await getPublicProfile(slug);
-  if (!profile) return { title: "Página no encontrada", robots: { index: false } };
+  if (!profile)
+    return { title: "Página no encontrada", robots: { index: false } };
 
   const title = `${profile.displayName} · Agenda tu consulta`;
   const description =
@@ -39,12 +54,42 @@ export async function generateMetadata({ params }: PageProps<"/[slug]">): Promis
 // `params` fuera de <Suspense> y desactivamos la validación de navegación instantánea.
 export const instant = false;
 
-export default async function PublicProfilePage({ params }: PageProps<"/[slug]">) {
+export default async function PublicProfilePage({
+  params,
+}: PageProps<"/[slug]">) {
   const { slug } = await params;
   if (isReservedSlug(slug)) notFound();
 
   const profile = await getPublicProfile(slug);
   if (!profile) notFound();
 
-  return <ProfileView profile={profile} />;
+  return (
+    <ProfileView
+      profile={profile}
+      nextAvailable={
+        <Suspense fallback={<Skeleton className="mx-auto h-4 w-64" />}>
+          <NextAvailable slug={slug} />
+        </Suspense>
+      }
+    />
+  );
+}
+
+async function NextAvailable({ slug }: { slug: string }) {
+  await connection();
+  const slot = await getFirstAvailableSlot(slug);
+  return (
+    <p className="text-center text-xs text-(--pp-muted)">
+      {slot ? (
+        <>
+          Próximo horario disponible:{" "}
+          {formatDateInTz(new Date(slot.startsAt), slot.timezone)}{" "}
+          {formatTimeInTz(new Date(slot.startsAt), slot.timezone)} (
+          {timeZoneLabel(slot.timezone)})
+        </>
+      ) : (
+        "Sin horarios disponibles por ahora"
+      )}
+    </p>
+  );
 }

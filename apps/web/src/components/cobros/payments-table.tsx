@@ -1,30 +1,43 @@
+import Link from "next/link";
+import { EmptyState, Button } from "@granola/ui";
 import type { PaymentListItem } from "@granola/payments";
 
-import { failureReasonLabel, formatDate, formatDateTime, formatMoney } from "./format";
+import {
+  failureReasonLabel,
+  formatDate,
+  formatDateTime,
+  formatMoney,
+} from "./format";
 import { MethodIcon, StatusBadge } from "./method-icon";
 
 /**
  * Lista de pagos. En móvil cada pago es una tarjeta (el nutri consulta desde el
  * celular); en md+ se vuelve tabla. Un solo markup con grid para no duplicar.
  */
-export function PaymentsTable({ items, timeZone }: { items: PaymentListItem[]; timeZone: string }) {
+export function PaymentsTable({
+  items,
+  timeZone,
+}: {
+  items: PaymentListItem[];
+  timeZone: string;
+}) {
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-1 rounded-xl border border-dashed border-border px-4 py-10 text-center">
-        <p className="text-sm font-medium">Sin cobros este mes</p>
-        <p className="text-sm text-muted-foreground">
-          Cuando un paciente pague una cita, aparecerá aquí.
-        </p>
-      </div>
+      <EmptyState
+        title="Sin cobros este mes"
+        description="Cuando un paciente pague una cita, aparecerá aquí."
+        action={
+          <Button variant="outline" asChild>
+            <Link href="/app/agenda">Ver agenda</Link>
+          </Button>
+        }
+      />
     );
   }
 
   return (
     <div className="overflow-hidden rounded-xl border border-border">
-      <div
-        role="row"
-        className="hidden grid-cols-[1.1fr_1.4fr_1.4fr_1fr_1fr_1fr] gap-3 border-b border-border bg-secondary/60 px-4 py-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase md:grid"
-      >
+      <div className="hidden grid-cols-[1.1fr_1.4fr_1.4fr_1fr_1fr_1fr] gap-3 border-b border-border bg-secondary/60 px-4 py-2 text-xs font-semibold tracking-wide text-muted-foreground md:grid">
         <span>Fecha</span>
         <span>Paciente</span>
         <span>Servicio</span>
@@ -45,18 +58,29 @@ export function PaymentsTable({ items, timeZone }: { items: PaymentListItem[]; t
             </p>
             <p className="truncate text-sm text-muted-foreground md:order-3 md:text-foreground">
               {p.serviceName}
-              <span className="md:hidden"> · cita {formatDateTime(p.appointmentStartsAt, timeZone)}</span>
+              <span className="md:hidden">
+                {" "}
+                · cita {formatDateTime(p.appointmentStartsAt, timeZone)}
+              </span>
             </p>
-            <div className="flex items-center justify-end gap-2 md:order-6" title={failureReasonLabel(p.failureReason) ?? undefined}>
+            <div
+              className="flex items-center justify-end gap-2 md:order-6"
+              title={failureReasonLabel(p.failureReason) ?? undefined}
+            >
               <StatusBadge status={p.status} />
             </div>
             <div className="col-span-2 flex items-center justify-between text-sm md:col-span-1 md:order-4 md:justify-start">
               <MethodIcon method={p.method} />
               <span className="text-xs text-muted-foreground md:hidden">
-                {p.paidAt ? `Pagado ${formatDate(p.paidAt, timeZone)}` : formatDate(p.createdAt, timeZone)}
+                {p.paidAt
+                  ? `Pagado ${formatDate(p.paidAt, timeZone)}`
+                  : formatDate(p.createdAt, timeZone)}
               </span>
             </div>
-            <p className="hidden text-sm text-muted-foreground md:order-1 md:block" title={p.createdAt.toISOString()}>
+            <p
+              className="hidden text-sm text-muted-foreground md:order-1 md:block"
+              title={p.createdAt.toISOString()}
+            >
               {formatDateTime(p.paidAt ?? p.createdAt, timeZone)}
             </p>
           </li>

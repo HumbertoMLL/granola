@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowUpRight, Copy } from "lucide-react";
 import {
   Badge,
+  EmptyState,
   Button,
   Card,
   CardContent,
@@ -59,7 +60,7 @@ export async function BioLink() {
   return (
     <Card className="flex-row items-center justify-between gap-4 bg-primary-soft/60 p-4 sm:p-5">
       <div className="min-w-0">
-        <p className="text-xs font-semibold tracking-wider text-primary uppercase">
+        <p className="text-xs font-semibold tracking-wide text-primary">
           Tu link para la bio
         </p>
         <p className="truncate font-semibold">
@@ -121,11 +122,19 @@ export async function AppointmentSection({
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
         {groups.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            {period === "today"
-              ? "Sin citas hoy."
-              : "Sin citas en los próximos 7 días."}
-          </p>
+          <EmptyState
+            title={
+              period === "today"
+                ? "Sin citas hoy"
+                : "Sin citas en los próximos 7 días"
+            }
+            description="Comparte tu página o revisa tu disponibilidad para recibir reservas."
+            action={
+              <Button variant="outline" asChild>
+                <Link href="/app/agenda">Ver agenda</Link>
+              </Button>
+            }
+          />
         ) : (
           groups.map((group) => (
             <section key={group.date} className="flex flex-col gap-2">
@@ -195,12 +204,15 @@ export async function IncomeSection() {
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {income.length === 0 ? (
-          <>
-            <p className="text-3xl font-extrabold">{formatDashboardMoney(0)}</p>
-            <p className="text-sm text-muted-foreground">
-              Aún no hay pagos acreditados este mes.
-            </p>
-          </>
+          <EmptyState
+            title="Sin ingresos este mes"
+            description="Aún no hay pagos acreditados este mes."
+            action={
+              <Button variant="outline" asChild>
+                <Link href="/app/cobros">Ver cobros</Link>
+              </Button>
+            }
+          />
         ) : (
           income.map((summary) => (
             <div key={summary.currency}>
@@ -228,12 +240,14 @@ export async function IncomeSection() {
             </div>
           ))
         )}
-        <Link
-          href="/app/cobros"
-          className="text-sm font-semibold text-primary underline"
-        >
-          Ver cobros
-        </Link>
+        {income.length > 0 && (
+          <Link
+            href="/app/cobros"
+            className="text-sm font-semibold text-primary underline"
+          >
+            Ver cobros
+          </Link>
+        )}
       </CardContent>
     </Card>
   );

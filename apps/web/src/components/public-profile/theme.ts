@@ -17,7 +17,11 @@ export const THEME_PRESETS = [
   "durazno",
   "carbon",
 ] as const satisfies readonly ThemePreset[];
-export const BUTTON_STYLES = ["pill", "rounded", "square"] as const satisfies readonly ButtonStyle[];
+export const BUTTON_STYLES = [
+  "pill",
+  "rounded",
+  "square",
+] as const satisfies readonly ButtonStyle[];
 export const LINK_ICONS = [
   "instagram",
   "tiktok",
@@ -151,17 +155,25 @@ export const DEFAULT_THEME: ResolvedTheme = {
 };
 
 export function isPreset(v: unknown): v is ThemePreset {
-  return typeof v === "string" && (THEME_PRESETS as readonly string[]).includes(v);
+  return (
+    typeof v === "string" && (THEME_PRESETS as readonly string[]).includes(v)
+  );
 }
 export function isButtonStyle(v: unknown): v is ButtonStyle {
-  return typeof v === "string" && (BUTTON_STYLES as readonly string[]).includes(v);
+  return (
+    typeof v === "string" && (BUTTON_STYLES as readonly string[]).includes(v)
+  );
 }
 
 /** Normaliza el jsonb `theme` (puede venir vacío o con campos legacy). */
-export function resolveTheme(theme: NutritionistTheme | null | undefined): ResolvedTheme {
+export function resolveTheme(
+  theme: NutritionistTheme | null | undefined,
+): ResolvedTheme {
   return {
     preset: isPreset(theme?.preset) ? theme.preset : DEFAULT_THEME.preset,
-    buttonStyle: isButtonStyle(theme?.buttonStyle) ? theme.buttonStyle : DEFAULT_THEME.buttonStyle,
+    buttonStyle: isButtonStyle(theme?.buttonStyle)
+      ? theme.buttonStyle
+      : DEFAULT_THEME.buttonStyle,
     showWhatsApp: theme?.showWhatsApp ?? DEFAULT_THEME.showWhatsApp,
     showReviews: theme?.showReviews ?? DEFAULT_THEME.showReviews,
   };
@@ -176,6 +188,15 @@ export function themeStyle(theme: ResolvedTheme): CSSProperties {
     "--pp-fg": t.fg,
     "--pp-muted": t.muted,
     "--pp-primary": t.primary,
+    // CTA de reserva negro o verde según el preset; los demás acentos se conservan.
+    "--pp-booking-primary":
+      theme.preset === "lavanda" || theme.preset === "durazno"
+        ? "var(--foreground)"
+        : t.primary,
+    "--pp-booking-fg":
+      theme.preset === "lavanda" || theme.preset === "durazno"
+        ? "var(--primary-foreground)"
+        : t.primaryFg,
     "--pp-primary-fg": t.primaryFg,
     "--pp-accent": t.accent,
     "--pp-border": t.border,

@@ -9,11 +9,20 @@ import { defineConfig, devices } from "@playwright/test";
  * `pnpm e2e` (raíz) o `pnpm --filter @granola/web e2e`.
  */
 const testEnv = parse(readFileSync(path.join(__dirname, ".env.test")));
+// Aislamiento opcional por worktree; CI conserva granola_test por defecto.
+if (process.env.GRANOLA_TEST_DATABASE_URL)
+  testEnv.DATABASE_URL = process.env.GRANOLA_TEST_DATABASE_URL;
+if (process.env.GRANOLA_TEST_PROXY)
+  testEnv.NEON_LOCAL_PROXY = process.env.GRANOLA_TEST_PROXY;
 // Los specs leen la DB con @granola/db/testing: necesitan las mismas variables que el server.
 for (const [k, v] of Object.entries(testEnv)) process.env[k] = v;
 
-const PORT = 3100;
+const PORT = Number(process.env.E2E_PORT ?? 3100);
 const baseURL = `http://localhost:${PORT}`;
+testEnv.BETTER_AUTH_URL = baseURL;
+testEnv.NEXT_PUBLIC_APP_URL = baseURL;
+process.env.BETTER_AUTH_URL = baseURL;
+process.env.NEXT_PUBLIC_APP_URL = baseURL;
 const isCI = Boolean(process.env.CI);
 
 /**
@@ -38,6 +47,8 @@ const EXTERNAL_KEYS_BLANK = Object.fromEntries(
     "R2_ACCESS_KEY_ID",
     "R2_SECRET_ACCESS_KEY",
     "RESEND_API_KEY",
+    "UPSTASH_REDIS_REST_URL",
+    "UPSTASH_REDIS_REST_TOKEN",
   ].map((k) => [k, ""]),
 );
 

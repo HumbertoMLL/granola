@@ -78,7 +78,9 @@ const PUBLIC_NUTRITIONIST_COLUMNS = {
 } as const;
 
 /** Solo campos públicos: nunca phone_wa, tokens ni plan. */
-export async function getPublicNutritionistBySlug(slug: string): Promise<PublicNutritionist | null> {
+export async function getPublicNutritionistBySlug(
+  slug: string,
+): Promise<PublicNutritionist | null> {
   const row = await db.query.nutritionists.findFirst({
     // Cuenta en gracia de borrado (ADR 0015) → como si no existiera.
     where: and(eq(nutritionists.slug, slug), isNull(nutritionists.deletedAt)),
@@ -87,7 +89,9 @@ export async function getPublicNutritionistBySlug(slug: string): Promise<PublicN
   return row ?? null;
 }
 
-export async function getPublicNutritionistById(id: string): Promise<PublicNutritionist | null> {
+export async function getPublicNutritionistById(
+  id: string,
+): Promise<PublicNutritionist | null> {
   const row = await db.query.nutritionists.findFirst({
     where: and(eq(nutritionists.id, id), isNull(nutritionists.deletedAt)),
     columns: PUBLIC_NUTRITIONIST_COLUMNS,
@@ -95,9 +99,14 @@ export async function getPublicNutritionistById(id: string): Promise<PublicNutri
   return row ?? null;
 }
 
-export async function getActiveServices(nutritionistId: string): Promise<PublicService[]> {
+export async function getActiveServices(
+  nutritionistId: string,
+): Promise<PublicService[]> {
   const rows = await db.query.services.findMany({
-    where: and(eq(services.nutritionistId, nutritionistId), eq(services.isActive, true)),
+    where: and(
+      eq(services.nutritionistId, nutritionistId),
+      eq(services.isActive, true),
+    ),
     orderBy: (s, { asc }) => [asc(s.sortOrder), asc(s.createdAt)],
     columns: {
       id: true,
@@ -114,7 +123,10 @@ export async function getActiveServices(nutritionistId: string): Promise<PublicS
   return rows;
 }
 
-export async function getActiveService(nutritionistId: string, serviceId: string): Promise<PublicService | null> {
+export async function getActiveService(
+  nutritionistId: string,
+  serviceId: string,
+): Promise<PublicService | null> {
   const row = await db.query.services.findFirst({
     where: and(
       eq(services.id, serviceId),
@@ -158,7 +170,8 @@ export async function loadSchedulingContext(
     lt(appointments.startsAt, to),
     gt(appointments.endsAt, from),
   ];
-  if (excludeAppointmentId) busyWhere.push(ne(appointments.id, excludeAppointmentId));
+  if (excludeAppointmentId)
+    busyWhere.push(ne(appointments.id, excludeAppointmentId));
 
   const [rules, overrides, busy] = await Promise.all([
     db
@@ -208,11 +221,19 @@ export type AvailableSlotsInput = {
 };
 
 /** Slots ofrecibles (UTC) para un servicio en las próximas `horizonDays`. */
-export async function computeAvailableSlots(input: AvailableSlotsInput): Promise<Slot[]> {
+export async function computeAvailableSlots(
+  input: AvailableSlotsInput,
+): Promise<Slot[]> {
   const now = new Date();
   const from = input.from ?? now;
-  const to = input.to ?? new Date(now.getTime() + BOOKING_HORIZON_DAYS * 86_400_000);
-  const ctx = await loadSchedulingContext(input.nutritionistId, from, to, input.excludeAppointmentId);
+  const to =
+    input.to ?? new Date(now.getTime() + BOOKING_HORIZON_DAYS * 86_400_000);
+  const ctx = await loadSchedulingContext(
+    input.nutritionistId,
+    from,
+    to,
+    input.excludeAppointmentId,
+  );
   return computeSlots({
     ...ctx,
     service: input.service,
@@ -237,7 +258,12 @@ export async function checkSlotAvailable(input: {
 }): Promise<boolean> {
   const from = new Date(input.slot.startsAt.getTime() - 86_400_000);
   const to = new Date(input.slot.endsAt.getTime() + 86_400_000);
-  const ctx = await loadSchedulingContext(input.nutritionistId, from, to, input.excludeAppointmentId);
+  const ctx = await loadSchedulingContext(
+    input.nutritionistId,
+    from,
+    to,
+    input.excludeAppointmentId,
+  );
   return isSlotAvailable({
     ...ctx,
     service: input.service,
@@ -257,3 +283,29 @@ export function generateCancelToken(): string {
 
 // Vive en lib/request.ts; se reexporta para los imports existentes.
 export { getClientIp } from "./request";
+
+/** Primer horario real entre los servicios activos; solo devuelve disponibilidad pública. */
+export async function getFirstAvailableSlot(
+  slug: string,
+): Promise<{ startsAt: string; timezone: string } | null> {
+  const nutritionist = await getPublicNutritionistBySlug(slug);
+  if (!nutritionist) return null;
+  const active = await getActiveServices(nutritionist.id);
+  const firstSlots = await Promise.all(
+    active.map(async (service) => {
+      const slots = await computeAvailableSlots({
+        nutritionistId: nutritionist.id,
+        timezone: nutritionist.timezone,
+        settings: nutritionist,
+        service,
+      });
+      return slots[0]?.startsAt;
+    }),
+  );
+  const earliest = firstSlots
+    .filter((slot): slot is Date => !!slot)
+    .sort((a, b) => a.getTime() - b.getTime())[0];
+  return earliest
+    ? { startsAt: earliest.toISOString(), timezone: nutritionist.timezone }
+    : null;
+}

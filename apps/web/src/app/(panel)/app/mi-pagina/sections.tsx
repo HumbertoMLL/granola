@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import {
-  Check,
   ChevronDown,
   ChevronUp,
   Eye,
@@ -25,6 +24,13 @@ import {
   SelectTrigger,
   SelectValue,
   Switch,
+  SegmentedControl,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
   cn,
   toast,
 } from "@granola/ui";
@@ -74,7 +80,8 @@ async function resizeImage(file: File): Promise<Blob> {
   bitmap.close();
   return new Promise((resolve, reject) => {
     canvas.toBlob(
-      (b) => (b ? resolve(b) : reject(new Error("No se pudo procesar la imagen"))),
+      (b) =>
+        b ? resolve(b) : reject(new Error("No se pudo procesar la imagen")),
       "image/jpeg",
       0.86,
     );
@@ -112,7 +119,9 @@ export function AvatarUploader({
         toast.error(res.error);
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "No se pudo subir la foto");
+      toast.error(
+        err instanceof Error ? err.message : "No se pudo subir la foto",
+      );
     } finally {
       setPending(false);
     }
@@ -122,7 +131,9 @@ export function AvatarUploader({
     <div className="flex items-center gap-4">
       <Avatar className="size-20 ring-2 ring-border">
         {avatarUrl ? <AvatarImage src={avatarUrl} alt="" /> : null}
-        <AvatarFallback className="text-xl">{initials(name || "N")}</AvatarFallback>
+        <AvatarFallback className="text-xl">
+          {initials(name || "N")}
+        </AvatarFallback>
       </Avatar>
       <div className="flex flex-col gap-2">
         <div className="flex flex-wrap gap-2">
@@ -146,7 +157,13 @@ export function AvatarUploader({
             {avatarUrl ? "Cambiar foto" : "Subir foto"}
           </Button>
           {avatarUrl ? (
-            <Button type="button" variant="ghost" size="sm" onClick={onRemove} disabled={pending}>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={onRemove}
+              disabled={pending}
+            >
               Quitar
             </Button>
           ) : null}
@@ -196,6 +213,7 @@ type LinksEditorProps = {
 };
 
 export function LinksEditor({ links, onChange, errors }: LinksEditorProps) {
+  const [deleting, setDeleting] = React.useState<string | null>(null);
   function update(id: string, patch: Partial<EditableLink>) {
     onChange(links.map((l) => (l.id === id ? { ...l, ...patch } : l)));
   }
@@ -216,15 +234,18 @@ export function LinksEditor({ links, onChange, errors }: LinksEditorProps) {
       toast.error("Máximo 20 links");
       return;
     }
-    onChange([...links, { id: newLinkId(), label: "", url: "", icon: "otro", visible: true }]);
+    onChange([
+      ...links,
+      { id: newLinkId(), label: "", url: "", icon: "otro", visible: true },
+    ]);
   }
 
   return (
     <div className="flex flex-col gap-3">
       {links.length === 0 ? (
         <p className="rounded-xl border border-dashed border-border px-4 py-6 text-center text-sm text-muted-foreground">
-          Aún no tienes links. Agrega tu Instagram, TikTok, YouTube o lo que quieras que vean
-          tus pacientes.
+          Aún no tienes links. Agrega tu Instagram, TikTok, YouTube o lo que
+          quieras que vean tus pacientes.
         </p>
       ) : null}
 
@@ -260,31 +281,42 @@ export function LinksEditor({ links, onChange, errors }: LinksEditorProps) {
 
             <div className="grid min-w-0 flex-1 gap-2">
               <div className="grid gap-2 sm:grid-cols-[1fr_150px]">
-                <Input
-                  aria-label="Título del link"
-                  placeholder="Título (p. ej. Instagram)"
-                  value={l.label}
-                  maxLength={40}
-                  onChange={(e) => update(l.id, { label: e.target.value })}
-                />
-                <Select
-                  value={l.icon}
-                  onValueChange={(v) => update(l.id, { icon: v as LinkIconKind })}
-                >
-                  <SelectTrigger aria-label="Ícono">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {LINK_ICONS.map((k) => (
-                      <SelectItem key={k} value={k}>
-                        <LinkIcon kind={k} className="size-4" />
-                        {LINK_ICON_LABELS[k]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div>
+                  <Label htmlFor={`link-label-${l.id}`}>Título del link</Label>
+                  <Input
+                    id={`link-label-${l.id}`}
+                    aria-label="Título del link"
+                    placeholder="Título (p. ej. Instagram)"
+                    value={l.label}
+                    maxLength={40}
+                    onChange={(e) => update(l.id, { label: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor={`link-icon-${l.id}`}>Ícono</Label>
+                  <Select
+                    value={l.icon}
+                    onValueChange={(v) =>
+                      update(l.id, { icon: v as LinkIconKind })
+                    }
+                  >
+                    <SelectTrigger id={`link-icon-${l.id}`} aria-label="Ícono">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {LINK_ICONS.map((k) => (
+                        <SelectItem key={k} value={k}>
+                          <LinkIcon kind={k} className="size-4" />
+                          {LINK_ICON_LABELS[k]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
+              <Label htmlFor={`link-url-${l.id}`}>URL</Label>
               <Input
+                id={`link-url-${l.id}`}
                 aria-label="URL"
                 type="url"
                 inputMode="url"
@@ -307,13 +339,17 @@ export function LinksEditor({ links, onChange, errors }: LinksEditorProps) {
                 className="rounded-md p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground"
                 onClick={() => update(l.id, { visible: !l.visible })}
               >
-                {l.visible ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
+                {l.visible ? (
+                  <Eye className="size-4" />
+                ) : (
+                  <EyeOff className="size-4" />
+                )}
               </button>
               <button
                 type="button"
                 aria-label="Borrar link"
                 className="rounded-md p-1.5 text-muted-foreground hover:bg-destructive-soft hover:text-destructive"
-                onClick={() => remove(l.id)}
+                onClick={() => setDeleting(l.id)}
               >
                 <Trash2 className="size-4" />
               </button>
@@ -322,9 +358,45 @@ export function LinksEditor({ links, onChange, errors }: LinksEditorProps) {
         ))}
       </ul>
 
-      {errors?.length ? <p className="text-xs text-destructive">{errors[0]}</p> : null}
+      <Dialog
+        open={!!deleting}
+        onOpenChange={(open) => !open && setDeleting(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>¿Borrar este link?</DialogTitle>
+            <DialogDescription>
+              Se quitará de tu página al guardar los cambios.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleting(null)}>
+              Volver
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (deleting) remove(deleting);
+                setDeleting(null);
+              }}
+            >
+              Sí, borrar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-      <Button type="button" variant="outline" size="sm" className="w-fit" onClick={add}>
+      {errors?.length ? (
+        <p className="text-xs text-destructive">{errors[0]}</p>
+      ) : null}
+
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="w-fit"
+        onClick={add}
+      >
         <Plus /> Agregar link
       </Button>
     </div>
@@ -341,86 +413,62 @@ type AppearanceEditorProps = {
   onChange: (theme: ResolvedTheme) => void;
 };
 
-export function AppearanceEditor({ theme, hasPhone, onChange }: AppearanceEditorProps) {
+export function AppearanceEditor({
+  theme,
+  hasPhone,
+  onChange,
+}: AppearanceEditorProps) {
   return (
     <div className="flex flex-col gap-6">
       <div className="grid gap-2.5">
         <Label>Tema</Label>
-        <div role="radiogroup" aria-label="Tema" className="grid grid-cols-5 gap-2">
-          {THEME_PRESETS.map((p) => {
-            const t = PRESETS[p];
-            const active = theme.preset === p;
-            return (
-              <button
-                key={p}
-                type="button"
-                role="radio"
-                aria-checked={active}
-                aria-label={t.label}
-                onClick={() => onChange({ ...theme, preset: p })}
-                className={cn(
-                  "group flex flex-col items-center gap-1.5 rounded-xl border p-2 transition-colors",
-                  active ? "border-primary ring-2 ring-primary/25" : "border-border hover:bg-secondary",
-                )}
-              >
+        <SegmentedControl
+          label="Tema"
+          value={theme.preset}
+          onValueChange={(preset) =>
+            onChange({ ...theme, preset: preset as ResolvedTheme["preset"] })
+          }
+          options={THEME_PRESETS.map((preset) => ({
+            value: preset,
+            label: (
+              <span className="flex flex-col items-center gap-1">
                 <span
-                  className="relative flex size-10 items-center justify-center overflow-hidden rounded-full border border-black/5"
-                  style={{ background: t.bg }}
-                >
-                  <span
-                    className="absolute inset-y-0 left-0 w-1/2"
-                    style={{ background: t.primary }}
-                  />
-                  <span
-                    className="absolute right-1 bottom-1 size-3 rounded-full"
-                    style={{ background: t.accent }}
-                  />
-                  {active ? (
-                    <Check
-                      className="relative size-4 drop-shadow"
-                      style={{ color: t.primaryFg }}
-                      aria-hidden
-                    />
-                  ) : null}
-                </span>
-                <span className="text-[11px] font-medium text-muted-foreground group-aria-checked:text-foreground">
-                  {t.label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+                  aria-hidden
+                  className="size-6 rounded-full border border-border"
+                  style={{ background: PRESETS[preset].primary }}
+                />
+                <span className="text-[11px]">{PRESETS[preset].label}</span>
+              </span>
+            ),
+          }))}
+        />
       </div>
 
       <div className="grid gap-2.5">
         <Label>Estilo de botones</Label>
-        <div role="radiogroup" aria-label="Estilo de botones" className="grid grid-cols-3 gap-2">
-          {BUTTON_STYLES.map((b) => {
-            const active = theme.buttonStyle === b;
-            return (
-              <button
-                key={b}
-                type="button"
-                role="radio"
-                aria-checked={active}
-                onClick={() => onChange({ ...theme, buttonStyle: b })}
-                className={cn(
-                  "flex flex-col items-center gap-2 rounded-xl border p-3 text-xs font-medium transition-colors",
-                  active
-                    ? "border-primary ring-2 ring-primary/25"
-                    : "border-border text-muted-foreground hover:bg-secondary",
-                )}
-              >
+        <SegmentedControl
+          label="Estilo de botones"
+          value={theme.buttonStyle}
+          onValueChange={(buttonStyle) =>
+            onChange({
+              ...theme,
+              buttonStyle: buttonStyle as ResolvedTheme["buttonStyle"],
+            })
+          }
+          options={BUTTON_STYLES.map((style) => ({
+            value: style,
+            label: (
+              <span className="flex flex-col gap-1">
                 <span
-                  className="block h-6 w-full bg-primary"
-                  style={{ borderRadius: BUTTON_RADIUS[b] }}
                   aria-hidden
+                  className="h-5 w-12 bg-primary"
+                  style={{ borderRadius: BUTTON_RADIUS[style] }}
                 />
-                {BUTTON_STYLE_LABELS[b]}
-              </button>
-            );
-          })}
-        </div>
+                {BUTTON_STYLE_LABELS[style]}
+              </span>
+            ),
+          }))}
+        />
       </div>
 
       <ToggleRow
@@ -469,7 +517,12 @@ function ToggleRow({
         </Label>
         <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
       </div>
-      <Switch id={id} checked={checked} disabled={disabled} onCheckedChange={onCheckedChange} />
+      <Switch
+        id={id}
+        checked={checked}
+        disabled={disabled}
+        onCheckedChange={onCheckedChange}
+      />
     </div>
   );
 }

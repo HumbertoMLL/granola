@@ -2,7 +2,15 @@
 
 import Link from "next/link";
 import * as React from "react";
-import { CalendarCheck, CalendarX2, Check, Clock, MapPin, UserX, Video } from "lucide-react";
+import {
+  CalendarCheck,
+  CalendarX2,
+  Check,
+  Clock,
+  MapPin,
+  UserX,
+  Video,
+} from "lucide-react";
 
 import {
   Badge,
@@ -15,9 +23,14 @@ import {
   DialogHeader,
   DialogTitle,
   Textarea,
+  Label,
   toast,
 } from "@granola/ui";
-import { formatTimeInTz, formatYmdLong, ymdInTz } from "@granola/core/scheduling";
+import {
+  formatTimeInTz,
+  formatYmdLong,
+  ymdInTz,
+} from "@granola/core/scheduling";
 
 import {
   cancelAppointment,
@@ -58,14 +71,26 @@ export function AppointmentsList({ appointments, timezone, nowIso }: Props) {
   const upcoming = appointments.filter(
     (a) => new Date(a.endsAt).getTime() >= now && a.status !== "cancelled",
   );
-  const past = appointments.filter((a) => new Date(a.endsAt).getTime() < now || a.status === "cancelled");
+  const past = appointments.filter(
+    (a) => new Date(a.endsAt).getTime() < now || a.status === "cancelled",
+  );
 
   return (
     <div className="flex flex-col gap-8">
-      <Section title="Próximas" count={upcoming.length} emptyIcon={CalendarCheck} empty="Sin citas próximas. Comparte tu página para que agenden contigo.">
+      <Section
+        title="Próximas"
+        count={upcoming.length}
+        emptyIcon={CalendarCheck}
+        empty="Sin citas próximas. Comparte tu página para que agenden contigo."
+      >
         <DayGroups rows={upcoming} timezone={timezone} nowIso={nowIso} />
       </Section>
-      <Section title="Pasadas y canceladas" count={past.length} emptyIcon={Clock} empty="Aquí aparecerán las citas que ya pasaron.">
+      <Section
+        title="Pasadas y canceladas"
+        count={past.length}
+        emptyIcon={Clock}
+        empty="Aquí aparecerán las citas que ya pasaron."
+      >
         <DayGroups rows={past} timezone={timezone} nowIso={nowIso} reverse />
       </Section>
     </div>
@@ -127,7 +152,11 @@ function DayGroups({
     .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0) * dir)
     .map(([date, list]) => ({
       date,
-      rows: list.sort((a, b) => (a.startsAt < b.startsAt ? -1 : a.startsAt > b.startsAt ? 1 : 0) * dir),
+      rows: list.sort(
+        (a, b) =>
+          (a.startsAt < b.startsAt ? -1 : a.startsAt > b.startsAt ? 1 : 0) *
+          dir,
+      ),
     }));
 
   return (
@@ -139,7 +168,12 @@ function DayGroups({
           </h3>
           <ul className="flex flex-col gap-2">
             {g.rows.map((row) => (
-              <AppointmentCard key={row.id} row={row} timezone={timezone} nowIso={nowIso} />
+              <AppointmentCard
+                key={row.id}
+                row={row}
+                timezone={timezone}
+                nowIso={nowIso}
+              />
             ))}
           </ul>
         </div>
@@ -148,7 +182,15 @@ function DayGroups({
   );
 }
 
-function AppointmentCard({ row, timezone, nowIso }: { row: AppointmentRow; timezone: string; nowIso: string }) {
+function AppointmentCard({
+  row,
+  timezone,
+  nowIso,
+}: {
+  row: AppointmentRow;
+  timezone: string;
+  nowIso: string;
+}) {
   const [pending, startTransition] = React.useTransition();
   const [cancelOpen, setCancelOpen] = React.useState(false);
   const [reason, setReason] = React.useState("");
@@ -157,7 +199,10 @@ function AppointmentCard({ row, timezone, nowIso }: { row: AppointmentRow; timez
   const isPast = end.getTime() < new Date(nowIso).getTime();
   const active = row.status === "confirmed" || row.status === "pending_payment";
 
-  function run(label: string, fn: () => Promise<{ ok: boolean; error?: string }>) {
+  function run(
+    label: string,
+    fn: () => Promise<{ ok: boolean; error?: string }>,
+  ) {
     startTransition(async () => {
       const res = await fn();
       if (res.ok) toast.success(label);
@@ -172,19 +217,32 @@ function AppointmentCard({ row, timezone, nowIso }: { row: AppointmentRow; timez
           <div className="flex min-w-0 flex-col gap-0.5">
             <p className="text-lg font-bold tabular-nums">
               {formatTimeInTz(start, timezone)}
-              <span className="text-sm font-normal text-muted-foreground"> – {formatTimeInTz(end, timezone)}</span>
+              <span className="text-sm font-normal text-muted-foreground">
+                {" "}
+                – {formatTimeInTz(end, timezone)}
+              </span>
             </p>
-            <p className="truncate font-semibold"><Link href={`/app/agenda/${row.id}`} className="hover:underline">{row.patientName}</Link></p>
+            <p className="truncate font-semibold">
+              <Link href={`/app/agenda/${row.id}`} className="hover:underline">
+                {row.patientName}
+              </Link>
+            </p>
             <p className="truncate text-sm text-muted-foreground">
               {row.serviceName} · {row.durationMin} min
             </p>
           </div>
-          <Badge variant={STATUS_BADGE_VARIANT[row.status]}>{STATUS_LABEL[row.status]}</Badge>
+          <Badge variant={STATUS_BADGE_VARIANT[row.status]}>
+            {STATUS_LABEL[row.status]}
+          </Badge>
         </div>
 
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
           <span className="inline-flex items-center gap-1.5">
-            {row.modality === "online" ? <Video className="size-4" /> : <MapPin className="size-4" />}
+            {row.modality === "online" ? (
+              <Video className="size-4" />
+            ) : (
+              <MapPin className="size-4" />
+            )}
             {row.modality === "online" ? "En línea" : "Presencial"}
           </span>
           {row.patientPhone ? (
@@ -198,7 +256,12 @@ function AppointmentCard({ row, timezone, nowIso }: { row: AppointmentRow; timez
             </a>
           ) : null}
           {row.meetUrl ? (
-            <a className="hover:underline" href={row.meetUrl} target="_blank" rel="noreferrer">
+            <a
+              className="hover:underline"
+              href={row.meetUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
               Link de videollamada
             </a>
           ) : null}
@@ -211,7 +274,11 @@ function AppointmentCard({ row, timezone, nowIso }: { row: AppointmentRow; timez
                 size="sm"
                 variant="outline"
                 loading={pending}
-                onClick={() => run("Cita confirmada", () => confirmAppointmentManually(row.id))}
+                onClick={() =>
+                  run("Cita confirmada", () =>
+                    confirmAppointmentManually(row.id),
+                  )
+                }
               >
                 <Check /> Confirmar pago
               </Button>
@@ -221,7 +288,11 @@ function AppointmentCard({ row, timezone, nowIso }: { row: AppointmentRow; timez
                 <Button
                   size="sm"
                   loading={pending}
-                  onClick={() => run("Marcada como completada", () => completeAppointment(row.id))}
+                  onClick={() =>
+                    run("Marcada como completada", () =>
+                      completeAppointment(row.id),
+                    )
+                  }
                 >
                   <Check /> Completada
                 </Button>
@@ -229,13 +300,21 @@ function AppointmentCard({ row, timezone, nowIso }: { row: AppointmentRow; timez
                   size="sm"
                   variant="outline"
                   loading={pending}
-                  onClick={() => run("Marcada como no asistió", () => markNoShow(row.id))}
+                  onClick={() =>
+                    run("Marcada como no asistió", () => markNoShow(row.id))
+                  }
                 >
                   <UserX /> No asistió
                 </Button>
               </>
             ) : null}
-            <Button size="sm" variant="ghost" className="text-destructive" disabled={pending} onClick={() => setCancelOpen(true)}>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-destructive"
+              disabled={pending}
+              onClick={() => setCancelOpen(true)}
+            >
               <CalendarX2 /> Cancelar
             </Button>
           </div>
@@ -250,14 +329,20 @@ function AppointmentCard({ row, timezone, nowIso }: { row: AppointmentRow; timez
               Le avisaremos por WhatsApp. Puedes agregar un motivo (opcional).
             </DialogDescription>
           </DialogHeader>
+          <Label htmlFor={`cancel-${row.id}`}>Motivo (opcional)</Label>
           <Textarea
+            id={`cancel-${row.id}`}
             placeholder="Ej. Tuve una emergencia, te escribo para reagendar"
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             maxLength={300}
           />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCancelOpen(false)} disabled={pending}>
+            <Button
+              variant="outline"
+              onClick={() => setCancelOpen(false)}
+              disabled={pending}
+            >
               Volver
             </Button>
             <Button

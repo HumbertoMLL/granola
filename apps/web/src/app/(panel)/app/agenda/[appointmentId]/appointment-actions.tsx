@@ -13,6 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
   Textarea,
+  Label,
   toast,
 } from "@granola/ui";
 
@@ -30,10 +31,17 @@ type Props = {
   status: AppointmentStatus;
   /** La cita ya empezó (calculado en servidor): habilita completada / no asistió. */
   started: boolean;
+  primaryCompletion?: boolean;
 };
 
 /** Acciones del detalle de cita. Reusa las server actions de la lista de agenda. */
-export function AppointmentActions({ appointmentId, patientName, status, started }: Props) {
+export function AppointmentActions({
+  appointmentId,
+  patientName,
+  status,
+  started,
+  primaryCompletion = true,
+}: Props) {
   const router = useRouter();
   const [pending, startTransition] = React.useTransition();
   const [cancelOpen, setCancelOpen] = React.useState(false);
@@ -42,7 +50,11 @@ export function AppointmentActions({ appointmentId, patientName, status, started
   const active = status === "confirmed" || status === "pending_payment";
   if (!active) return null;
 
-  function run(label: string, fn: () => Promise<{ ok: boolean; error?: string }>, after?: () => void) {
+  function run(
+    label: string,
+    fn: () => Promise<{ ok: boolean; error?: string }>,
+    after?: () => void,
+  ) {
     startTransition(async () => {
       const res = await fn();
       if (res.ok) {
@@ -60,26 +72,45 @@ export function AppointmentActions({ appointmentId, patientName, status, started
           <Button
             variant="outline"
             loading={pending}
-            onClick={() => run("Cita confirmada", () => confirmAppointmentManually(appointmentId))}
+            onClick={() =>
+              run("Cita confirmada", () =>
+                confirmAppointmentManually(appointmentId),
+              )
+            }
           >
             <Check /> Confirmar pago
           </Button>
         ) : null}
         {started ? (
           <>
-            <Button loading={pending} onClick={() => run("Marcada como completada", () => completeAppointment(appointmentId))}>
+            <Button
+              variant={primaryCompletion ? "primary" : "outline"}
+              loading={pending}
+              onClick={() =>
+                run("Marcada como completada", () =>
+                  completeAppointment(appointmentId),
+                )
+              }
+            >
               <Check /> Completada
             </Button>
             <Button
               variant="outline"
               loading={pending}
-              onClick={() => run("Marcada como no asistió", () => markNoShow(appointmentId))}
+              onClick={() =>
+                run("Marcada como no asistió", () => markNoShow(appointmentId))
+              }
             >
               <UserX /> No asistió
             </Button>
           </>
         ) : null}
-        <Button variant="ghost" className="text-destructive" disabled={pending} onClick={() => setCancelOpen(true)}>
+        <Button
+          variant="ghost"
+          className="text-destructive"
+          disabled={pending}
+          onClick={() => setCancelOpen(true)}
+        >
           <CalendarX2 /> Cancelar cita
         </Button>
       </div>
@@ -88,23 +119,35 @@ export function AppointmentActions({ appointmentId, patientName, status, started
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Cancelar la cita de {patientName}</DialogTitle>
-            <DialogDescription>Le avisaremos por WhatsApp. Puedes agregar un motivo (opcional).</DialogDescription>
+            <DialogDescription>
+              Le avisaremos por WhatsApp. Puedes agregar un motivo (opcional).
+            </DialogDescription>
           </DialogHeader>
+          <Label htmlFor="cancel-reason">Motivo (opcional)</Label>
           <Textarea
+            id="cancel-reason"
             placeholder="Ej. Tuve una emergencia, te escribo para reagendar"
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             maxLength={300}
           />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCancelOpen(false)} disabled={pending}>
+            <Button
+              variant="outline"
+              onClick={() => setCancelOpen(false)}
+              disabled={pending}
+            >
               Volver
             </Button>
             <Button
               variant="destructive"
               loading={pending}
               onClick={() =>
-                run("Cita cancelada", () => cancelAppointment(appointmentId, reason), () => setCancelOpen(false))
+                run(
+                  "Cita cancelada",
+                  () => cancelAppointment(appointmentId, reason),
+                  () => setCancelOpen(false),
+                )
               }
             >
               Sí, cancelar
