@@ -42,6 +42,8 @@ Implementación en `feature/ux`:
 - Auditoría por archivo en `docs/ux-audit.md`; decisión técnica en ADR 0014.
 - E2E adaptado a wizard y nuevos recorridos de agenda/historial; capturas móviles en `docs/ux-captures/`.
 
-Límites: el directorio permanece en F6. Pacientes aún es provisional en la base inicial; no se crea el módulo. El apartado de 10 minutos mostrado en los wireframes no existe en backend: no se promete ni se implementa en esta tarea de presentación. Nueva cita desde un hueco reutiliza la reserva pública prellenada. No se cambian server actions, schema, migraciones ni paquetes de backend.
+Límites: el directorio permanece en F6. Pacientes ya incluye F2: se aplican filtros Con correo/Sin correo, búsqueda removible, contador y Limpiar todo; alta y mediciones en Sheet, listas semánticas y estados compartidos. El apartado de 10 minutos mostrado en los wireframes no existe en backend: no se promete ni se implementa en esta tarea de presentación. Nueva cita desde un hueco reutiliza la reserva pública prellenada. No se cambian server actions, schema, migraciones ni paquetes de backend.
 
-Rebase final: integrado el dashboard real de main (#1), preservando consultas y métricas; sus listas vacías usan EmptyState compartido. Pacientes continúa provisional.
+Rebase final: integrado el dashboard real de main (#1), preservando consultas y métricas; sus listas vacías usan EmptyState compartido. También se integró F2 de pacientes/expediente (#2), aplicando los patrones a sus pantallas reales.
+
+Pacientes: filtros aplicados con contador sobre hasta 100 resultados de la búsqueda existente; alta manual con +52 y errores asociados, expediente con Skeleton/EmptyState y mediciones en Sheet con confirmación de borrado en Dialog. No cambian actions ni schemas de F2.

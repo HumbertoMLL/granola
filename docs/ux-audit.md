@@ -16,7 +16,7 @@ Referencia: las 12 reglas de `docs/ux-decisions.md`. Se revisaron las páginas d
 | components/agenda/availability-editor.tsx                                                   | Labels de horas y selects, EmptyState de excepciones, confirmación al eliminar, prioridad visual de Guardar horario.                                                                               |
 | app/(panel)/app/agenda/[appointmentId]/appointment-actions.tsx                              | Label del motivo, primario configurable para no competir con Abrir Meet.                                                                                                                           |
 | components/agenda/appointments-list.tsx                                                     | Label del motivo en la lista anterior que queda disponible para reutilización.                                                                                                                     |
-| app/(panel)/app/pacientes/page.tsx                                                          | Label visible del buscador provisional y EmptyState con acceso a Agenda. No se crea una lista ficticia.                                                                                            |
+| components/patients/patients-list.tsx                                                       | Filtros Con correo/Sin correo y búsqueda como aplicados, contador y Limpiar todo; filas con acción al final, Skeleton/EmptyState, alta en Sheet y WhatsApp +52.                                    |
 | components/dashboard/sections.tsx                                                           | Tras integrar el dashboard real de main: EmptyState con acciones para citas e ingresos y texto sin mayúsculas; se conservan consultas, métricas y agrupación.                                      |
 | components/cobros/payments-table.tsx                                                        | EmptyState con acción; se elimina role=row huérfano y mayúsculas del encabezado.                                                                                                                   |
 | app/(panel)/app/mi-pagina/sections.tsx                                                      | Labels visibles en links, selección única de tema/estilo con SegmentedControl, confirmación para borrar links.                                                                                     |
@@ -30,4 +30,8 @@ Login y registro ya usan labels visibles y un submit. Reseña ya usa radios nati
 
 Los specs `e2e/agenda.spec.ts` y `e2e/booking.spec.ts` cubren semilla → perfil → wizard → cita persistida → agenda → cancelación, más historial del navegador y filtros. Las capturas de `docs/ux-captures/` usan ancho 390 px: perfil, reserva, agenda Día y Semana con Sheet.
 
-El rebase final incluye el dashboard real integrado por main (#1). Pacientes continúa siendo provisional. La página del dashboard se conserva de main; sus estados vacíos se adaptan en components/dashboard/sections.tsx.
+El rebase final incluye el dashboard real integrado por main (#1). Pacientes incorpora F2 real (#2). La página del dashboard se conserva de main; sus estados vacíos se adaptan en components/dashboard/sections.tsx.
+
+- `components/patients/patient-record.tsx`: Skeleton del expediente, EmptyState con acciones, listas semánticas de mediciones/notas, edición en Sheet y borrado confirmado en Dialog.
+- `components/patients/{measurement-editor,nutrition-calculator}.tsx`: acciones inferiores y jerarquía primaria única en Antropometría.
+- `e2e/patients.spec.ts`: filtros aplicados, limpieza, expediente y Sheet de medición contra la semilla real.

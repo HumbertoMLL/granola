@@ -13,10 +13,11 @@ export const measurementFields = [
   ["bodyFatPct", "Grasa corporal (%)", "0.01", "100"],
   ["muscleKg", "Músculo (kg)", "0.01", "600"],
 ] as const;
-type Measurement = { id: string; measuredAt: Date; notes: string | null } & Record<
-  (typeof measurementFields)[number][0],
-  string | null
->;
+type Measurement = {
+  id: string;
+  measuredAt: Date;
+  notes: string | null;
+} & Record<(typeof measurementFields)[number][0], string | null>;
 
 export function MeasurementEditor({
   patientId,
@@ -31,7 +32,10 @@ export function MeasurementEditor({
 }) {
   const [error, setError] = useState("");
   const [pending, startTransition] = useTransition();
-  const localValue = (d: Date) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  const localValue = (d: Date) =>
+    new Date(d.getTime() - d.getTimezoneOffset() * 60000)
+      .toISOString()
+      .slice(0, 16);
   return (
     <form
       className="grid gap-4"
@@ -51,13 +55,14 @@ export function MeasurementEditor({
         }
         setError("");
         startTransition(async () => {
-          const r = await apiResult(saveMeasurement({ patientId, id: row?.id, values: input }));
+          const r = await apiResult(
+            saveMeasurement({ patientId, id: row?.id, values: input }),
+          );
           if (r.ok) await onSaved();
           else setError(r.error);
         });
       }}
     >
-      <h3 className="font-bold">{row ? "Editar medición" : "Nueva medición"}</h3>
       <label className="grid gap-1 text-sm">
         Fecha y hora (zona de este dispositivo)
         <Input
@@ -84,18 +89,27 @@ export function MeasurementEditor({
       </div>
       <label className="grid gap-1 text-sm">
         Notas de la medición
-        <Textarea name="notes" defaultValue={row?.notes ?? ""} maxLength={10000} />
+        <Textarea
+          name="notes"
+          defaultValue={row?.notes ?? ""}
+          maxLength={10000}
+        />
       </label>
       {error && (
         <p role="alert" className="text-sm text-destructive">
           {error}
         </p>
       )}
-      <div className="flex gap-2">
+      <div className="sticky bottom-0 flex gap-2 border-t border-border bg-card py-3">
         <Button type="submit" disabled={pending}>
           {pending ? "Guardando…" : "Guardar medición"}
         </Button>
-        <Button type="button" variant="outline" onClick={onCancel} disabled={pending}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          disabled={pending}
+        >
           Cancelar
         </Button>
       </div>

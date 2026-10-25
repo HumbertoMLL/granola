@@ -20,6 +20,6 @@ Los wireframes A/B/C exploran estructuras, pero también contienen contradiccion
 
 No cambian server actions, schema, migraciones ni paquetes de backend. No se promete un apartado de 10 minutos: no existe esa capacidad y agregarla excedería presentación. Nueva cita desde un hueco abre el flujo público con servicio/fecha/hora prellenados y consentimiento; Bloquear usa addAvailabilityOverride. Las acciones Completada/No asistió conservan la restricción temporal del servidor.
 
-El directorio sigue programado para F6. Pacientes en la base inicial es una pantalla provisional: se corrigen label y estado vacío, sin crear el módulo. Se volverá a revisar main al rebase final.
+El directorio sigue programado para F6. Al rebase final ya está integrado F2 de pacientes/expediente. Se adaptan su lista, alta manual, estados y mediciones a los patrones compartidos; se preservan sus actions, schemas y lógica clínica.
 
 Las pruebas permiten GRANOLA_TEST_DATABASE_URL y GRANOLA_TEST_PROXY para una base cuyo nombre termina en \_test por worktree, y E2E_PORT para evitar colisiones de puertos. Los valores por defecto y la CI no cambian.
