@@ -46,7 +46,12 @@ import {
 
 import { checkSlug, saveMyPage, type SlugStatus } from "./actions";
 import { PhonePreview } from "./phone-preview";
-import { AppearanceEditor, AvatarUploader, LinksEditor, type EditableLink } from "./sections";
+import {
+  AppearanceEditor,
+  AvatarUploader,
+  LinksEditor,
+  type EditableLink,
+} from "./sections";
 
 export type EditorInitial = {
   displayName: string;
@@ -99,7 +104,10 @@ export function MyPageEditor({ initial, siteUrl, storageConfigured }: Props) {
     () => false,
   );
 
-  const dirty = React.useMemo(() => JSON.stringify(draft) !== JSON.stringify(saved), [draft, saved]);
+  const dirty = React.useMemo(
+    () => JSON.stringify(draft) !== JSON.stringify(saved),
+    [draft, saved],
+  );
 
   // Aviso al salir con cambios sin guardar.
   React.useEffect(() => {
@@ -117,7 +125,10 @@ export function MyPageEditor({ initial, siteUrl, storageConfigured }: Props) {
 
   /* ----- Slug: disponibilidad en vivo ----- */
   // Solo guardamos el último resultado del server; el estado visible se deriva.
-  const [checked, setChecked] = React.useState<{ slug: string; status: SlugStatus } | null>(null);
+  const [checked, setChecked] = React.useState<{
+    slug: string;
+    status: SlugStatus;
+  } | null>(null);
   const slugStatus: SlugStatus | "checking" | null =
     draft.slug === saved.slug
       ? null
@@ -165,7 +176,11 @@ export function MyPageEditor({ initial, siteUrl, storageConfigured }: Props) {
 
   /* ----- Guardar ----- */
   function save() {
-    if (slugStatus === "taken" || slugStatus === "reserved" || slugStatus === "invalid") {
+    if (
+      slugStatus === "taken" ||
+      slugStatus === "reserved" ||
+      slugStatus === "invalid"
+    ) {
       setErrors((e) => ({ ...e, slug: ["Elige otro link"] }));
       toast.error("Ese link no está disponible");
       return;
@@ -225,7 +240,10 @@ export function MyPageEditor({ initial, siteUrl, storageConfigured }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title="Mi página" description="Lo que ven tus pacientes cuando entran a tu link.">
+      <PageHeader
+        title="Mi página"
+        description="Lo que ven tus pacientes cuando entran a tu link."
+      >
         <Button type="button" variant="outline" size="sm" onClick={copyLink}>
           <Copy /> Copiar link
         </Button>
@@ -254,7 +272,9 @@ export function MyPageEditor({ initial, siteUrl, storageConfigured }: Props) {
           <Card className="gap-5">
             <CardHeader>
               <CardTitle>Perfil</CardTitle>
-              <CardDescription>Tu nombre, tu link y cómo te presentas.</CardDescription>
+              <CardDescription>
+                Tu nombre, tu link y cómo te presentas.
+              </CardDescription>
             </CardHeader>
 
             <AvatarUploader
@@ -269,7 +289,11 @@ export function MyPageEditor({ initial, siteUrl, storageConfigured }: Props) {
               onRemove={() => patch({ avatarUrl: null })}
             />
 
-            <Field label="Nombre que se muestra" htmlFor="displayName" error={errors.displayName?.[0]}>
+            <Field
+              label="Nombre que se muestra"
+              htmlFor="displayName"
+              error={errors.displayName?.[0]}
+            >
               <Input
                 id="displayName"
                 value={draft.displayName}
@@ -300,15 +324,23 @@ export function MyPageEditor({ initial, siteUrl, storageConfigured }: Props) {
                   spellCheck={false}
                   aria-invalid={slugHint.tone === "error"}
                   className="h-11 min-w-0 flex-1 bg-transparent pr-3 pl-0.5 text-base outline-none md:text-sm"
-                  onChange={(e) => patch({ slug: normalizeSlug(e.target.value) })}
+                  onChange={(e) =>
+                    patch({ slug: normalizeSlug(e.target.value) })
+                  }
                 />
                 <span className="flex w-10 shrink-0 items-center justify-center">
                   {slugStatus === "checking" ? (
-                    <Loader2 className="size-4 animate-spin text-muted-foreground" aria-hidden />
+                    <Loader2
+                      className="size-4 animate-spin text-muted-foreground"
+                      aria-hidden
+                    />
                   ) : slugStatus === "ok" ? (
                     <Check className="size-4 text-primary" aria-hidden />
                   ) : slugHint.tone === "error" ? (
-                    <CircleAlert className="size-4 text-destructive" aria-hidden />
+                    <CircleAlert
+                      className="size-4 text-destructive"
+                      aria-hidden
+                    />
                   ) : null}
                 </span>
               </div>
@@ -352,18 +384,27 @@ export function MyPageEditor({ initial, siteUrl, storageConfigured }: Props) {
                 label="WhatsApp"
                 htmlFor="phoneWa"
                 error={errors.phoneWa?.[0]}
-                hint="Con lada internacional: +52 1 55 1234 5678"
+                hint="Escribe tu número de WhatsApp de México."
               >
-                <Input
-                  id="phoneWa"
-                  value={draft.phoneWa}
-                  type="tel"
-                  inputMode="tel"
-                  autoComplete="tel"
-                  placeholder="+5215512345678"
-                  aria-invalid={!!errors.phoneWa}
-                  onChange={(e) => patch({ phoneWa: e.target.value })}
-                />
+                <div className="flex items-center gap-2">
+                  <span className="flex h-11 items-center rounded-xl border border-border px-3 text-sm">
+                    +52
+                  </span>
+                  <Input
+                    id="phoneWa"
+                    value={draft.phoneWa.replace(/^\+52/, "")}
+                    type="tel"
+                    inputMode="tel"
+                    autoComplete="tel-national"
+                    placeholder="55 1234 5678"
+                    aria-invalid={!!errors.phoneWa}
+                    onChange={(e) =>
+                      patch({
+                        phoneWa: e.target.value ? `+52${e.target.value}` : "",
+                      })
+                    }
+                  />
+                </div>
               </Field>
             </div>
           </Card>
@@ -373,7 +414,8 @@ export function MyPageEditor({ initial, siteUrl, storageConfigured }: Props) {
             <CardHeader>
               <CardTitle>Links</CardTitle>
               <CardDescription>
-                Tus redes y lo que quieras destacar. El orden aquí es el orden en tu página.
+                Tus redes y lo que quieras destacar. El orden aquí es el orden
+                en tu página.
               </CardDescription>
             </CardHeader>
             <LinksEditor
@@ -387,7 +429,9 @@ export function MyPageEditor({ initial, siteUrl, storageConfigured }: Props) {
           <Card className="gap-5">
             <CardHeader>
               <CardTitle>Apariencia</CardTitle>
-              <CardDescription>Colores y forma de los botones. Se aplica a toda tu página.</CardDescription>
+              <CardDescription>
+                Colores y forma de los botones. Se aplica a toda tu página.
+              </CardDescription>
             </CardHeader>
             <AppearanceEditor
               theme={draft.theme}
@@ -400,7 +444,9 @@ export function MyPageEditor({ initial, siteUrl, storageConfigured }: Props) {
           <div
             className={cn(
               "sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-30 flex items-center justify-between gap-3 rounded-2xl border border-border bg-card/95 p-3 shadow-float backdrop-blur-md transition-all md:bottom-4",
-              dirty ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-2 opacity-0 lg:pointer-events-auto lg:translate-y-0 lg:opacity-100",
+              dirty
+                ? "translate-y-0 opacity-100"
+                : "pointer-events-none translate-y-2 opacity-0 lg:pointer-events-auto lg:translate-y-0 lg:opacity-100",
             )}
             aria-live="polite"
           >
@@ -456,7 +502,9 @@ export function MyPageEditor({ initial, siteUrl, storageConfigured }: Props) {
         <SheetContent side="bottom" className="items-center gap-3">
           <SheetHeader className="items-center text-center">
             <SheetTitle>Vista previa</SheetTitle>
-            <SheetDescription>Así ve tu página una paciente desde su celular.</SheetDescription>
+            <SheetDescription>
+              Así ve tu página una paciente desde su celular.
+            </SheetDescription>
           </SheetHeader>
           <PhonePreview profile={previewProfile} className="max-h-[70dvh]" />
         </SheetContent>
@@ -521,10 +569,16 @@ function slugStatusHint(
     case "reserved":
       return { text: "Ese link está reservado", tone: "error" };
     case "invalid":
-      return { text: "Mínimo 3 caracteres: letras, números y guiones", tone: "error" };
+      return {
+        text: "Mínimo 3 caracteres: letras, números y guiones",
+        tone: "error",
+      };
     case "checking":
       return { text: "Verificando disponibilidad…", tone: "muted" };
     default:
-      return { text: "Es el que compartes en tu bio de Instagram y TikTok.", tone: "muted" };
+      return {
+        text: "Es el que compartes en tu bio de Instagram y TikTok.",
+        tone: "muted",
+      };
   }
 }

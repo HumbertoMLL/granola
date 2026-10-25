@@ -96,12 +96,13 @@ export default function HomePage() {
             Para nutriólogas que atienden online
           </Badge>
           <h1 className="animate-fade-up max-w-4xl font-display text-[2.6rem] leading-[1.02] tracking-tight text-foreground [animation-delay:60ms] sm:text-6xl md:text-7xl">
-            La app que tus pacientes <em className="text-primary">sí usan</em>, y la agenda que
-            te llena la consulta.
+            La app que tus pacientes <em className="text-primary">sí usan</em>,
+            y la agenda que te llena la consulta.
           </h1>
           <p className="animate-fade-up mt-6 max-w-2xl text-lg text-muted-foreground [animation-delay:120ms] md:text-xl">
-            Tu página pública, reservas en línea, cobros sin comisión y WhatsApp automático. Todo
-            lo que necesitas para que agenden contigo desde Instagram, en una sola app.
+            Tu página pública, reservas en línea, cobros sin comisión y WhatsApp
+            automático. Todo lo que necesitas para que agenden contigo desde
+            Instagram, en una sola app.
           </p>
           <div className="animate-fade-up mt-9 flex w-full flex-col items-center gap-3 [animation-delay:180ms] sm:w-auto sm:flex-row">
             <Button asChild size="lg" className="w-full sm:w-auto">
@@ -110,7 +111,12 @@ export default function HomePage() {
                 Empieza gratis 14 días <ArrowRight />
               </Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="w-full sm:w-auto"
+            >
               <a href="#precios">Ver precios</a>
             </Button>
           </div>
@@ -129,11 +135,14 @@ export default function HomePage() {
                 </div>
                 <div>
                   <p className="font-semibold">Karla Demo, Nutrióloga</p>
-                  <p className="text-sm text-muted-foreground">granola.app/@karla</p>
+                  <p className="text-sm text-muted-foreground">
+                    granola.app/@karla
+                  </p>
                 </div>
               </div>
               <p className="text-sm text-muted-foreground">
-                Consulta online para mujeres que quieren comer bien sin dietas de castigo.
+                Consulta online para mujeres que quieren comer bien sin dietas
+                de castigo.
               </p>
               <div className="grid gap-2">
                 {[
@@ -150,20 +159,28 @@ export default function HomePage() {
                   </div>
                 ))}
               </div>
-              <Button className="mt-1 w-full" size="lg">
-                <CalendarCheck2 /> Agendar consulta
+              <Button
+                variant="outline"
+                className="mt-1 w-full"
+                size="lg"
+                asChild
+              >
+                <Link href="/karla">
+                  <CalendarCheck2 /> Ver perfil de ejemplo
+                </Link>
               </Button>
             </Card>
 
             <div className="grid gap-4">
               <Card className="gap-3 p-6">
                 <div className="flex items-center gap-2 text-sm font-semibold">
-                  <MessageCircle className="size-4 text-primary" /> WhatsApp automático
+                  <MessageCircle className="size-4 text-primary" /> WhatsApp
+                  automático
                 </div>
                 <div className="rounded-2xl rounded-tl-md bg-primary-soft px-4 py-3 text-sm text-foreground">
                   Hola Ana 👋 Tu consulta con Karla quedó confirmada para el{" "}
-                  <strong>jueves 10:00</strong>. Te mando el link de Meet aquí mismo un rato
-                  antes. ¿Necesitas reagendar? Toca aquí.
+                  <strong>jueves 10:00</strong>. Te mando el link de Meet aquí
+                  mismo un rato antes. ¿Necesitas reagendar? Toca aquí.
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Enviado al confirmar el pago · recordatorio 24 h y 2 h antes
@@ -176,7 +193,9 @@ export default function HomePage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-semibold">{mxn.format(650)} MXN</p>
-                    <p className="text-sm text-muted-foreground">OXXO · Ana López</p>
+                    <p className="text-sm text-muted-foreground">
+                      OXXO · Ana López
+                    </p>
                   </div>
                   <Badge>Comisión Granola: $0</Badge>
                 </div>
@@ -197,8 +216,8 @@ export default function HomePage() {
               Tres cosas que las otras apps no te dan.
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Granola no te vende recetas infinitas. Te ayuda a que más pacientes agenden, paguen
-              y lleguen a la consulta.
+              Granola no te vende recetas infinitas. Te ayuda a que más
+              pacientes agenden, paguen y lleguen a la consulta.
             </p>
           </div>
 
@@ -223,12 +242,15 @@ export default function HomePage() {
       <section id="precios">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24">
           <div className="mx-auto max-w-2xl text-center">
-            <p className="text-xs font-semibold tracking-wider text-primary uppercase">Precios</p>
+            <p className="text-xs font-semibold tracking-wider text-primary uppercase">
+              Precios
+            </p>
             <h2 className="mt-3 font-display text-4xl leading-tight tracking-tight md:text-5xl">
               Precio plano por nutrióloga. Sin tope de pacientes.
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Prueba 14 días sin tarjeta. Cancelas en un clic. Anual con 20% de descuento.
+              Prueba 14 días sin tarjeta. Cancelas en un clic. Anual con 20% de
+              descuento.
             </p>
           </div>
 
@@ -255,7 +277,9 @@ export default function HomePage() {
                   <span className="text-4xl font-extrabold tracking-tight">
                     {mxn.format(p.price)}
                   </span>
-                  <span className="text-sm text-muted-foreground">MXN / mes</span>
+                  <span className="text-sm text-muted-foreground">
+                    MXN / mes
+                  </span>
                 </div>
                 <CardContent className="p-0">
                   <ul className="flex flex-col gap-2.5">
@@ -269,20 +293,22 @@ export default function HomePage() {
                 </CardContent>
                 <Button
                   asChild
-                  variant={p.highlighted ? "primary" : "outline"}
+                  variant="outline"
                   size="lg"
                   className="mt-auto w-full"
                 >
                   {/* TODO(auth): ruta real de registro con plan preseleccionado */}
-                  <Link href={`/registro?plan=${p.name.toLowerCase()}`}>{p.cta}</Link>
+                  <Link href={`/registro?plan=${p.name.toLowerCase()}`}>
+                    {p.cta}
+                  </Link>
                 </Button>
               </Card>
             ))}
           </div>
 
           <p className="mt-8 text-center text-sm text-muted-foreground">
-            Precios tentativos de lanzamiento. Los planes Pro y Clínica incluyen funciones que
-            vamos liberando por fases.
+            Precios tentativos de lanzamiento. Los planes Pro y Clínica incluyen
+            funciones que vamos liberando por fases.
           </p>
         </div>
       </section>
@@ -293,13 +319,20 @@ export default function HomePage() {
           <h2 className="max-w-3xl font-display text-4xl leading-tight tracking-tight md:text-5xl">
             Pon tu link en la bio hoy y deja que agenden mientras das consulta.
           </h2>
-          <Button asChild size="lg" variant="accent">
+          <Button
+            asChild
+            size="lg"
+            variant="outline"
+            className="bg-card text-foreground"
+          >
             {/* TODO(auth): ruta real de registro */}
             <Link href="/registro">
               Crear mi página gratis <ArrowRight />
             </Link>
           </Button>
-          <p className="text-sm text-primary-foreground/80">14 días gratis · sin tarjeta</p>
+          <p className="text-sm text-primary-foreground/80">
+            14 días gratis · sin tarjeta
+          </p>
         </div>
       </section>
     </>

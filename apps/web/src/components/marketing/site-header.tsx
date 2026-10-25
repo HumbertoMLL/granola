@@ -17,7 +17,10 @@ export function SiteHeader() {
           <Logo size={30} />
         </Link>
 
-        <nav aria-label="Principal" className="hidden items-center gap-7 md:flex">
+        <nav
+          aria-label="Principal"
+          className="hidden items-center gap-7 md:flex"
+        >
           {links.map((l) => (
             <a
               key={l.href}
@@ -30,11 +33,16 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+          <Button
+            asChild
+            variant="ghost"
+            size="sm"
+            className="hidden sm:inline-flex"
+          >
             {/* TODO(auth): ruta real de login */}
             <Link href="/login">Entrar</Link>
           </Button>
-          <Button asChild size="sm">
+          <Button asChild variant="outline" size="sm">
             {/* TODO(auth): ruta real de registro */}
             <Link href="/registro">Empieza gratis</Link>
           </Button>
