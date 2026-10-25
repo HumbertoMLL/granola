@@ -5,7 +5,7 @@ Orden sugerido y dependencias al final. Fecha: 25 oct 2026.
 
 ---
 
-## 1. `calendar` — Google Calendar sync
+## 1. `calendar` ✅ mergeado — Google Calendar sync
 
 ```
 Tarea: Google Calendar sync. Al confirmarse una cita (evento appointment/confirmed) crear el evento en el Google Calendar de la nutrióloga con link de Google Meet si la modalidad es online; al cancelar/reagendar, borrar/mover el evento. Y al calcular slots disponibles, restar los eventos "busy" del calendario de la nutri (free/busy) además de las citas de Granola.
@@ -27,7 +27,7 @@ Terminado significa: pnpm typecheck && pnpm lint && pnpm test && pnpm test:integ
 
 ---
 
-## 2. `resend` — Magic link y correos transaccionales
+## 2. `resend` ✅ mergeado — Magic link y correos transaccionales
 
 ```
 Tarea: Correos transaccionales con Resend. El magic link de Better Auth hoy solo se imprime en consola (packages/auth/src/index.ts, TODO Resend): mandarlo por correo de verdad. Además: correo de bienvenida al registrarse, correo de confirmación de cita al paciente si dio email (complementa al WhatsApp, no lo sustituye) y correo de nueva cita a la nutrióloga.
@@ -49,7 +49,7 @@ Terminado significa: pnpm typecheck && pnpm lint && pnpm test && pnpm test:integ
 
 ---
 
-## 3. `ratelimit` — Rate limiter distribuido (twelve-factor VI)
+## 3. `ratelimit` ✅ mergeado — Rate limiter distribuido (twelve-factor VI)
 
 ```
 Tarea: Sacar el rate limiter de la memoria del proceso. Hoy packages/api/src/rate-limit.ts guarda contadores en globalThis, que en Vercel se multiplica por instancia (ver docs/twelve-factor.md, factor VI). Implementar un store intercambiable: Upstash Redis (REST, vía fetch, sin SDK) en producción y memoria en dev/test, elegido por env var.
@@ -70,7 +70,7 @@ Terminado significa: pnpm typecheck && pnpm lint && pnpm test && pnpm --filter @
 
 ---
 
-## 4. `migrate-deploy` — Migraciones como paso del release (twelve-factor V)
+## 4. `migrate-deploy` ✅ mergeado — Migraciones como paso del release (twelve-factor V)
 
 ```
 Tarea: Que las migraciones de base de datos se apliquen como parte del deploy y no a mano (docs/twelve-factor.md, factor V). Hoy `pnpm db:migrate` se corre manualmente contra Neon.
@@ -90,67 +90,63 @@ Terminado significa: YAML validado con `actionlint` (instálalo con brew si no e
 
 ---
 
-## 5. `logs` — Logs estructurados + Sentry (twelve-factor XI)
-
-> Hacerlo **al final** de la tanda: toca muchos archivos y choca con todo lo demás.
+## 5. `logs` — Logs estructurados + Sentry (twelve-factor XI) · PENDIENTE
 
 ```
-Tarea: Logs estructurados y errores a Sentry (docs/twelve-factor.md, factor XI). Hoy todo es console.* sin estructura.
+Tarea: Logs estructurados y errores a Sentry (docs/twelve-factor.md, factor XI, el único ⚠️ que queda). Hoy todo es console.* sin estructura.
 
-Estás en un git worktree aislado de Granola, en la rama feature/logs. Antes de tocar nada lee, en este orden: AGENTS.md, CLAUDE.md, STACK.md, docs/twelve-factor.md y docs/adr/. Respeta las reglas duras de CLAUDE.md. Lee cómo loguean hoy packages/whatsapp/src/client.ts, packages/payments/src/*/webhook.ts, packages/jobs/src/lib/send.ts y apps/web/src/app/api/webhooks/*/route.ts.
+Estás en un git worktree aislado de Granola, en la rama feature/logs. Antes de tocar nada lee, en este orden: AGENTS.md, CLAUDE.md, STACK.md, docs/twelve-factor.md, docs/ux-decisions.md y docs/adr/ (hay 15 ADRs; el tuyo será 0016). Respeta las reglas duras de CLAUDE.md. Lee cómo loguean hoy packages/whatsapp/src/client.ts, packages/email/src/*, packages/google-calendar/src/*, packages/payments/src/*/webhook.ts, packages/jobs/src/lib/*.ts, packages/api/src/*, apps/web/src/app/api/webhooks/*/route.ts y apps/web/src/app/api/inngest/route.ts.
 
 Entregables:
-1. packages/logger (nuevo, @granola/logger): pino con salida JSON a stdout (nunca a archivo), nivel por LOG_LEVEL, pretty solo en desarrollo (pino-pretty como devDep), campos base {service, env, requestId}. Helper withRequestId(headers) que toma x-vercel-id o x-request-id o genera uno. REDACCIÓN obligatoria: lista de paths que se enmascaran siempre (phoneWa, phone_wa, email, password, token, cancelToken, access_token, authorization, cookie, DATABASE_URL, *.secret) — datos de salud y de contacto nunca en logs. Tests de que la redacción funciona.
-2. Reemplazar console.* por el logger en packages/whatsapp, packages/payments, packages/jobs, packages/api y en las rutas api/webhooks/* y api/inngest de apps/web. Mantén los mensajes en español. No toques componentes React ni server actions del panel en este PR (solo capa de servicios y rutas).
-3. Sentry: @sentry/nextjs con la config mínima (sentry.client/server/edge.config.ts, instrumentation.ts, withSentryConfig en next.config.ts solo si SENTRY_DSN existe), beforeSend que aplica la misma redacción, tracesSampleRate 0.1, sin source maps subidos todavía (anota cómo hacerlo con SENTRY_AUTH_TOKEN). Captura también en las funciones Inngest (onFailure).
-4. Health: /api/v1/health devuelve además versión (VERCEL_GIT_COMMIT_SHA o "dev") y región.
-5. .env.example: LOG_LEVEL, SENTRY_DSN ya existe, NEXT_PUBLIC_SENTRY_DSN, SENTRY_ENVIRONMENT. STACK.md: filas Sentry (free 5K errores/mes; verifica en sentry.io/pricing con fecha) y logger. docs/twelve-factor.md: XI → ✅. docs/adr/0013-logs-y-sentry.md.
+1. packages/logger (nuevo, @granola/logger): pino con JSON a stdout (nunca a archivo), nivel por LOG_LEVEL, pino-pretty solo en desarrollo (devDep), campos base {service, env, requestId, release: VERCEL_GIT_COMMIT_SHA ?? "dev"}. Helper withRequestId(headers) que toma x-vercel-id o x-request-id o genera uno. REDACCIÓN obligatoria con la lista: phoneWa, phone_wa, phone, email, password, token, cancelToken, cancel_token, access_token, refresh_token, authorization, cookie, DATABASE_URL, *.secret, *.key, clabe, reference — datos de salud y de contacto nunca en logs. Tests vitest de la redacción (objetos anidados y arrays) y del formato.
+2. Reemplazar console.* por el logger en packages/whatsapp, email, google-calendar, payments, jobs, api y en las rutas api/webhooks/* y api/inngest de apps/web. Mensajes en español. No toques componentes React ni server actions del panel en este PR (solo capa de servicios y rutas); las server actions públicas (agendar, cita, resena) sí: registra intento de reserva, rate-limit excedido y conflicto de horario con requestId.
+3. Sentry: @sentry/nextjs con config mínima (instrumentation.ts, instrumentation-client.ts, withSentryConfig en next.config.ts solo si SENTRY_DSN existe), beforeSend que aplica la misma redacción, tracesSampleRate 0.1, sin subir source maps aún (documenta SENTRY_AUTH_TOKEN). Captura en funciones Inngest (onFailure) y en las rutas de webhooks. Debe compilar con cacheComponents y Turbopack; si rompe el build, deja Sentry detrás de un flag y repórtalo en vez de pelear horas.
+4. /api/v1/health devuelve además release (sha corto) y region (VERCEL_REGION ?? "local").
+5. .env.example: LOG_LEVEL, NEXT_PUBLIC_SENTRY_DSN, SENTRY_ENVIRONMENT (SENTRY_DSN ya existe). STACK.md: filas Sentry (verifica free tier en sentry.io/pricing con fecha) y logger. docs/twelve-factor.md: XI → ✅ con evidencia y balance a 12 ✅. docs/adr/0016-logs-y-sentry.md.
 
-Alcance: lo listado. Si una dependencia de Sentry rompe el build con cacheComponents o Turbopack, repórtalo y deja Sentry desactivado por flag en vez de pelear horas.
+Alcance: lo listado. Sin migraciones. No toques packages/db ni UI.
 
-Terminado significa: pnpm typecheck && pnpm lint && pnpm test && pnpm --filter @granola/web exec next build en verde, un ejemplo de línea de log JSON en el PR, commits chicos en español, git push -u origin feature/logs y gh pr create --fill con resumen, cómo probarlo y qué quedó fuera.
+Terminado significa: pnpm typecheck && pnpm lint && pnpm test && pnpm test:integration && pnpm --filter @granola/web exec next build en verde (docker-compose -f docker-compose.local.yml up -d antes), un ejemplo de línea de log JSON en el PR, commits chicos en español, git push -u origin feature/logs y gh pr create --fill con resumen, cómo probarlo y qué quedó fuera.
 ```
 
 ---
 
-## 6. `inbody` — InBody / labs: subir, leer, personalizar y enviar (F2)
-
-> Requiere que el PR #2 (expediente) esté mergeado en `main`. Crear el worktree **después**.
+## 6. `inbody` — InBody / labs: subir, leer, personalizar y enviar (F2) · PENDIENTE
 
 ```
-Tarea: InBody y análisis de laboratorio en el expediente. La nutrióloga sube el PDF (o foto) del InBody que el paciente se hizo en otro lado, Granola extrae los datos, la nutri los revisa y PERSONALIZA (comentarios por indicador, qué mostrar y qué no, su interpretación, su marca) y genera una versión propia para mandarle al paciente por WhatsApp/correo como PDF con su logo. Lo mismo para labs (glucosa, perfil lipídico, HbA1c, etc.).
+Tarea: InBody y análisis de laboratorio en el expediente. La nutrióloga sube el PDF del InBody que el paciente se hizo en otro lado, Granola extrae los datos, la nutri los revisa y PERSONALIZA (comentario por indicador, qué mostrar, su interpretación, su marca) y genera una versión propia en PDF para mandarla al paciente por WhatsApp y correo. Lo mismo para labs (glucosa, HbA1c, perfil lipídico, etc.).
 
-Estás en un git worktree aislado de Granola, en la rama feature/inbody. Antes de tocar nada lee, en este orden: AGENTS.md, CLAUDE.md, PLAN.md (F2), STACK.md, docs/twelve-factor.md, docs/adr/ y el código de pacientes/expediente que ya está en main (apps/web/src/app/(panel)/app/pacientes/**, packages/db/src/schema/measurements.ts y clinical_notes.ts, packages/core/src/nutrition/). Respeta las reglas duras de CLAUDE.md sin excepción: datos de salud nunca al cliente sin pasar por la API, filtro por nutritionist_id, consentimiento, audit_log en lecturas y escrituras.
+Estás en un git worktree aislado de Granola, en la rama feature/inbody. Antes de tocar nada lee, en este orden: AGENTS.md, CLAUDE.md, PLAN.md (F2), STACK.md, docs/twelve-factor.md, docs/ux-decisions.md (reglas de patrones y primitivos de packages/ui: Sheet, Dialog, EmptyState, FormField, Stepper…), docs/adr/ y el código actual de pacientes: apps/web/src/app/(panel)/app/pacientes/**, apps/web/src/components/pacientes/**, packages/db/src/schema/{measurements,clinical_notes,patients}.ts, packages/core/src/nutrition/, packages/email (ya existe: usa sendEmail y agrega una plantilla reporteListo), packages/whatsapp (plantillas tipadas; agrega reporte_listo y documéntala en docs/whatsapp-plantillas.md), apps/web/src/lib/storage.ts (R2). Respeta las reglas duras: datos de salud nunca al cliente sin pasar por la API, filtro por nutritionist_id, consentimiento, audit_log en lecturas y escrituras.
 
 Entregables:
-1. Schema (eres el único con migración en esta tanda: 0003_inbody): tabla documents (id, nutritionist_id, patient_id, kind: 'inbody'|'labs'|'otro', storage_key, mime, size_bytes, uploaded_at, parsed_status: 'pending'|'ok'|'failed', parsed_json jsonb, parse_error) y tabla reports (id, document_id, nutritionist_id, patient_id, template: 'inbody'|'labs', content jsonb — la versión personalizada: indicadores con valor, unidad, rango, visible, comentario de la nutri —, brand jsonb — logo_url, color, firma —, pdf_storage_key, sent_at, sent_via: 'whatsapp'|'email'|null, created_at). Índices por (nutritionist_id, patient_id). Relations.
-2. Subida: a Cloudflare R2 con apps/web/src/lib/storage.ts (ya existe putObject/createSignedUploadUrl; si R2 no está configurado, guardar en disco local bajo .uploads/ solo en desarrollo, nunca en prod). Límite 15 MB, mime pdf/jpg/png. Guardar storage_key, nunca URL pública: todo acceso vía ruta firmada de corta vida.
-3. Extracción: packages/core/src/documents/ (puro, sin IO): parsers de texto para InBody 270/570/770 (peso, masa muscular esquelética, masa grasa, % grasa, agua corporal, IMC, tasa metabólica basal, segmentos) y de labs comunes (glucosa, HbA1c, colesterol total, LDL, HDL, triglicéridos, creatinina, TSH, vitamina D) con unidades y rangos de referencia por defecto. El texto del PDF se obtiene con pdf-parse (o pdfjs-dist) en un route handler; para imágenes, OCR fuera de alcance: marcar parsed_status failed con mensaje "sube el PDF" y permitir captura manual. Tests vitest con fixtures de texto de 2 InBody y 2 labs anonimizados que tú inventes.
-4. UI en la ficha del paciente, tab "Documentos": subir, ver estado de extracción, botón "Revisar y personalizar" → editor del reporte: tabla de indicadores (valor extraído editable, unidad, rango, toggle visible, comentario), bloque "Mi interpretación" (texto libre), marca (toma avatar/nombre/cédula de nutritionists y permite color), vista previa, "Generar PDF". PDF con @react-pdf/renderer (o la lib que ya use el repo si existe) en un route handler, guardado en R2, descargable con URL firmada. "Enviar al paciente": por WhatsApp usa packages/whatsapp con una plantilla nueva `reporte_listo` (documenta el texto en docs/whatsapp-plantillas.md; en dry run solo registra) con link firmado de 7 días; por correo si existe @granola/email en main, si no, deja el botón deshabilitado con TODO.
-5. Comparativa: en Antropometría, si hay ≥2 InBody, mostrar la evolución (peso, % grasa, masa muscular) junto con las measurements manuales que ya existen.
-6. Tests de integración: subir documento → row con parsed_status; crear reporte → content con indicadores visibles; aislamiento por tenant (nutri A no ve documentos de B); URL firmada expira.
+1. Schema y migración 0005_documents (eres el único con migración en esta tanda; sigue la regla expand/contract de CLAUDE.md; genera con pnpm db:generate --name documents y verifica que el journal quede idx 0..5): tabla documents (id, nutritionist_id, patient_id, kind: 'inbody'|'labs'|'otro', storage_key, mime, size_bytes, uploaded_at, parsed_status: 'pending'|'ok'|'failed', parsed_json jsonb, parse_error text) y tabla reports (id, document_id, nutritionist_id, patient_id, template: 'inbody'|'labs', content jsonb — indicadores: clave, etiqueta, valor, unidad, rango_min, rango_max, visible, comentario —, interpretation text, brand jsonb — logo_url, color, firma —, pdf_storage_key, sent_at, sent_via: 'whatsapp'|'email'|null, created_at, updated_at). Índices por (nutritionist_id, patient_id). Relations. Ambas tablas entran en el export de cuenta (configuracion) y en el purge del borrado lógico (packages/jobs: anonimizar/borrar archivos de R2) — cambio mínimo en esos dos puntos.
+2. Subida a R2 con putObject (límite 15 MB; mime pdf/jpg/png); sin R2 configurado, guardar bajo .uploads/ solo en desarrollo (nunca en prod; falla con mensaje claro). Nunca URL pública: descarga por ruta firmada de corta vida (10 min) que valida tenant.
+3. Extracción en packages/core/src/documents/ (puro): parsers de texto para InBody 270/570/770 (peso, masa muscular esquelética, masa grasa, % grasa, agua corporal, IMC, TMB, segmentos) y labs comunes (glucosa, HbA1c, colesterol total, LDL, HDL, triglicéridos, creatinina, TSH, vitamina D) con unidades y rangos de referencia por defecto. El texto del PDF se obtiene con pdf-parse o pdfjs-dist en un route handler. Imágenes: OCR fuera de alcance → parsed_status failed con "sube el PDF" y captura manual de indicadores. Tests vitest con fixtures de texto (2 InBody + 2 labs inventados y anonimizados).
+4. UI en la ficha del paciente, tab "Documentos" (sigue docs/ux-decisions.md: lista semántica, EmptyState, Sheet para editar, Dialog solo para confirmar, un botón primario): subir, estado de extracción, "Revisar y personalizar" → editor del reporte: tabla de indicadores (valor editable, unidad, rango, toggle visible, comentario), "Mi interpretación", marca (toma avatar/nombre/cédula de nutritionists; color del tema), vista previa, "Generar PDF" (@react-pdf/renderer en route handler, guardado en R2), "Enviar al paciente" por WhatsApp (plantilla reporte_listo con link firmado de 7 días; en dry run solo registra) y por correo (@granola/email). Registrar sent_at/sent_via.
+5. Evolución: si hay ≥2 InBody, en Antropometría graficar peso, % grasa y masa muscular junto con las measurements manuales.
+6. Tests de integración (apps/web/src/test o junto a las actions, proyecto integration): subir documento → row con parsed_status; crear y editar reporte → content con visibles; nutri B no ve ni edita documentos/reportes de A; URL firmada expira; envío registra sent_via.
 
-Alcance: lo listado. No toques pagos, agenda ni auth. Notas por grabación de voz NO están en alcance (decisión de Beto).
+Alcance: lo listado. No toques pagos, agenda, auth ni el booking. Notas por grabación de voz NO están en alcance (decisión de Beto).
 
-Terminado significa: pnpm typecheck && pnpm lint && pnpm test && pnpm test:integration && pnpm --filter @granola/web exec next build en verde (docker-compose -f docker-compose.local.yml up -d antes; aplica tu migración con psql en tu DB), commits chicos en español, git push -u origin feature/inbody y gh pr create --fill con resumen, capturas o descripción de cómo probarlo y qué quedó fuera.
+Terminado significa: pnpm typecheck && pnpm lint && pnpm test && pnpm test:integration && pnpm --filter @granola/web exec next build en verde (docker-compose -f docker-compose.local.yml up -d antes; aplica tu migración con psql en tu DB local), capturas móviles del flujo en el PR, commits chicos en español, git push -u origin feature/inbody y gh pr create --fill con resumen, cómo probarlo y qué quedó fuera.
 ```
 
 ---
 
-## 7. `importador` — Importar pacientes desde Avena / Nutrimind / Excel (F2)
+## 7. `importador` — Importar pacientes desde Avena / Nutrimind / Excel (F2) · PENDIENTE
 
-> Requiere PR #2 mergeado. No crea migraciones.
+> Sin migraciones. Puede correr en paralelo con `inbody` y `logs`.
 
 ```
 Tarea: Importador de pacientes. Una nutrióloga que viene de Avena, Nutrimind o de un Excel propio sube un CSV/XLSX y Granola crea sus pacientes (y opcionalmente medidas históricas) sin duplicar.
 
-Estás en un git worktree aislado de Granola, en la rama feature/importador. Antes de tocar nada lee, en este orden: AGENTS.md, CLAUDE.md, PLAN.md, STACK.md, docs/twelve-factor.md, docs/adr/ y el código de pacientes en main (apps/web/src/app/(panel)/app/pacientes/**, packages/db/src/schema/patients.ts y measurements.ts). Respeta las reglas duras de CLAUDE.md: consentimiento LFPDPPP obligatorio (en importación, la nutri declara bajo su responsabilidad que tiene el consentimiento: checkbox + texto legal, se guarda consent_at = ahora, consent_ip y source = 'import'), filtro por nutritionist_id, audit_log.
+Estás en un git worktree aislado de Granola, en la rama feature/importador. Antes de tocar nada lee, en este orden: AGENTS.md, CLAUDE.md, PLAN.md, STACK.md, docs/twelve-factor.md, docs/ux-decisions.md (Stepper, FormField, EmptyState, AppliedFilters de packages/ui) y docs/adr/, y el código de pacientes en main: apps/web/src/app/(panel)/app/pacientes/**, apps/web/src/components/pacientes/**, packages/db/src/schema/{patients,measurements}.ts. Respeta las reglas duras: consentimiento LFPDPPP obligatorio (en importación la nutri declara bajo su responsabilidad que lo tiene: checkbox + texto legal; se guarda consent_at = ahora, consent_ip con getClientIp() de apps/web/src/lib/request.ts y source = 'import'), filtro por nutritionist_id, audit_log.
 
 Entregables:
-1. packages/core/src/import/ (puro): parser de CSV (sin librería pesada; maneja comillas y BOM) y de XLSX (usa `xlsx` SheetJS o `exceljs`, elige la más ligera y justifica); detección automática de columnas por sinónimos en español e inglés (nombre, apellido, teléfono/celular/whatsapp, correo/email, fecha de nacimiento, sexo, peso, estatura/talla, fecha de medición, notas) con mapeo editable; normalización de teléfono a E.164 MX (reutiliza normalizePhoneMx de @granola/whatsapp si se puede importar sin IO; si no, copia la función a core con test); dedupe por teléfono y por (nombre + fecha de nacimiento); reporte de validación por fila (ok / advertencia / error con motivo). Tests vitest con fixtures: export real de Avena (inventa uno plausible con sus encabezados típicos: "Nombre", "Teléfono", "Correo", "Fecha de nacimiento", "Peso", "Talla"), uno de Nutrimind y un Excel desordenado.
-2. UI /app/pacientes/importar: paso 1 subir archivo (≤ 5 MB, ≤ 2,000 filas), paso 2 mapeo de columnas con vista previa de 5 filas y conteo de ok/advertencias/errores, paso 3 checkbox de consentimiento declarado + "Importar", paso 4 resultado (creados, actualizados, omitidos, errores descargables como CSV). Todo en server actions con zod; inserción por lotes de 100 en db.batch; idempotente si se vuelve a subir el mismo archivo (dedupe).
-3. Tests de integración: importa 3 filas (1 nueva, 1 duplicada por teléfono, 1 inválida) → 1 creada, 1 omitida, 1 error; aislamiento por tenant.
-4. Docs: sección en docs/granola-overview.html NO (no toques el overview); agrega docs/importar-pacientes.md con los formatos soportados.
+1. packages/core/src/import/ (puro): parser CSV propio (comillas, BOM, ; o ,) y XLSX con la librería más ligera que encuentres (justifica); detección automática de columnas por sinónimos es/en (nombre, apellido, teléfono/celular/whatsapp, correo/email, fecha de nacimiento, sexo, peso, estatura/talla, fecha de medición, notas) con mapeo editable; normalización de teléfono a E.164 MX (reutiliza normalizePhoneMx de @granola/whatsapp si no arrastra IO; si no, copia con test); dedupe por teléfono y por (nombre + fecha de nacimiento); reporte por fila (ok / advertencia / error con motivo). Tests vitest con fixtures: export plausible de Avena ("Nombre", "Teléfono", "Correo", "Fecha de nacimiento", "Peso", "Talla"), uno de Nutrimind y un Excel desordenado.
+2. UI /app/pacientes/importar con Stepper de 4 pasos: subir archivo (≤ 5 MB, ≤ 2,000 filas) → mapeo de columnas con vista previa de 5 filas y conteo ok/advertencias/errores → consentimiento declarado + "Importar" → resultado (creados, actualizados, omitidos, errores descargables como CSV). Server actions con zod; inserción por lotes de 100 con db.batch; idempotente si se vuelve a subir el mismo archivo.
+3. Tests de integración: importa 3 filas (1 nueva, 1 duplicada por teléfono, 1 inválida) → 1 creada, 1 omitida, 1 error; nutri B no ve lo importado por A; audit_log registra patients.import con conteos.
+4. docs/importar-pacientes.md con formatos soportados y entrada en el menú de Pacientes ("Importar").
 
 Alcance: lo listado. Sin migraciones. No toques agenda, pagos ni auth.
 
@@ -159,12 +155,32 @@ Terminado significa: pnpm typecheck && pnpm lint && pnpm test && pnpm test:integ
 
 ---
 
-## Orden y dependencias
+## 8. `post-integracion` — Ajustes chicos que dejaron los merges · PENDIENTE
 
-| Tanda | Worktrees en paralelo | Condición |
+> Pequeño; puede ir con cualquiera de los anteriores en paralelo.
+
+```
+Tarea: Cerrar los cabos sueltos que dejó la integración de los PRs #1–#10.
+
+Estás en un git worktree aislado de Granola, en la rama feature/post-integracion. Lee AGENTS.md, CLAUDE.md, docs/twelve-factor.md y docs/adr/. Respeta las reglas duras.
+
+1. packages/jobs/src/functions/appointment-confirmed.ts: el correo de confirmación al paciente se manda antes del step de Google Calendar, así que puede salir sin link de Meet. Mueve el correo después de los steps calendar-confirmed / calendar-meet-N, recargando la cita (loadAppointment) para tomar meet_url; el WhatsApp de confirmación también debe llevar el link si ya existe. Ajusta los tests de integración de jobs (email-jobs.int.test.ts y los de calendar) al orden nuevo.
+2. Toggle "avisarme por WhatsApp cuando agenden" (quitado del PR #3): agrégalo bien: migración 0006 con columna nutritionists.notify_new_booking boolean not null default true (expand), switch en /app/configuracion → Notificaciones, y packages/jobs respeta la columna al mandar nueva_cita_nutri. Test de integración: con false no se envía. Coordina el número de migración con el PR de inbody (0005): si él aún no está en main cuando abras el PR, usa 0005 y avísalo en el PR para que el integrador renumere.
+3. docs/granola-overview.html: sección 4 "Estado": actualiza "hecho" (dashboard real, expediente, onboarding, Docker completo, borrado lógico, UX nueva, calendar, resend, ratelimit, migraciones en deploy) y "siguiente" (logs, inbody, importador). No cambies el diseño del documento.
+4. II de twelve-factor: fija versiones de CLIs en docs y scripts (`npx neon@8`, `vercel@65`) y quita el ⚠️ menor de la tabla.
+5. CI: documenta en .github/workflows/README.md cómo volver requerido el job "Docker (build runner)"; no lo actives.
+
+Terminado significa: pnpm typecheck && pnpm lint && pnpm test && pnpm test:integration en verde (docker-compose -f docker-compose.local.yml up -d antes), commits chicos en español, git push -u origin feature/post-integracion y gh pr create --fill.
+```
+
+---
+
+## Orden y dependencias (actualizado 25 oct 2026, noche)
+
+| Tanda | Worktrees en paralelo | Nota |
 |---|---|---|
-| A (ya) | `calendar`, `resend`, `ratelimit`, `migrate-deploy` | archivos distintos entre sí; arrancar hoy |
-| B | `inbody`, `importador` | después de mergear PR #2 (expediente) |
-| C | `logs` | solo, al final de la tanda A/B (toca todo) |
+| ✅ hechas | `calendar`, `resend`, `ratelimit`, `migrate-deploy`, `dashboard`, `configuracion`, `expediente`, `docker`, `ux`, `cuenta-borrado` | todo en `main` |
+| **Ahora** | `inbody`, `importador`, `post-integracion` | archivos distintos; `inbody` lleva migración 0005 y `post-integracion` 0006 (el integrador renumera si llegan al revés) |
+| Después | `logs` | solo, al final: toca todos los paquetes |
 
-Merge en el orden en que lleguen dentro de la tanda; `logs` siempre al último. Si dos PRs tocan `.env.example`, `STACK.md` o `docs/twelve-factor.md`, el segundo se resuelve a mano (son conflictos triviales).
+Siguiente fase tras esto: F3 (motor de planes SMAE + recetas + PDF con marca) — prompts por escribir.
