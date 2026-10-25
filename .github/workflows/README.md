@@ -7,6 +7,7 @@
 | **Lint, typecheck, build y unit tests** (`checks`) | `pnpm lint`, `pnpm typecheck`, `next build` de apps/web, `pnpm test` (vitest unit en core, whatsapp, payments y web) | ninguno |
 | **Tests de integración (Postgres real)** (`integration`) | `pnpm test:integration` (`apps/web/**/*.int.test.ts`) | Postgres 17 (`granola_test`, puerto 5433) + proxy neon-http en 4445 |
 | **E2E (Playwright)** (`e2e`) | `pnpm e2e`: reservar en `/karla/agendar` → la nutri ve la cita en `/app/agenda` → la paciente cancela en `/cita/<token>` | igual que integración + Chromium (cacheado) |
+| **Docker (build runner)** (`docker`) | `docker build --target runner -f apps/web/Dockerfile .` (sin push). **No es check requerido**: no lo agregues a la protección de `main` salvo que se decida | ninguno |
 
 Ningún job usa secretos: todo corre con `apps/web/.env.test` (llaves ficticias). Stripe se prueba firmando eventos con una clave falsa; Inngest, WhatsApp y Mercado Pago no se llaman.
 

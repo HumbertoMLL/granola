@@ -4,6 +4,7 @@
 #   checks       lint + typecheck + build de apps/web + unit tests (sin servicios)
 #   integration  vitest *.int.test.ts contra Postgres 17 real + proxy neon-http
 #   e2e          Playwright: reservar → agenda de la nutri → cancelar por token
+#   docker       docker build --target runner de apps/web (informativo, NO requerido)
 name: CI
 
 on:
@@ -156,3 +157,14 @@ jobs:
             apps/web/playwright-report
             apps/web/test-results
           retention-days: 7
+
+  # No es check requerido (no está en la protección de main): valida que la imagen
+  # standalone de apps/web compila. Sin push a ningún registry.
+  docker:
+    name: Docker (build runner)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: docker build --target runner
+        run: docker build --target runner -f apps/web/Dockerfile .
