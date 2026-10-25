@@ -10,7 +10,7 @@ Empieza por aquí, en este orden:
 
 ## Trabajo en paralelo
 
-Cada tarea va en su propio git worktree y rama (`scripts/wt.sh nueva <slug>`), se entrega por PR a `main` y CI decide. Guía y prompt-plantilla en `docs/worktrees.md`.
+Cada tarea va en su propio git worktree y rama (`scripts/wt.sh nueva <slug>`), se entrega por PR a `main` y CI decide. Guía y prompt-plantilla en `docs/worktrees.md`. Prompts listos por tarea pendiente en `docs/prompts-codex.md`.
 
 ## Guía de construcción
 
