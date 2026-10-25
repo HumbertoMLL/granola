@@ -14,20 +14,47 @@ import { noteSchema } from "./schemas";
 
 type RecordResult = Awaited<ReturnType<typeof getPatientRecord>>;
 type RecordData = Extract<RecordResult, { ok: true }>["data"];
-const bmiLabels = { bajo_peso: "Bajo peso", normal: "Peso normal", sobrepeso: "Sobrepeso", obesidad_i: "Obesidad I", obesidad_ii: "Obesidad II", obesidad_iii: "Obesidad III" };
+const bmiLabels = {
+  bajo_peso: "Bajo peso",
+  normal: "Peso normal",
+  sobrepeso: "Sobrepeso",
+  obesidad_i: "Obesidad I",
+  obesidad_ii: "Obesidad II",
+  obesidad_iii: "Obesidad III",
+};
 const sexLabels = { f: "Femenino", m: "Masculino", otro: "Otro" };
 
 export function PatientRecord({ patientId, appointmentId }: { patientId: string; appointmentId?: string }) {
   const [result, setResult] = useState<RecordResult | null>(null);
   useEffect(() => {
     let active = true;
-    void apiResult(getPatientRecord({ patientId, appointmentId })).then((r) => { if (active) setResult(r); });
-    return () => { active = false; };
+    void apiResult(getPatientRecord({ patientId, appointmentId })).then((r) => {
+      if (active) setResult(r);
+    });
+    return () => {
+      active = false;
+    };
   }, [patientId, appointmentId]);
-  const refresh = async () => { setResult(await apiResult(getPatientRecord({ patientId, appointmentId }))); };
-  return <div className="mx-auto grid max-w-4xl gap-5"><Link href="/app/pacientes" className="text-sm font-medium text-primary">← Pacientes</Link>
-    {!result ? <p role="status">Cargando expediente…</p> : !result.ok ? <Card><p role="alert">{result.error}</p><Button onClick={() => void refresh()}>Reintentar</Button></Card> : <RecordContent key={patientId} data={result.data} refresh={refresh} />}
-  </div>;
+  const refresh = async () => {
+    setResult(await apiResult(getPatientRecord({ patientId, appointmentId })));
+  };
+  return (
+    <div className="mx-auto grid max-w-4xl gap-5">
+      <Link href="/app/pacientes" className="text-sm font-medium text-primary">
+        ← Pacientes
+      </Link>
+      {!result ? (
+        <p role="status">Cargando expediente…</p>
+      ) : !result.ok ? (
+        <Card>
+          <p role="alert">{result.error}</p>
+          <Button onClick={() => void refresh()}>Reintentar</Button>
+        </Card>
+      ) : (
+        <RecordContent key={patientId} data={result.data} refresh={refresh} />
+      )}
+    </div>
+  );
 }
 
 function RecordContent({ data, refresh }: { data: RecordData; refresh: () => Promise<void> }) {
@@ -36,72 +63,332 @@ function RecordContent({ data, refresh }: { data: RecordData; refresh: () => Pro
   const [deleting, setDeleting] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [pending, startTransition] = useTransition();
-  const date = (d: Date) => new Intl.DateTimeFormat("es-MX", { timeZone: timezone, dateStyle: "medium", timeStyle: "short" }).format(d);
+  const date = (d: Date) =>
+    new Intl.DateTimeFormat("es-MX", { timeZone: timezone, dateStyle: "medium", timeStyle: "short" }).format(d);
   const now = new Date();
-  const today = new Intl.DateTimeFormat("en-CA", { timeZone: timezone, year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
+  const today = new Intl.DateTimeFormat("en-CA", {
+    timeZone: timezone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(now);
   const birth = patient.birthDate;
-  const age = birth ? Number(today.slice(0, 4)) - Number(birth.slice(0, 4)) - (today.slice(5) < birth.slice(5) ? 1 : 0) : undefined;
+  const age = birth
+    ? Number(today.slice(0, 4)) - Number(birth.slice(0, 4)) - (today.slice(5) < birth.slice(5) ? 1 : 0)
+    : undefined;
   const latest = rows[rows.length - 1];
-  const bmi = latest?.weightKg && latest.heightCm && age !== undefined && age >= 18 ? calculateBmi(Number(latest.weightKg), Number(latest.heightCm)) : null;
-  const upcoming = visits.filter((v) => v.startsAt >= now).reverse().slice(0, 5);
+  const bmi =
+    latest?.weightKg && latest.heightCm && age !== undefined && age >= 18
+      ? calculateBmi(Number(latest.weightKg), Number(latest.heightCm))
+      : null;
+  const upcoming = visits
+    .filter((v) => v.startsAt >= now)
+    .reverse()
+    .slice(0, 5);
   const past = visits.filter((v) => v.startsAt < now).slice(0, 5);
-  const visitList = (items: typeof visits) => items.length ? <ul className="grid gap-2">{items.map((v) => <li key={v.id}><Link href={`/app/agenda/${v.id}`} className="text-sm text-primary underline">{date(v.startsAt)} · {STATUS_LABEL[v.status]}</Link></li>)}</ul> : <p className="text-sm text-muted-foreground">Sin citas.</p>;
-  return <>
-    <header><h1 className="text-3xl font-extrabold">{patient.name}</h1><p className="text-sm text-muted-foreground">Expediente básico · zona horaria: {timezone}</p></header>
-    <Tabs defaultValue={appointmentId ? "history" : "summary"}>
-      <TabsList className="w-full"><TabsTrigger value="summary">Resumen</TabsTrigger><TabsTrigger value="measurements">Antropometría</TabsTrigger><TabsTrigger value="history">Historial</TabsTrigger></TabsList>
-      <TabsContent value="summary" className="grid gap-4">
-        <Card><h2 className="text-lg font-bold">Datos del paciente</h2><dl className="grid gap-3 text-sm sm:grid-cols-2">
-          {[["WhatsApp", patient.phoneWa], ["Correo", patient.email], ["Nacimiento", birth], ["Sexo", patient.sex ? sexLabels[patient.sex] : null]].map(([label, value]) => <div key={label}><dt className="text-muted-foreground">{label}</dt><dd className="break-words font-medium">{value || "Sin registrar"}</dd></div>)}
-        </dl><p className="whitespace-pre-wrap text-sm">{patient.notes || "Sin notas generales."}</p>
-          <p className="text-xs text-muted-foreground">Consentimiento expreso: {date(patient.consentAt)} · IP: {patient.consentIp}</p></Card>
-        <div className="grid gap-4 sm:grid-cols-2"><Card><h2 className="font-bold">Próximas citas</h2>{visitList(upcoming)}</Card><Card><h2 className="font-bold">Últimas citas</h2>{visitList(past)}</Card></div>
-        <Card><h2 className="font-bold">Pagos</h2>{charges.length ? <ul className="grid gap-2">{charges.map((p) => <li key={p.id} className="flex flex-wrap justify-between gap-2 text-sm"><span>{date(p.createdAt)}</span><span>{new Intl.NumberFormat("es-MX", { style: "currency", currency: p.currency }).format(p.amountCents / 100)} · {({ paid: "Pagado", pending: "Pendiente", failed: "Fallido", expired: "Expirado", refunded: "Reembolsado" })[p.status]}</span></li>)}</ul> : <p className="text-sm text-muted-foreground">Sin pagos registrados.</p>}</Card>
-      </TabsContent>
-      <TabsContent value="measurements" className="grid gap-4">
-        <Card><div className="flex items-center justify-between gap-3"><h2 className="text-lg font-bold">Antropometría</h2><Button onClick={() => setEditor("new")}>Nueva medición</Button></div>
-          <MeasurementChart rows={rows} timezone={timezone} />
-          <div className="flex flex-wrap gap-4 text-sm">
-            <p>IMC (OMS, adultos): <strong>{bmi ? `${bmi.value.toFixed(2)} · ${bmiLabels[bmi.classification]}` : "Requiere edad adulta, peso y talla en la última medición"}</strong></p>
-            <p>Cintura/cadera: <strong>{latest?.waistCm && latest.hipCm ? waistHipRatio(Number(latest.waistCm), Number(latest.hipCm)).toFixed(2) : "Sin datos"}</strong></p>
-            <p>Cintura/talla: <strong>{latest?.waistCm && latest.heightCm ? waistHeightRatio(Number(latest.waistCm), Number(latest.heightCm)).toFixed(2) : "Sin datos"}</strong></p>
+  const visitList = (items: typeof visits) =>
+    items.length ? (
+      <ul className="grid gap-2">
+        {items.map((v) => (
+          <li key={v.id}>
+            <Link href={`/app/agenda/${v.id}`} className="text-sm text-primary underline">
+              {date(v.startsAt)} · {STATUS_LABEL[v.status]}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p className="text-sm text-muted-foreground">Sin citas.</p>
+    );
+  return (
+    <>
+      <header>
+        <h1 className="text-3xl font-extrabold">{patient.name}</h1>
+        <p className="text-sm text-muted-foreground">Expediente básico · zona horaria: {timezone}</p>
+      </header>
+      <Tabs defaultValue={appointmentId ? "history" : "summary"}>
+        <TabsList className="w-full">
+          <TabsTrigger value="summary">Resumen</TabsTrigger>
+          <TabsTrigger value="measurements">Antropometría</TabsTrigger>
+          <TabsTrigger value="history">Historial</TabsTrigger>
+        </TabsList>
+        <TabsContent value="summary" className="grid gap-4">
+          <Card>
+            <h2 className="text-lg font-bold">Datos del paciente</h2>
+            <dl className="grid gap-3 text-sm sm:grid-cols-2">
+              {[
+                ["WhatsApp", patient.phoneWa],
+                ["Correo", patient.email],
+                ["Nacimiento", birth],
+                ["Sexo", patient.sex ? sexLabels[patient.sex] : null],
+              ].map(([label, value]) => (
+                <div key={label}>
+                  <dt className="text-muted-foreground">{label}</dt>
+                  <dd className="break-words font-medium">{value || "Sin registrar"}</dd>
+                </div>
+              ))}
+            </dl>
+            <p className="whitespace-pre-wrap text-sm">{patient.notes || "Sin notas generales."}</p>
+            <p className="text-xs text-muted-foreground">
+              Consentimiento expreso: {date(patient.consentAt)} · IP: {patient.consentIp}
+            </p>
+          </Card>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Card>
+              <h2 className="font-bold">Próximas citas</h2>
+              {visitList(upcoming)}
+            </Card>
+            <Card>
+              <h2 className="font-bold">Últimas citas</h2>
+              {visitList(past)}
+            </Card>
           </div>
-        </Card>
-        {editor && <Card><MeasurementEditor key={editor} patientId={patient.id} row={rows.find((r) => r.id === editor)} onCancel={() => setEditor(null)} onSaved={async () => { await refresh(); setEditor(null); }} /></Card>}
-        {error && <p role="alert" className="text-destructive">{error}</p>}
-        <div className="grid gap-3">{[...rows].reverse().map((r) => <Card key={r.id} className="gap-3"><h3 className="font-bold">{date(r.measuredAt)}</h3><dl className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">{measurementFields.map(([name, label]) => <div key={name}><dt className="text-muted-foreground">{label}</dt><dd>{r[name] ?? "—"}</dd></div>)}</dl>{r.notes && <p className="whitespace-pre-wrap text-sm">{r.notes}</p>}
-          <div className="flex flex-wrap gap-2"><Button variant="outline" size="sm" onClick={() => setEditor(r.id)}>Editar</Button><Button variant="ghost" size="sm" onClick={() => setDeleting(r.id)}>Borrar</Button>
-          {deleting === r.id && <div className="flex flex-wrap items-center gap-2"><span className="text-sm">¿Borrar esta medición?</span><Button size="sm" variant="destructive" disabled={pending} onClick={() => { setError(""); startTransition(async () => { const result = await apiResult(deleteMeasurement({ patientId: patient.id, id: r.id })); if (result.ok) { await refresh(); setDeleting(null); } else setError(result.error); }); }}>Confirmar borrado</Button><Button size="sm" variant="outline" disabled={pending} onClick={() => setDeleting(null)}>Conservar</Button></div>}</div>
-        </Card>)}</div>
-        {!rows.length && <p className="text-sm text-muted-foreground">Todavía no hay mediciones.</p>}
-        <Card><NutritionCalculator key={`${latest?.id}-${latest?.weightKg}-${latest?.heightCm}`} weight={latest?.weightKg} height={latest?.heightCm} age={age} sex={patient.sex} /></Card>
-      </TabsContent>
-      <TabsContent value="history" className="grid gap-4">
-        <Card><h2 className="text-lg font-bold">Agregar nota clínica</h2><ClinicalNoteForm patientId={patient.id} appointmentId={appointmentId} refresh={refresh} /></Card>
-        <h2 className="font-bold">Historial · más reciente primero</h2>
-        {notes.length ? notes.map((n) => <Card key={n.id} className="gap-2"><div className="flex flex-wrap justify-between gap-2 text-sm"><strong className="capitalize">{n.kind}</strong><time dateTime={n.createdAt.toISOString()}>{date(n.createdAt)}</time></div><p className="whitespace-pre-wrap break-words text-sm">{n.body}</p>{n.appointmentId && <Link href={`/app/agenda/${n.appointmentId}`} className="text-sm text-primary underline">Ver cita vinculada</Link>}</Card>) : <Card>Sin notas clínicas.</Card>}
-      </TabsContent>
-    </Tabs>
-  </>;
+          <Card>
+            <h2 className="font-bold">Pagos</h2>
+            {charges.length ? (
+              <ul className="grid gap-2">
+                {charges.map((p) => (
+                  <li key={p.id} className="flex flex-wrap justify-between gap-2 text-sm">
+                    <span>{date(p.createdAt)}</span>
+                    <span>
+                      {new Intl.NumberFormat("es-MX", { style: "currency", currency: p.currency }).format(
+                        p.amountCents / 100,
+                      )}{" "}
+                      ·{" "}
+                      {
+                        {
+                          paid: "Pagado",
+                          pending: "Pendiente",
+                          failed: "Fallido",
+                          expired: "Expirado",
+                          refunded: "Reembolsado",
+                        }[p.status]
+                      }
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">Sin pagos registrados.</p>
+            )}
+          </Card>
+        </TabsContent>
+        <TabsContent value="measurements" className="grid gap-4">
+          <Card>
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-lg font-bold">Antropometría</h2>
+              <Button onClick={() => setEditor("new")}>Nueva medición</Button>
+            </div>
+            <MeasurementChart rows={rows} timezone={timezone} />
+            <div className="flex flex-wrap gap-4 text-sm">
+              <p>
+                IMC (OMS, adultos):{" "}
+                <strong>
+                  {bmi
+                    ? `${bmi.value.toFixed(2)} · ${bmiLabels[bmi.classification]}`
+                    : "Requiere edad adulta, peso y talla en la última medición"}
+                </strong>
+              </p>
+              <p>
+                Cintura/cadera:{" "}
+                <strong>
+                  {latest?.waistCm && latest.hipCm
+                    ? waistHipRatio(Number(latest.waistCm), Number(latest.hipCm)).toFixed(2)
+                    : "Sin datos"}
+                </strong>
+              </p>
+              <p>
+                Cintura/talla:{" "}
+                <strong>
+                  {latest?.waistCm && latest.heightCm
+                    ? waistHeightRatio(Number(latest.waistCm), Number(latest.heightCm)).toFixed(2)
+                    : "Sin datos"}
+                </strong>
+              </p>
+            </div>
+          </Card>
+          {editor && (
+            <Card>
+              <MeasurementEditor
+                key={editor}
+                patientId={patient.id}
+                row={rows.find((r) => r.id === editor)}
+                onCancel={() => setEditor(null)}
+                onSaved={async () => {
+                  await refresh();
+                  setEditor(null);
+                }}
+              />
+            </Card>
+          )}
+          {error && (
+            <p role="alert" className="text-destructive">
+              {error}
+            </p>
+          )}
+          <div className="grid gap-3">
+            {[...rows].reverse().map((r) => (
+              <Card key={r.id} className="gap-3">
+                <h3 className="font-bold">{date(r.measuredAt)}</h3>
+                <dl className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">
+                  {measurementFields.map(([name, label]) => (
+                    <div key={name}>
+                      <dt className="text-muted-foreground">{label}</dt>
+                      <dd>{r[name] ?? "—"}</dd>
+                    </div>
+                  ))}
+                </dl>
+                {r.notes && <p className="whitespace-pre-wrap text-sm">{r.notes}</p>}
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="outline" size="sm" onClick={() => setEditor(r.id)}>
+                    Editar
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => setDeleting(r.id)}>
+                    Borrar
+                  </Button>
+                  {deleting === r.id && (
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-sm">¿Borrar esta medición?</span>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        disabled={pending}
+                        onClick={() => {
+                          setError("");
+                          startTransition(async () => {
+                            const result = await apiResult(deleteMeasurement({ patientId: patient.id, id: r.id }));
+                            if (result.ok) {
+                              await refresh();
+                              setDeleting(null);
+                            } else setError(result.error);
+                          });
+                        }}
+                      >
+                        Confirmar borrado
+                      </Button>
+                      <Button size="sm" variant="outline" disabled={pending} onClick={() => setDeleting(null)}>
+                        Conservar
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </Card>
+            ))}
+          </div>
+          {!rows.length && <p className="text-sm text-muted-foreground">Todavía no hay mediciones.</p>}
+          <Card>
+            <NutritionCalculator
+              key={`${latest?.id}-${latest?.weightKg}-${latest?.heightCm}`}
+              weight={latest?.weightKg}
+              height={latest?.heightCm}
+              age={age}
+              sex={patient.sex}
+            />
+          </Card>
+        </TabsContent>
+        <TabsContent value="history" className="grid gap-4">
+          <Card>
+            <h2 className="text-lg font-bold">Agregar nota clínica</h2>
+            <ClinicalNoteForm patientId={patient.id} appointmentId={appointmentId} refresh={refresh} />
+          </Card>
+          <h2 className="font-bold">Historial · más reciente primero</h2>
+          {notes.length ? (
+            notes.map((n) => (
+              <Card key={n.id} className="gap-2">
+                <div className="flex flex-wrap justify-between gap-2 text-sm">
+                  <strong className="capitalize">{n.kind}</strong>
+                  <time dateTime={n.createdAt.toISOString()}>{date(n.createdAt)}</time>
+                </div>
+                <p className="whitespace-pre-wrap break-words text-sm">{n.body}</p>
+                {n.appointmentId && (
+                  <Link href={`/app/agenda/${n.appointmentId}`} className="text-sm text-primary underline">
+                    Ver cita vinculada
+                  </Link>
+                )}
+              </Card>
+            ))
+          ) : (
+            <Card>Sin notas clínicas.</Card>
+          )}
+        </TabsContent>
+      </Tabs>
+    </>
+  );
 }
 
-function ClinicalNoteForm({ patientId, appointmentId, refresh }: { patientId: string; appointmentId: string | null; refresh: () => Promise<void> }) {
+function ClinicalNoteForm({
+  patientId,
+  appointmentId,
+  refresh,
+}: {
+  patientId: string;
+  appointmentId: string | null;
+  refresh: () => Promise<void>;
+}) {
   const [error, setError] = useState("");
   const [pending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
-  return <form className="grid gap-3" onSubmit={(event) => {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const values = { ...Object.fromEntries(new FormData(form)), appointmentId };
-    const parsed = noteSchema.safeParse(values);
-    if (!parsed.success) { setError(parsed.error.issues[0]?.message ?? "Revisa la nota"); return; }
-    setError(""); setSaved(false);
-    startTransition(async () => { const r = await apiResult(createClinicalNote({ patientId, values: parsed.data })); if (r.ok) { form.reset(); setSaved(true); await refresh(); } else setError(r.error); });
-  }}>
-    {appointmentId && <p className="text-sm text-primary">Esta nota se vinculará a la cita seleccionada. <Link href={`/app/agenda/${appointmentId}`} className="underline">Ver cita</Link></p>}
-    <label className="grid gap-1 text-sm">Tipo<select name="kind" defaultValue={appointmentId ? "consulta" : "nota"} className="h-11 rounded-xl border bg-card px-3"><option value="consulta">Consulta</option><option value="nota">Nota</option><option value="antecedente">Antecedente</option></select></label>
-    <label className="grid gap-1 text-sm">Contenido<Textarea name="body" required maxLength={30000} rows={5} /></label>
-    {error && <p role="alert" className="text-destructive">{error}</p>}{saved && <p role="status" className="text-primary">Nota guardada.</p>}
-    <Button className="justify-self-start" type="submit" disabled={pending}>{pending ? "Guardando…" : "Guardar nota"}</Button>
-  </form>;
+  return (
+    <form
+      className="grid gap-3"
+      onSubmit={(event) => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const values = { ...Object.fromEntries(new FormData(form)), appointmentId };
+        const parsed = noteSchema.safeParse(values);
+        if (!parsed.success) {
+          setError(parsed.error.issues[0]?.message ?? "Revisa la nota");
+          return;
+        }
+        setError("");
+        setSaved(false);
+        startTransition(async () => {
+          const r = await apiResult(createClinicalNote({ patientId, values: parsed.data }));
+          if (r.ok) {
+            form.reset();
+            setSaved(true);
+            await refresh();
+          } else setError(r.error);
+        });
+      }}
+    >
+      {appointmentId && (
+        <p className="text-sm text-primary">
+          Esta nota se vinculará a la cita seleccionada.{" "}
+          <Link href={`/app/agenda/${appointmentId}`} className="underline">
+            Ver cita
+          </Link>
+        </p>
+      )}
+      <label className="grid gap-1 text-sm">
+        Tipo
+        <select
+          name="kind"
+          defaultValue={appointmentId ? "consulta" : "nota"}
+          className="h-11 rounded-xl border bg-card px-3"
+        >
+          <option value="consulta">Consulta</option>
+          <option value="nota">Nota</option>
+          <option value="antecedente">Antecedente</option>
+        </select>
+      </label>
+      <label className="grid gap-1 text-sm">
+        Contenido
+        <Textarea name="body" required maxLength={30000} rows={5} />
+      </label>
+      {error && (
+        <p role="alert" className="text-destructive">
+          {error}
+        </p>
+      )}
+      {saved && (
+        <p role="status" className="text-primary">
+          Nota guardada.
+        </p>
+      )}
+      <Button className="justify-self-start" type="submit" disabled={pending}>
+        {pending ? "Guardando…" : "Guardar nota"}
+      </Button>
+    </form>
+  );
 }
