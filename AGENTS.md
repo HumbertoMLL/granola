@@ -46,7 +46,7 @@ CI (`.github/workflows/ci.yml`) corre lo mismo en cada PR; `main` debe exigir lo
 
 - Producción: https://granola-humbertomlls-projects.vercel.app (proyecto Vercel `granola`, team `humbertomlls-projects`, root `apps/web`). Sin `DATABASE_URL` en Vercel solo sirven landing/login/privacidad.
 - Usuario demo tras `pnpm db:seed`: `karla@granola.demo` / `granola-demo-2026`, slug `karla`.
-- Deploy: `npx vercel deploy --prod --yes --scope humbertomlls-projects` desde la raíz del repo.
+- Deploy: `npx vercel@65 deploy --prod --yes --scope humbertomlls-projects` desde la raíz del repo.
 
 ## Dev
 

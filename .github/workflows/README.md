@@ -51,6 +51,22 @@ gh api -X PUT repos/OWNER/REPO/branches/main/protection \
 Si renombras un job en `ci.yml`, actualiza también la lista de checks requeridos (si no, GitHub espera para siempre un check que ya no existe).
 
 
+### Hacer requerido Docker (cuando se decida)
+
+El job **Docker (build runner)** ya corre, pero sigue siendo opcional. Este PR no
+cambia la protección de `main` ni activa ese requisito.
+
+Para exigirlo más adelante, un administrador debe:
+
+1. Esperar un run verde de **CI** que incluya **Docker (build runner)**; así GitHub
+   puede ofrecer el contexto en el buscador de checks.
+2. Abrir **Settings → Branches → main → Edit**, o el ruleset que protege `main`.
+3. En **Require status checks to pass before merging**, agregar exactamente
+   **Docker (build runner)**, conservando los tres checks requeridos de arriba y
+   **Require branches to be up to date before merging**.
+4. Guardar y revisar en un PR que el job se muestre como **Required**. Si se
+   renombra el job, actualizar también esta regla para no bloquear los merges.
+
 ## Deploy: migraciones como parte del release
 
 `deploy.yml` escucha `workflow_run` del workflow **CI**, `completed`, rama `main`.
@@ -101,7 +117,7 @@ se llama `main` o la base tiene otro nombre. `DATABASE_URL` no se deduce de esto
 3. Si tu proyecto no permite usar Deployment Checks, desactiva **Auto-assign Custom
    Production Domains** en Production Environment Settings. Los builds quedan staged;
    promociona el **deployment del mismo SHA**, solo después de `migrate` verde. También
-   se puede usar `vercel deploy --prod --skip-domain` y luego `vercel promote <deployment>`.
+   se puede usar `npx vercel@65 deploy --prod --skip-domain` y luego `npx vercel@65 promote <deployment>`.
    Automatizar esa promoción con credenciales Vercel queda fuera de este PR.
 
 Un `workflow_run` **por sí solo no frena Vercel**. El YAML emite el estado correcto;

@@ -1,0 +1,1 @@
+ALTER TABLE "nutritionists" ADD COLUMN "notify_new_booking" boolean DEFAULT true NOT NULL;

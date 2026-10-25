@@ -22,7 +22,7 @@ export type AppointmentContext = {
     patientTimezone: string | null;
   };
   patient: { id: string; name: string; phoneWa: string | null; email: string | null };
-  nutritionist: { id: string; displayName: string; slug: string; phoneWa: string | null; timezone: string; email: string };
+  nutritionist: { id: string; displayName: string; slug: string; phoneWa: string | null; timezone: string; email: string; notifyNewBooking: boolean };
   service: { id: string; name: string; location: string | null; priceCents: number; currency: string; paymentMode: "prepaid" | "at_visit" | "optional" };
 };
 
@@ -57,6 +57,7 @@ export async function loadAppointment(appointmentId: string, nutritionistId: str
       phoneWa: row.nutritionist.phoneWa,
       timezone: row.nutritionist.timezone,
       email: row.nutritionist.user.email,
+      notifyNewBooking: row.nutritionist.notifyNewBooking,
     },
     service: {
       id: row.service.id,

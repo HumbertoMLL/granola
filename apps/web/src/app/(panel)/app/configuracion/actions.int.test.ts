@@ -7,7 +7,7 @@ import { requireNutritionist } from "@/lib/session";
 import { TEST_CLIENT_IP } from "@/test/next-mocks";
 
 import { updateTimezone } from "../agenda/actions";
-import { exportAccount, saveAccount } from "./actions";
+import { exportAccount, saveAccount, saveNotifications } from "./actions";
 
 vi.mock("@/lib/inngest-client", () => ({ sendEvent: vi.fn(async () => true) }));
 // La sesión (Better Auth + cookies) es frontera: decidimos quién está logueada.
@@ -94,6 +94,26 @@ describe("Configuración de cuenta", () => {
         ip: TEST_CLIENT_IP,
         meta: { patients: 1, appointments: 1, payments: 1 },
       });
+    });
+  });
+
+  describe("Cuando cambia los avisos de nuevas citas", () => {
+    it("vienen activados y permite apagarlos y volverlos a encender solo para la sesión", async () => {
+      expect(a.nutritionist.notifyNewBooking).toBe(true);
+      // El ID enviado por un cliente no decide qué perfil se actualiza.
+      expect(await saveNotifications({ notifyNewBooking: false, nutritionistId: b.nutritionist.id })).toEqual({ ok: true });
+      const own = await db.query.nutritionists.findFirst({ where: eq(nutritionists.id, a.nutritionist.id) });
+      const other = await db.query.nutritionists.findFirst({ where: eq(nutritionists.id, b.nutritionist.id) });
+      expect(own?.notifyNewBooking).toBe(false);
+      expect(other?.notifyNewBooking).toBe(true);
+      expect(await saveNotifications({ notifyNewBooking: true })).toEqual({ ok: true });
+      const restored = await db.query.nutritionists.findFirst({ where: eq(nutritionists.id, a.nutritionist.id) });
+      expect(restored?.notifyNewBooking).toBe(true);
+    });
+    it.each([{ notifyNewBooking: "false" }, {}, null])("rechaza un valor inválido sin cambiar la preferencia (%j)", async (input) => {
+      expect(await saveNotifications(input)).toMatchObject({ ok: false });
+      const row = await db.query.nutritionists.findFirst({ where: eq(nutritionists.id, a.nutritionist.id) });
+      expect(row?.notifyNewBooking).toBe(true);
     });
   });
 
