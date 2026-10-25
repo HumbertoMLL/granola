@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="es-MX"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agendar · Propuesta C</title>
+<style>
+*{box-sizing:border-box}
+body{max-width:390px;margin:0 auto;font-family:system-ui;color:#111;background:#fff;padding:0 0 24px;font-size:15px}
+.tag{font:600 12px/1 system-ui;letter-spacing:.04em;background:#111;color:#fff;padding:8px 10px;margin:0 0 10px}
+.screen{position:relative;border-bottom:1px solid #ccc}
+.pad{padding:0 16px}
+.top{display:flex;justify-content:space-between;align-items:baseline;padding:4px 0 2px}
+.top b{font-size:18px}.top span{font-size:13px;color:#666}
+.sub{font-size:14px;color:#666;margin:2px 0 10px}
+.tz{font-size:13px;color:#666;margin-bottom:10px}.tz u{color:#111}
+.wk{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px}
+.wk i{font-style:normal;color:#999}
+.week{overflow-x:auto;padding:0 16px 12px}
+table{border-collapse:separate;border-spacing:4px;font-size:12px}
+th{font-weight:500;color:#666;padding:2px 0;min-width:52px}
+th b{display:block;font-size:16px;color:#111}
+th.hoy b{text-decoration:underline}
+td{height:34px;text-align:center;border-radius:6px}
+td.h{color:#999;text-align:right;padding-right:4px;min-width:40px}
+.f{border:1px solid #999;font-weight:600}
+.o{background:repeating-linear-gradient(45deg,#eee 0 4px,#fff 4px 8px);color:#bbb}
+.s{background:#111;color:#fff;font-weight:700}
+.cue{text-align:center;font-size:13px;color:#444;margin:0 0 8px}
+.leg{display:flex;gap:14px;font-size:12px;color:#666;padding:0 16px 10px}
+.leg i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:4px}
+.dim{position:absolute;inset:0;background:rgba(0,0,0,.45)}
+.sheet{margin-top:-120px;position:relative;background:#fff;border-radius:18px 18px 0 0;box-shadow:0 -6px 20px rgba(0,0,0,.25);padding:8px 16px 18px}
+.grab{width:40px;height:5px;border-radius:3px;background:#ccc;margin:0 auto 10px}
+.sh{display:flex;justify-content:space-between;align-items:baseline}
+.sh b{font-size:18px}.sh span{font-size:13px;color:#666}
+.seg{display:flex;border:1px solid #111;border-radius:10px;overflow:hidden;margin:12px 0}
+.seg div{flex:1;padding:10px;font-size:13px}
+.seg .on{background:#111;color:#fff}
+.seg small{display:block;opacity:.75}
+label{display:block;font-size:13px;color:#444;margin:8px 0 4px}
+.in{border:1px solid #bbb;border-radius:8px;padding:12px;color:#999;display:flex;gap:8px}
+.in em{font-style:normal;color:#111;border-right:1px solid #ccc;padding-right:8px}
+.more{font-size:13px;color:#444;text-decoration:underline;margin:8px 0 0}
+.chk{display:flex;gap:10px;font-size:12px;color:#444;margin-top:12px;line-height:1.35}
+.chk i{width:20px;height:20px;border:2px solid #111;border-radius:4px;flex:none}
+.btn{background:#111;color:#fff;border-radius:999px;text-align:center;padding:16px;font-weight:700;margin-top:14px}
+.fine{text-align:center;font-size:12px;color:#666;margin:8px 0 0;line-height:1.5}
+.notes{border-top:2px dashed #999;margin:24px 16px 0;padding-top:8px;font-size:13px;color:#333}
+.notes li{margin-bottom:8px}
+</style></head><body>
+<div class="tag">Propuesta C — Primero el calendario, luego datos</div>
+<div class="screen">
+<div class="pad">
+<div class="top"><b>Karla Demo</b><span>Nutrióloga</span></div>
+<p class="sub">Toca un horario libre</p>
+<div class="tz">Ciudad de México (GMT-6) · <u>Cambiar</u></div>
+<div class="wk"><i>‹ Anterior</i><b>24 – 30 oct 2026</b><span>Siguiente ›</span></div>
+</div>
+<div class="week"><table>
+<tr><th></th><th class="hoy">sáb<b>24</b></th><th>dom<b>25</b></th><th>lun<b>26</b></th><th>mar<b>27</b></th><th>mié<b>28</b></th><th>jue<b>29</b></th></tr>
+<tr><td class="h">10:00</td><td class="o">—</td><td class="o">—</td><td class="f">libre</td><td class="f">libre</td><td class="o">—</td><td class="f">libre</td></tr>
+<tr><td class="h">10:30</td><td class="o">—</td><td class="o">—</td><td class="o">—</td><td class="f">libre</td><td class="f">libre</td><td class="f">libre</td></tr>
+<tr><td class="h">11:00</td><td class="o">—</td><td class="o">—</td><td class="f">libre</td><td class="s">11:00</td><td class="f">libre</td><td class="o">—</td></tr>
+<tr><td class="h">11:30</td><td class="o">—</td><td class="o">—</td><td class="f">libre</td><td class="f">libre</td><td class="o">—</td><td class="f">libre</td></tr>
+<tr><td class="h">12:00</td><td class="o">—</td><td class="o">—</td><td class="o">—</td><td class="f">libre</td><td class="f">libre</td><td class="f">libre</td></tr>
+<tr><td class="h">16:00</td><td class="o">—</td><td class="o">—</td><td class="f">libre</td><td class="f">libre</td><td class="f">libre</td><td class="o">—</td></tr>
+<tr><td class="h">16:30</td><td class="o">—</td><td class="o">—</td><td class="f">libre</td><td class="f">libre</td><td class="o">—</td><td class="f">libre</td></tr>
+</table></div>
+<p class="cue">← desliza para ver vie 30 →</p>
+<div class="leg"><span><i class="f"></i>Libre</span><span><i class="o"></i>Ocupado</span><span><i class="s"></i>Tu elección</span></div>
+<div class="dim"></div>
+</div>
+
+<div class="sheet">
+<div class="grab"></div>
+<div class="sh"><b>mar 27 oct · 11:00</b><span>✕ Cambiar hora</span></div>
+<div class="seg"><div class="on"><b>Primera consulta</b><small>60 min · $800 MXN</small></div><div><b>Seguimiento</b><small>30 min · $500 MXN</small></div></div>
+<label>Nombre</label><div class="in">Ej. Ana López</div>
+<label>WhatsApp</label><div class="in"><em>+52</em>55 1234 5678</div>
+<p class="more">+ Agregar correo (opcional)</p>
+<div class="chk"><i></i>Acepto el aviso de privacidad y el tratamiento de mis datos de salud para agendar y dar seguimiento</div>
+<div class="btn">Reservar · $800</div>
+<p class="fine">El pago se elige al confirmar: Tarjeta, SPEI, OXXO o Pagar en consulta.<br>Te llega la confirmación por WhatsApp</p>
+</div>
+
+<div class="notes"><b>Notas UX</b><ul>
+<li><b>Toques hasta confirmar:</b> ~6 (celda, servicio si no es primera vez, 2 campos, checkbox, Reservar) + 1 en la pantalla de pago. Lo primero que ve es disponibilidad real: responde "¿hay lugar?" en 0 toques.</li>
+<li><b>Dónde abandona:</b> al abrir la hoja y ver campos; por eso solo pide 2 (correo escondido) y deja el pago para después. Segundo riesgo: la pantalla de pago tras "Reservar"; "Pagar en consulta" evita que la cita se caiga ahí.</li>
+<li><b>Si el horario se ocupa:</b> al tocar la celda se aparta 10 min. Si se pierde, la hoja no se cierra: el título cambia a "Esa hora se ocupó" con chips de las 3 horas libres más cercanas, y nombre y WhatsApp siguen escritos.</li>
+</ul></div>
+</body></html>

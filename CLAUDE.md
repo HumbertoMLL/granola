@@ -24,6 +24,10 @@ packages/config eslint / tsconfig compartidos
 
 Seguimos Twelve-Factor (https://github.com/twelve-factor/twelve-factor). Estado y huecos por factor en `docs/twelve-factor.md`; toda decisión nueva se contrasta ahí.
 
+## UX
+
+Estructura elegida por pantalla y reglas de patrones de interfaz (checkbox vs radio vs chip, tab bar, listas, hojas) en `docs/ux-decisions.md`. Toda UI nueva las sigue.
+
 ## Reglas duras
 
 1. **Datos de salud nunca llegan al cliente sin pasar por la API.** Toda query filtra por `nutritionist_id` de la sesión. No hay cliente de DB en el navegador.
@@ -35,6 +39,7 @@ Seguimos Twelve-Factor (https://github.com/twelve-factor/twelve-factor). Estado 
 7. Sin `any`. Zod en toda frontera (forms, webhooks, API).
 8. Commits en español, imperativo, cortos. Un PR por workstream.
 9. **Todo feature nuevo llega con su test (integración si toca DB, E2E si toca el flujo de reserva). Nada se da por terminado con CI en rojo.**
+10. **Migraciones expand/contract:** cada release debe funcionar con el schema anterior y con el expandido. Primero agrega columnas/tablas opcionales o con defaults compatibles; aplica esa expansión en un release anterior al código que la necesite. Nunca renombres ni borres una columna en el mismo PR que deja de usarla. Backfill y retirada del uso van separados; el contract llega en otro release cuando ningún deploy activo ni rollback dependa del campo.
 
 ## Comandos
 

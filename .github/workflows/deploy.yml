@@ -1,0 +1,169 @@
+# Las migraciones de producción usan solo un SHA de main que pasó CI.
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "25"
+  NEXT_TELEMETRY_DISABLED: "1"
+  TURBO_TELEMETRY_DISABLED: "1"
+
+jobs:
+  migrate:
+    name: Migrar Neon producción
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: migrate-prod
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      statuses: write
+    steps:
+      - name: Marcar migración pendiente en el commit validado
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createCommitStatus({
+              ...context.repo, sha: context.payload.workflow_run.head_sha,
+              context: 'granola/migrate-production', state: 'pending',
+              description: 'Esperando migración de producción',
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });
+            const { data } = await github.rest.repos.getBranch({ ...context.repo, branch: 'main' });
+            if (data.commit.sha !== context.payload.workflow_run.head_sha) {
+              core.setFailed('Este CI pertenece a un commit de main superado. Espera el CI del nuevo HEAD.');
+            }
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Migrar producción (fallar si falta el secret)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          node --input-type=module <<'JS'
+          const url = new URL(process.env.DATABASE_URL || 'invalid');
+          if (!['postgres:', 'postgresql:'].includes(url.protocol) ||
+              !url.hostname.endsWith('.neon.tech') || url.hostname.includes('-pooler')) {
+            throw new Error('DATABASE_URL debe ser la conexión directa de Neon producción.');
+          }
+          JS
+          pnpm --filter @granola/db migrate
+      - name: Publicar resultado para Vercel Deployment Checks
+        if: always()
+        uses: actions/github-script@v7
+        env:
+          MIGRATION_JOB_STATUS: ${{ job.status }}
+        with:
+          script: |
+            const success = process.env.MIGRATION_JOB_STATUS === 'success';
+            await github.rest.repos.createCommitStatus({
+              ...context.repo, sha: context.payload.workflow_run.head_sha,
+              context: 'granola/migrate-production', state: success ? 'success' : 'failure',
+              description: success ? 'Schema de producción actualizado' : 'Migración fallida: no promover',
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });
+
+  preview:
+    name: Migrar Neon preview del PR
+    # Nunca ejecutar código de forks con credenciales ni usar pull_request_target.
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: neon-pr-${{ github.event.pull_request.number }}
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Comprobar configuración de previews
+        id: config
+        env:
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+        run: |
+          if [ -n "$NEON_API_KEY" ] && [ -n "$NEON_PROJECT_ID" ]; then
+            echo 'enabled=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'enabled=false' >> "$GITHUB_OUTPUT"
+            echo 'Preview omitido: cargar NEON_API_KEY y NEON_PROJECT_ID en GitHub Secrets.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Consultar estado actual del PR (eventos pueden llegar fuera de orden)
+        id: pr
+        if: steps.config.outputs.enabled == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data } = await github.rest.pulls.get({ ...context.repo, pull_number: context.issue.number });
+            core.setOutput('closed', String(data.state === 'closed'));
+            core.setOutput('head_sha', data.head.sha);
+      - uses: actions/checkout@v4
+        if: steps.config.outputs.enabled == 'true'
+        with:
+          ref: ${{ steps.pr.outputs.head_sha }}
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        if: steps.config.outputs.enabled == 'true'
+      - uses: actions/setup-node@v4
+        if: steps.config.outputs.enabled == 'true'
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+        if: steps.config.outputs.enabled == 'true'
+      - name: Crear, reutilizar o borrar pr-numero
+        id: branch
+        if: steps.config.outputs.enabled == 'true'
+        env:
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+          NEON_PARENT_BRANCH: ${{ vars.NEON_PARENT_BRANCH || 'production' }}
+          NEON_DATABASE_NAME: ${{ vars.NEON_DATABASE_NAME || 'neondb' }}
+          PREVIEW_CLOSED: ${{ steps.pr.outputs.closed }}
+        run: pnpm exec tsx scripts/neon-preview.ts
+      - name: Migrar preview
+        if: steps.config.outputs.enabled == 'true' && steps.pr.outputs.closed == 'false'
+        run: pnpm --filter @granola/db migrate
+      - name: Publicar enlace al preview sin credenciales
+        if: steps.config.outputs.enabled == 'true' && steps.pr.outputs.closed == 'false'
+        uses: actions/github-script@v7
+        env:
+          CONSOLE_URL: ${{ steps.branch.outputs.console_url }}
+          PREVIEW_SHA: ${{ steps.pr.outputs.head_sha }}
+        with:
+          script: |
+            const marker = '<!-- granola-neon-preview -->';
+            const body = `${marker}\nMigraciones aplicadas para ${process.env.PREVIEW_SHA}.\n\n[Neon pr-${context.issue.number}](${process.env.CONSOLE_URL}) — requiere acceso al proyecto. La cadena DATABASE_URL se conserva solo en el runner.`;
+            const comments = await github.paginate(github.rest.issues.listComments, { ...context.repo, issue_number: context.issue.number });
+            const previous = comments.find(comment => comment.user?.login === 'github-actions[bot]' && comment.body?.startsWith(marker));
+            if (previous) {
+              await github.rest.issues.updateComment({ ...context.repo, comment_id: previous.id, body });
+            } else {
+              await github.rest.issues.createComment({ ...context.repo, issue_number: context.issue.number, body });
+            }

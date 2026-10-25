@@ -2,7 +2,6 @@ import "server-only";
 import { getCalendarBusy } from "@granola/google-calendar";
 
 import { randomBytes } from "node:crypto";
-import { headers } from "next/headers";
 
 import {
   computeSlots,
@@ -254,10 +253,5 @@ export function generateCancelToken(): string {
   return randomBytes(24).toString("base64url");
 }
 
-/** IP del request (x-forwarded-for) para `patients.consent_ip`. */
-export async function getClientIp(): Promise<string> {
-  const h = await headers();
-  const fwd = h.get("x-forwarded-for");
-  const first = fwd?.split(",")[0]?.trim();
-  return first || h.get("x-real-ip") || "unknown";
-}
+// Vive en lib/request.ts; se reexporta para los imports existentes.
+export { getClientIp } from "./request";

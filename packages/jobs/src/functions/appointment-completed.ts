@@ -9,7 +9,7 @@ export const onAppointmentCompleted = inngest.createFunction(
   { event: "appointment/completed" },
   async ({ event, step }) => {
     const { appointmentId } = event.data;
-    const ctx = await step.run("cargar-cita", () => loadAppointment(appointmentId));
+    const ctx = await step.run("cargar-cita", () => loadAppointment(appointmentId, event.data.nutritionistId));
     if (!ctx) return { skipped: "cita no existe" };
     if (ctx.appointment.status !== "completed") return { skipped: `status ${ctx.appointment.status}` };
 

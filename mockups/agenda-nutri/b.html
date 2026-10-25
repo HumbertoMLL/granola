@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="es-MX"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agenda B — Vista de semana</title>
+<style>
+*{box-sizing:border-box}
+body{max-width:390px;margin:0 auto;font-family:system-ui;color:#111;background:#fff;padding:12px}
+h1{font-size:15px;margin:0 0 10px}
+.phone{border:2px solid #111;border-radius:22px;overflow:hidden}
+.top{display:flex;align-items:center;gap:8px;padding:12px 12px 8px}
+.top b{flex:1;font-size:17px}
+.ic{width:30px;height:30px;border:1px solid #999;border-radius:8px;display:grid;place-items:center}
+.seg{display:flex;margin:0 12px 8px;border:1px solid #111;border-radius:10px;overflow:hidden}
+.seg div{flex:1;text-align:center;font-size:13px;padding:6px 0}
+.seg .on{background:#111;color:#fff;font-weight:600}
+.grid{display:grid;grid-template-columns:34px repeat(7,1fr);padding:0 8px 0 0;font-size:10px}
+.dh{text-align:center;color:#666;padding:4px 0;border-bottom:1px solid #ccc}
+.dh b{display:block;font-size:13px;color:#111}
+.dh.on{background:#111;color:#ccc;border-radius:8px 8px 0 0}.dh.on b{color:#fff}
+.hrs{position:relative;height:200px}
+.hrs span{position:absolute;right:4px;color:#888;transform:translateY(-6px)}
+.col{position:relative;height:200px;border-left:1px solid #eee;background:repeating-linear-gradient(#fff 0 19px,#eee 19px 20px)}
+.col.on{background:repeating-linear-gradient(#f5f5f5 0 19px,#e3e3e3 19px 20px)}
+.k{position:absolute;left:2px;right:2px;border-radius:4px;background:#d6d6d6;font-weight:700;font-size:10px;display:grid;place-items:center}
+.k.conf{border:2px solid #111}
+.k.pay{border:2px dashed #111;background:#eee}
+.k.done{border:1px solid #bbb;background:#f3f3f3;color:#999}
+.k.sel{background:#111;color:#fff;border:2px solid #111;box-shadow:0 0 0 2px #fff,0 0 0 3px #111}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:#444;padding:8px 12px;border-top:1px solid #eee}
+.legend i{display:inline-block;width:12px;height:10px;border-radius:2px;background:#d6d6d6;vertical-align:-1px;margin-right:4px}
+.sheet{border-top:1px solid #bbb;border-radius:16px 16px 0 0;box-shadow:0 -4px 12px #0002;padding:8px 14px 12px}
+.grab{width:36px;height:4px;border-radius:2px;background:#bbb;margin:0 auto 8px}
+.sheet h2{font-size:18px;margin:0}
+.meta{font-size:13px;color:#555;margin:2px 0 8px}
+.st{display:inline-block;font-size:11px;border:1px solid #111;border-radius:99px;padding:1px 8px;margin-bottom:10px}
+.btn{display:block;width:100%;text-align:center;border-radius:10px;padding:11px;font-size:14px;font-weight:600;border:1px solid #111;margin-bottom:8px}
+.pri{background:#111;color:#fff}
+.two{display:flex;gap:8px}.two .btn{flex:1}
+.links{display:flex;justify-content:space-between;font-size:13px;color:#444;padding:4px 2px 0}
+.links u{text-decoration:none;border-bottom:1px solid #999}
+.tabs{display:flex;border-top:1px solid #ccc;background:#fafafa}
+.tabs div{flex:1;text-align:center;font-size:10px;padding:8px 0 10px;color:#777}
+.tabs div:before{content:"";display:block;width:18px;height:18px;margin:0 auto 3px;border:1.5px solid #999;border-radius:5px}
+.tabs .on{color:#111;font-weight:700}.tabs .on:before{background:#111;border-color:#111}
+.notes{font-size:13px;line-height:1.45;margin-top:16px}
+.notes h2{font-size:14px;margin:0 0 6px}.notes ul{padding-left:18px;margin:0}
+</style></head><body>
+<h1>Propuesta B — La semana completa de un vistazo</h1>
+<div class="phone">
+  <div class="top"><div class="ic">‹</div><b>20–26 oct</b><div class="ic">›</div><div class="ic">+</div></div>
+  <div class="seg"><div>Día</div><div class="on">Semana</div><div>Lista</div></div>
+  <div class="grid">
+    <div></div>
+    <div class="dh">mar<b>20</b></div><div class="dh">mié<b>21</b></div><div class="dh">jue<b>22</b></div>
+    <div class="dh">vie<b>23</b></div><div class="dh on">sáb<b>24</b></div><div class="dh">dom<b>25</b></div><div class="dh">lun<b>26</b></div>
+    <div class="hrs">
+      <span style="top:0">9</span><span style="top:20px">10</span><span style="top:40px">11</span><span style="top:60px">12</span>
+      <span style="top:80px">13</span><span style="top:100px">14</span><span style="top:120px">15</span><span style="top:140px">16</span>
+      <span style="top:160px">17</span><span style="top:180px">18</span><span style="top:199px">19</span>
+    </div>
+    <div class="col"></div><div class="col"></div><div class="col"></div><div class="col"></div>
+    <div class="col on">
+      <div class="k sel" style="top:20px;height:20px">A</div>
+      <div class="k pay" style="top:50px;height:10px">L</div>
+      <div class="k done" style="top:80px;height:10px">M</div>
+      <div class="k conf" style="top:140px;height:20px">J</div>
+    </div>
+    <div class="col"></div><div class="col"></div>
+  </div>
+  <div class="legend">
+    <span><i style="border:2px solid #111"></i>Confirmada</span>
+    <span><i style="border:2px dashed #111;background:#eee"></i>Pendiente de pago</span>
+    <span><i style="border:1px solid #bbb;background:#f3f3f3"></i>Completada</span>
+    <span><i style="background:#fff;border:1px solid #ddd"></i>Libre</span>
+  </div>
+  <div class="sheet">
+    <div class="grab"></div>
+    <h2>Ana López</h2>
+    <div class="meta">sáb 24 oct · 10:00–11:00 · Primera consulta · 60 min · Online</div>
+    <span class="st">Confirmada</span>
+    <div class="btn pri">Abrir Meet</div>
+    <div class="two"><div class="btn">Completada</div><div class="btn">WhatsApp</div></div>
+    <div class="links"><u>No asistió</u><u>Reagendar</u><u>Confirmar pago</u><u>Cancelar</u></div>
+  </div>
+  <div class="tabs">
+    <div>Inicio</div><div class="on">Agenda</div><div>Pacientes</div><div>Cobros</div><div>Mi página</div>
+  </div>
+</div>
+
+<div class="notes">
+  <h2>Notas UX</h2>
+  <ul>
+    <li><b>Completada en 2 toques:</b> toca el bloque con la inicial → se abre el panel inferior con el detalle → "Completada". El bloque pasa a gris claro con borde fino.</li>
+    <li><b>Qué le falta cobrar:</b> 0 toques. El estado vive en el borde del bloque: punteado = pendiente de pago (aquí la "L" de Luis Ortega), explicado en la leyenda fija. Se ven todos los pendientes de la semana a la vez.</li>
+    <li><b>Hueco libre:</b> la grilla de 7 días × 9:00–19:00 muestra el espacio en blanco como disponibilidad; tocar una celda vacía abre "Nueva cita" con día y hora prellenados (1 toque). Ideal para responder "¿qué día te queda?" con el paciente enfrente.</li>
+  </ul>
+</div>
+</body></html>

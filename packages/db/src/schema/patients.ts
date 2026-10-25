@@ -4,6 +4,8 @@ import { nutritionists } from "./nutritionists";
 import { appointments } from "./appointments";
 import { reviews } from "./reviews";
 import { waMessages } from "./wa_messages";
+import { measurements } from "./measurements";
+import { clinicalNotes } from "./clinical_notes";
 
 export const sexEnum = pgEnum("sex", ["f", "m", "otro"]);
 export const patientSourceEnum = pgEnum("patient_source", ["booking", "manual", "import"]);
@@ -38,5 +40,7 @@ export const patientsRelations = relations(patients, ({ one, many }) => ({
   nutritionist: one(nutritionists, { fields: [patients.nutritionistId], references: [nutritionists.id] }),
   appointments: many(appointments),
   reviews: many(reviews),
+  clinicalNotes: many(clinicalNotes),
+  measurements: many(measurements),
   waMessages: many(waMessages),
 }));
