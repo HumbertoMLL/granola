@@ -4,16 +4,13 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { authClient } from "@granola/auth/client";
+import { Button, FormField, Input } from "@granola/ui";
 
 const schema = z.object({
   name: z.string().trim().min(2, "Escribe tu nombre"),
   email: z.email("Escribe un correo válido"),
   password: z.string().min(8, "Mínimo 8 caracteres"),
 });
-
-const inputClass = "w-full rounded-md border border-neutral-300 px-3 py-2 text-base";
-const buttonClass = "w-full rounded-md bg-neutral-900 px-3 py-2 font-medium text-white disabled:opacity-50";
-const secondaryClass = "w-full rounded-md border border-neutral-300 px-3 py-2 font-medium disabled:opacity-50";
 
 export function RegistroForm() {
   const router = useRouter();
@@ -32,7 +29,10 @@ export function RegistroForm() {
       return;
     }
     setPending(true);
-    const { error: err } = await authClient.signUp.email({ ...parsed.data, callbackURL: "/app" });
+    const { error: err } = await authClient.signUp.email({
+      ...parsed.data,
+      callbackURL: "/app",
+    });
     setPending(false);
     if (err) {
       setError(err.message ?? "No pudimos crear la cuenta");
@@ -44,7 +44,10 @@ export function RegistroForm() {
   async function onGoogle() {
     setError(null);
     setPending(true);
-    const { error: err } = await authClient.signIn.social({ provider: "google", callbackURL: "/app" });
+    const { error: err } = await authClient.signIn.social({
+      provider: "google",
+      callbackURL: "/app",
+    });
     if (err) {
       setPending(false);
       setError(err.message ?? "Google no está configurado todavía");
@@ -52,11 +55,9 @@ export function RegistroForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-3">
-      <label className="flex flex-col gap-1 text-sm">
-        Nombre
-        <input
-          className={inputClass}
+    <form onSubmit={onSubmit} className="flex flex-col gap-4">
+      <FormField label="Nombre">
+        <Input
           type="text"
           name="name"
           autoComplete="name"
@@ -64,11 +65,9 @@ export function RegistroForm() {
           onChange={(e) => setName(e.target.value)}
           required
         />
-      </label>
-      <label className="flex flex-col gap-1 text-sm">
-        Correo
-        <input
-          className={inputClass}
+      </FormField>
+      <FormField label="Correo">
+        <Input
           type="email"
           name="email"
           autoComplete="email"
@@ -76,11 +75,9 @@ export function RegistroForm() {
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-      </label>
-      <label className="flex flex-col gap-1 text-sm">
-        Contraseña
-        <input
-          className={inputClass}
+      </FormField>
+      <FormField label="Contraseña" hint="Mínimo 8 caracteres">
+        <Input
           type="password"
           name="password"
           autoComplete="new-password"
@@ -89,16 +86,25 @@ export function RegistroForm() {
           required
           minLength={8}
         />
-      </label>
-
-      {error && <p className="text-sm text-red-600">{error}</p>}
-
-      <button type="submit" className={buttonClass} disabled={pending}>
+      </FormField>
+      {error ? (
+        <p role="alert" className="text-sm text-destructive-ink">
+          {error}
+        </p>
+      ) : null}
+      <Button type="submit" loading={pending} className="w-full">
         Crear cuenta
-      </button>
-      <button type="button" className={secondaryClass} disabled={pending} onClick={onGoogle}>
-        Continuar con Google
-      </button>
+      </Button>
+      <div className="flex flex-col gap-2 border-t border-border pt-4">
+        <Button
+          type="button"
+          variant="outline"
+          disabled={pending}
+          onClick={onGoogle}
+        >
+          Continuar con Google
+        </Button>
+      </div>
     </form>
   );
 }
