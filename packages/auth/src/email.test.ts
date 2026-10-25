@@ -14,8 +14,8 @@ vi.mock("@granola/email", async (importOriginal) => ({
   sendEmail: vi.fn(async () => ({ id: "resend-mocked", dryRun: false })),
 }));
 const user = { id: "user-demo", name: "Karla", email: "karla@example.test", emailVerified: false, createdAt: new Date(), updatedAt: new Date() };
-let authOptions: Parameters<typeof betterAuth>[0];
-let linkOptions: Parameters<typeof magicLink>[0];
+let authOptions: Parameters<typeof betterAuth>[0] | undefined;
+let linkOptions: Parameters<typeof magicLink>[0] | undefined;
 beforeAll(() => {
   getAuth();
   authOptions = vi.mocked(betterAuth).mock.calls[0]?.[0];
