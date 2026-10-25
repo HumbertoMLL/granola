@@ -3,14 +3,24 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "exports": { ".": "./src/index.ts", "./events": "./src/events.ts" },
-  "scripts": { "typecheck": "tsc --noEmit" },
+  "exports": {
+    ".": "./src/index.ts",
+    "./events": "./src/events.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1156.0",
     "@granola/db": "workspace:*",
     "@granola/payments": "workspace:*",
     "@granola/whatsapp": "workspace:*",
     "inngest": "^3.40.0",
     "zod": "^4.1.0"
   },
-  "devDependencies": { "@granola/config": "workspace:*", "@types/node": "^20", "typescript": "^5.9.0" }
+  "devDependencies": {
+    "@granola/config": "workspace:*",
+    "@types/node": "^20",
+    "typescript": "^5.9.0"
+  }
 }

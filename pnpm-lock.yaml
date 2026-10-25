@@ -241,6 +241,9 @@ importers:
 
   packages/jobs:
     dependencies:
+      '@aws-sdk/client-s3':
+        specifier: ^3.1156.0
+        version: 3.1156.0
       '@granola/db':
         specifier: workspace:*
         version: link:../db
