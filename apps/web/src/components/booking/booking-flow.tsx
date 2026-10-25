@@ -2,24 +2,28 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowLeft, Check, Clock, CreditCard, MapPin, ShieldCheck, Video } from "lucide-react";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
+import { Clock, CreditCard, MapPin, ShieldCheck, Video } from "lucide-react";
 
 import {
   Badge,
   Button,
   Card,
   Input,
-  Label,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  FormField as Field,
+  Stepper,
+  SegmentedControl,
+  EmptyState,
   Textarea,
   cn,
   toast,
 } from "@granola/ui";
-import { formatDateInTz, formatTimeInTz, timeZoneLabel } from "@granola/core/scheduling";
+import {
+  formatDateInTz,
+  formatTimeInTz,
+  timeZoneLabel,
+  ymdInTz,
+} from "@granola/core/scheduling";
 
 import { createBooking, fetchSlots } from "@/app/[slug]/agendar/actions";
 import { bookingSchema } from "@/components/booking/booking-schema";
@@ -31,8 +35,15 @@ import {
   type Modality,
   type PaymentMode,
 } from "@/components/booking/format";
-import { DEFAULT_DIAL_CODE, DIAL_CODES, normalizePhoneE164 } from "@/components/booking/phone";
-import { SlotPicker, useDetectedTimezone, type SlotIso } from "@/components/booking/slot-picker";
+import {
+  DEFAULT_DIAL_CODE,
+  normalizePhoneE164,
+} from "@/components/booking/phone";
+import {
+  SlotPicker,
+  useDetectedTimezone,
+  type SlotIso,
+} from "@/components/booking/slot-picker";
 
 export type BookingService = {
   id: string;
@@ -55,161 +66,275 @@ type Props = {
   initialServiceId?: string;
 };
 
-type Step = "service" | "slot" | "form";
-
-export function BookingFlow({ slug, nutritionistTimezone, services, nowIso, initialServiceId }: Props) {
-  const initialService = services.find((s) => s.id === initialServiceId) ?? (services.length === 1 ? services[0] : undefined);
-  const [service, setService] = React.useState<BookingService | undefined>(initialService);
-  const [step, setStep] = React.useState<Step>(initialService ? "slot" : "service");
+export function BookingFlow({
+  slug,
+  nutritionistTimezone,
+  services,
+  nowIso,
+  initialServiceId,
+}: Props) {
+  const params = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
+  const serviceId = params.get("servicio") ?? initialServiceId;
+  const service = services.find((s) => s.id === serviceId);
   const [tzOverride, setTzOverride] = React.useState<string | null>(null);
   const detectedTz = useDetectedTimezone(nutritionistTimezone);
   const timezone = tzOverride ?? detectedTz;
-  const [loaded, setLoaded] = React.useState<{ serviceId: string; slots: SlotIso[] } | null>(null);
-  const [slot, setSlot] = React.useState<SlotIso | null>(null);
-  // null mientras carga el servicio actual.
-  const slots = service && loaded?.serviceId === service.id ? loaded.slots : null;
+  const [loaded, setLoaded] = React.useState<{
+    serviceId: string;
+    slots: SlotIso[];
+  } | null>(null);
+  const [revision, refreshSlots] = React.useReducer((n: number) => n + 1, 0);
+  const [message, setMessage] = React.useState("");
+  const [form, setForm] = React.useState<FormState>({
+    name: "",
+    dialCode: DEFAULT_DIAL_CODE,
+    phone: "",
+    email: "",
+    consent: false,
+    modality: "online",
+    paymentMethod: "card",
+    notes: "",
+  });
+  const slots =
+    service && loaded?.serviceId === service.id ? loaded.slots : null;
+  const date = params.get("fecha");
+  const validDate = slots?.some(
+    (s) => ymdInTz(new Date(s.startsAt), timezone) === date,
+  );
+  const slot = slots?.find(
+    (s) =>
+      s.startsAt === params.get("hora") &&
+      ymdInTz(new Date(s.startsAt), timezone) === date,
+  );
+  const requested = Number(params.get("paso") ?? (service ? 2 : 1));
+  const step = !service
+    ? 1
+    : !Number.isInteger(requested)
+      ? 2
+      : Math.max(
+          1,
+          Math.min(
+            requested,
+            !date || (slots !== null && !validDate) ? 2 : !slot ? 3 : 4,
+          ),
+        );
 
-  // Carga slots cuando cambia el servicio (setState solo en el callback async).
-  React.useEffect(() => {
-    if (!service) return;
-    let cancelled = false;
-    const id = service.id;
-    fetchSlots({ slug, serviceId: id }).then((res) => {
-      if (cancelled) return;
-      if (res.ok) setLoaded({ serviceId: id, slots: res.slots });
-      else {
-        setLoaded({ serviceId: id, slots: [] });
-        toast.error(res.error);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [slug, service]);
-
-  if (services.length === 0) {
-    return (
-      <Card className="items-center gap-2 py-10 text-center">
-        <p className="font-semibold">Todavía no hay servicios para agendar</p>
-        <p className="text-sm text-muted-foreground">Vuelve pronto o escríbele directamente.</p>
-      </Card>
+  function navigate(
+    next: number,
+    changes: Record<string, string | null> = {},
+    replace = false,
+  ) {
+    const search = new URLSearchParams(params.toString());
+    search.set("paso", String(next));
+    for (const [key, value] of Object.entries(changes)) {
+      if (value === null) search.delete(key);
+      else search.set(key, value);
+    }
+    // La API nativa se integra con useSearchParams en Next y conserva el estado del formulario.
+    window.history[replace ? "replaceState" : "pushState"](
+      null,
+      "",
+      `${pathname}?${search}`,
     );
   }
 
+  const selectedServiceId = service?.id;
+  React.useEffect(() => {
+    if (!selectedServiceId) return;
+    let cancelled = false;
+    fetchSlots({ slug, serviceId: selectedServiceId })
+      .then((res) => {
+        if (cancelled) return;
+        if (res.ok)
+          setLoaded({ serviceId: selectedServiceId, slots: res.slots });
+        else {
+          setLoaded({ serviceId: selectedServiceId, slots: [] });
+          toast.error(res.error);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setLoaded({ serviceId: selectedServiceId, slots: [] });
+          toast.error("No pudimos cargar los horarios. Intenta de nuevo.");
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [slug, selectedServiceId, revision]);
+
+  if (services.length === 0)
+    return (
+      <EmptyState
+        title="Todavía no hay servicios para agendar"
+        description="Vuelve pronto o escríbele directamente."
+        action={
+          <Button variant="outline" asChild>
+            <Link href={`/${slug}`}>Volver al perfil</Link>
+          </Button>
+        }
+      />
+    );
+
   return (
-    <div className="flex flex-col gap-5">
-      <Steps step={step} />
-
-      {step === "service" ? (
-        <div className="flex flex-col gap-3">
-          <h1 className="text-xl font-extrabold tracking-tight">¿Qué consulta necesitas?</h1>
-          <ul className="flex flex-col gap-2">
+    <div className="flex flex-col gap-5 pb-28">
+      <Stepper
+        steps={["Servicio", "Fecha", "Hora", "Tus datos"]}
+        currentStep={step - 1}
+      />
+      <aside
+        aria-label="Resumen de tu cita"
+        className="sticky top-0 z-20 rounded-xl border border-border bg-card p-3 text-sm shadow-soft"
+      >
+        <p className="font-semibold">
+          {service?.name ?? "Elige tu consulta"}
+          {service
+            ? ` · ${formatPrice(service.priceCents, service.currency)}`
+            : ""}
+        </p>
+        {date && (
+          <p className="text-muted-foreground">
+            {date}
+            {slot
+              ? ` · ${formatTimeInTz(new Date(slot.startsAt), timezone)} (${timeZoneLabel(timezone)})`
+              : ""}
+          </p>
+        )}
+      </aside>
+      {message && (
+        <p
+          role="alert"
+          className="rounded-xl bg-destructive-soft p-3 text-sm text-destructive"
+        >
+          {message}
+        </p>
+      )}
+      {step === 1 && (
+        <>
+          <h1 className="text-xl font-extrabold">¿Qué consulta necesitas?</h1>
+          <fieldset className="flex flex-col gap-3">
+            <legend className="sr-only">Servicio</legend>
             {services.map((s) => (
-              <li key={s.id}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setService(s);
-                    setSlot(null);
-                    setStep("slot");
+              <label
+                key={s.id}
+                className={cn(
+                  "flex cursor-pointer items-start gap-3 rounded-2xl border bg-card p-4",
+                  service?.id === s.id ? "border-primary" : "border-border",
+                )}
+              >
+                <input
+                  type="radio"
+                  name="service"
+                  value={s.id}
+                  checked={service?.id === s.id}
+                  className="mt-1 size-4 accent-primary"
+                  onChange={() => {
+                    setForm((f) => ({
+                      ...f,
+                      modality:
+                        s.modality === "presencial" ? "presencial" : "online",
+                    }));
+                    setMessage("");
+                    navigate(1, { servicio: s.id, fecha: null, hora: null });
                   }}
-                  className="w-full rounded-2xl border border-border bg-card p-4 text-left shadow-soft transition-colors hover:border-primary"
-                >
+                />
+                <span className="min-w-0 flex-1">
                   <ServiceSummary service={s} />
-                </button>
-              </li>
+                </span>
+              </label>
             ))}
-          </ul>
-        </div>
-      ) : null}
-
-      {step === "slot" && service ? (
-        <div className="flex flex-col gap-4">
-          <BackLink
-            onClick={() => {
-              setStep("service");
-            }}
-            label={services.length > 1 ? "Cambiar servicio" : undefined}
-          />
-          <Card className="gap-2 p-4">
-            <ServiceSummary service={service} compact />
-          </Card>
-          <h1 className="text-xl font-extrabold tracking-tight">Elige día y hora</h1>
+          </fieldset>
+        </>
+      )}
+      {(step === 2 || step === 3) && service && (
+        <>
+          <h1 className="text-xl font-extrabold">
+            {step === 2 ? "¿Qué día te queda?" : "¿A qué hora?"}
+          </h1>
           <SlotPicker
             slots={slots}
             timezone={timezone}
-            onTimezoneChange={setTzOverride}
-            selected={slot?.startsAt ?? null}
-            onSelect={(s) => {
-              setSlot(s);
-              setStep("form");
-            }}
             nowIso={nowIso}
+            selected={slot?.startsAt ?? null}
+            mode={step === 2 ? "date" : "time"}
+            selectedDate={date}
+            onDateSelect={(fecha) => navigate(2, { fecha, hora: null }, true)}
+            onTimezoneChange={(tz) => {
+              setTzOverride(tz);
+              navigate(2, { fecha: null, hora: null });
+            }}
+            onSelect={(s) => {
+              setMessage("");
+              navigate(3, { hora: s.startsAt }, true);
+            }}
           />
-        </div>
-      ) : null}
-
-      {step === "form" && service && slot ? (
+          {slots?.length === 0 && (
+            <Button variant="outline" onClick={() => refreshSlots()}>
+              Reintentar horarios
+            </Button>
+          )}
+        </>
+      )}
+      {step === 4 && service && slot && (
         <BookingForm
           slug={slug}
           service={service}
           slot={slot}
           timezone={timezone}
           nutritionistTimezone={nutritionistTimezone}
-          onBack={() => setStep("slot")}
+          form={form}
+          setForm={setForm}
+          onBack={() => navigate(3)}
+          onConflict={(error) => {
+            setMessage(error);
+            setLoaded(null);
+            refreshSlots();
+            navigate(3, { hora: null }, true);
+          }}
         />
-      ) : null}
+      )}
+      {step < 4 && (
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          <div className="mx-auto flex max-w-lg gap-3">
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() =>
+                step === 1 ? router.push(`/${slug}`) : navigate(step - 1)
+              }
+            >
+              Atrás
+            </Button>
+            <Button
+              className="flex-[2]"
+              disabled={step === 1 ? !service : step === 2 ? !validDate : !slot}
+              onClick={() => navigate(step + 1)}
+            >
+              Continuar
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-function Steps({ step }: { step: Step }) {
-  const items: { key: Step; label: string }[] = [
-    { key: "service", label: "Servicio" },
-    { key: "slot", label: "Horario" },
-    { key: "form", label: "Tus datos" },
-  ];
-  const idx = items.findIndex((i) => i.key === step);
-  return (
-    <ol className="flex items-center gap-2 text-xs font-semibold">
-      {items.map((it, i) => (
-        <li key={it.key} className="flex items-center gap-2">
-          <span
-            className={cn(
-              "flex size-6 items-center justify-center rounded-full border text-[11px]",
-              i < idx && "border-primary bg-primary text-primary-foreground",
-              i === idx && "border-primary text-primary",
-              i > idx && "border-border text-muted-foreground",
-            )}
-          >
-            {i < idx ? <Check className="size-3.5" /> : i + 1}
-          </span>
-          <span className={cn(i === idx ? "text-foreground" : "text-muted-foreground")}>{it.label}</span>
-          {i < items.length - 1 ? <span className="h-px w-4 bg-border" /> : null}
-        </li>
-      ))}
-    </ol>
-  );
-}
-
-function BackLink({ onClick, label = "Regresar" }: { onClick: () => void; label?: string }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="inline-flex w-fit items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-    >
-      <ArrowLeft className="size-4" /> {label}
-    </button>
-  );
-}
-
-function ServiceSummary({ service, compact = false }: { service: BookingService; compact?: boolean }) {
+function ServiceSummary({
+  service,
+  compact = false,
+}: {
+  service: BookingService;
+  compact?: boolean;
+}) {
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex items-start justify-between gap-3">
         <p className="font-semibold">{service.name}</p>
-        <p className="shrink-0 font-bold text-primary">{formatPrice(service.priceCents, service.currency)}</p>
+        <p className="shrink-0 font-bold text-primary">
+          {formatPrice(service.priceCents, service.currency)}
+        </p>
       </div>
       {!compact && service.description ? (
         <p className="text-sm text-muted-foreground">{service.description}</p>
@@ -219,12 +344,17 @@ function ServiceSummary({ service, compact = false }: { service: BookingService;
           <Clock className="size-3.5" /> {formatDuration(service.durationMin)}
         </span>
         <span className="inline-flex items-center gap-1">
-          {service.modality === "online" ? <Video className="size-3.5" /> : <MapPin className="size-3.5" />}
+          {service.modality === "online" ? (
+            <Video className="size-3.5" />
+          ) : (
+            <MapPin className="size-3.5" />
+          )}
           {MODALITY_LABEL[service.modality]}
         </span>
         {!compact ? (
           <span className="inline-flex items-center gap-1">
-            <CreditCard className="size-3.5" /> {PAYMENT_MODE_LABEL[service.paymentMode]}
+            <CreditCard className="size-3.5" />{" "}
+            {PAYMENT_MODE_LABEL[service.paymentMode]}
           </span>
         ) : null}
       </div>
@@ -252,6 +382,9 @@ function BookingForm({
   timezone,
   nutritionistTimezone,
   onBack,
+  onConflict,
+  form,
+  setForm,
 }: {
   slug: string;
   service: BookingService;
@@ -259,20 +392,15 @@ function BookingForm({
   timezone: string;
   nutritionistTimezone: string;
   onBack: () => void;
+  onConflict: (message: string) => void;
+  form: FormState;
+  setForm: React.Dispatch<React.SetStateAction<FormState>>;
 }) {
-  const [form, setForm] = React.useState<FormState>({
-    name: "",
-    dialCode: DEFAULT_DIAL_CODE,
-    phone: "",
-    email: "",
-    consent: false,
-    modality: service.modality === "presencial" ? "presencial" : "online",
-    paymentMethod: "card",
-    notes: "",
-  });
+  const [showEmail, setShowEmail] = React.useState(!!form.email);
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [pending, startTransition] = React.useTransition();
-  const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setForm((f) => ({ ...f, [k]: v }));
+  const set = <K extends keyof FormState>(k: K, v: FormState[K]) =>
+    setForm((f) => ({ ...f, [k]: v }));
 
   const start = new Date(slot.startsAt);
   const end = new Date(slot.endsAt);
@@ -284,19 +412,22 @@ function BookingForm({
       slug,
       serviceId: service.id,
       startsAt: slot.startsAt,
-      modality: form.modality,
+      modality: service.modality === "ambas" ? form.modality : service.modality,
       name: form.name,
       dialCode: form.dialCode,
       phone: form.phone,
       email: form.email,
       consent: form.consent as true,
       timezone,
-      paymentMethod: service.paymentMode === "prepaid" ? form.paymentMethod : undefined,
+      paymentMethod:
+        service.paymentMode === "prepaid" ? form.paymentMethod : undefined,
       notes: form.notes.trim() || undefined,
     };
     const parsed = bookingSchema.safeParse(input);
     const fe: Record<string, string> = {};
-    if (!parsed.success) for (const i of parsed.error.issues) fe[String(i.path[0] ?? "_")] ??= i.message;
+    if (!parsed.success)
+      for (const i of parsed.error.issues)
+        fe[String(i.path[0] ?? "_")] ??= i.message;
     const phone = normalizePhoneE164(form.phone, form.dialCode);
     if (!phone.ok) fe.phone ??= phone.error;
     if (Object.keys(fe).length) {
@@ -310,25 +441,32 @@ function BookingForm({
       if (!res.ok) {
         setErrors(res.fieldErrors ?? {});
         toast.error(res.error);
-        if (res.error.includes("horario")) onBack();
+        if (
+          res.error.includes("se acaba de ocupar") ||
+          res.error.includes("horario")
+        )
+          onConflict(res.error);
       }
     });
   }
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-5">
-      <BackLink onClick={onBack} label="Cambiar horario" />
-
+    <form id="booking-form" onSubmit={submit} className="flex flex-col gap-5">
       <Card className="gap-1 p-4">
         <p className="text-sm text-muted-foreground">{service.name}</p>
-        <p className="text-lg font-bold capitalize">{formatDateInTz(start, timezone)}</p>
+        <p className="text-lg font-bold capitalize">
+          {formatDateInTz(start, timezone)}
+        </p>
         <p className="font-semibold tabular-nums">
           {formatTimeInTz(start, timezone)} – {formatTimeInTz(end, timezone)}{" "}
-          <span className="text-sm font-normal text-muted-foreground">({timeZoneLabel(timezone)})</span>
+          <span className="text-sm font-normal text-muted-foreground">
+            ({timeZoneLabel(timezone)})
+          </span>
         </p>
         {differentTz ? (
           <p className="text-xs text-muted-foreground">
-            Hora de la nutrióloga: {formatTimeInTz(start, nutritionistTimezone)} ({timeZoneLabel(nutritionistTimezone)}).
+            Hora de la nutrióloga: {formatTimeInTz(start, nutritionistTimezone)}{" "}
+            ({timeZoneLabel(nutritionistTimezone)}).
           </p>
         ) : null}
       </Card>
@@ -337,6 +475,7 @@ function BookingForm({
 
       <Field label="Nombre completo" error={errors.name}>
         <Input
+          required
           autoComplete="name"
           value={form.name}
           onChange={(e) => set("name", e.target.value)}
@@ -345,21 +484,17 @@ function BookingForm({
         />
       </Field>
 
-      <Field label="WhatsApp" error={errors.phone} hint="Ahí te llega la confirmación y los recordatorios.">
+      <Field
+        label="WhatsApp"
+        error={errors.phone}
+        hint="Ahí te llega la confirmación y los recordatorios."
+      >
         <div className="flex gap-2">
-          <Select value={form.dialCode} onValueChange={(v) => set("dialCode", v)}>
-            <SelectTrigger className="w-28 shrink-0" aria-label="Lada">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {DIAL_CODES.map((c) => (
-                <SelectItem key={c.code} value={c.code}>
-                  <span aria-hidden>{c.flag}</span> +{c.code}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <span className="flex h-11 items-center rounded-xl border border-border px-3 text-sm">
+            +52
+          </span>
           <Input
+            required
             type="tel"
             inputMode="tel"
             autoComplete="tel-national"
@@ -371,16 +506,29 @@ function BookingForm({
         </div>
       </Field>
 
-      <Field label="Correo (opcional)" error={errors.email}>
-        <Input
-          type="email"
-          autoComplete="email"
-          value={form.email}
-          onChange={(e) => set("email", e.target.value)}
-          placeholder="maria@correo.com"
-          aria-invalid={!!errors.email}
-        />
-      </Field>
+      {!showEmail ? (
+        <Button
+          type="button"
+          variant="ghost"
+          className="w-fit"
+          onClick={() => setShowEmail(true)}
+        >
+          + Agregar correo
+        </Button>
+      ) : (
+        <>
+          <Field label="Correo (opcional)" error={errors.email}>
+            <Input
+              type="email"
+              autoComplete="email"
+              value={form.email}
+              onChange={(e) => set("email", e.target.value)}
+              placeholder="maria@correo.com"
+              aria-invalid={!!errors.email}
+            />
+          </Field>
+        </>
+      )}
 
       <Field
         label="¿Algo que deba saber tu nutrióloga? (opcional)"
@@ -399,22 +547,17 @@ function BookingForm({
 
       {service.modality === "ambas" ? (
         <Field label="¿Cómo prefieres tu consulta?">
-          <div className="grid grid-cols-2 gap-2">
-            {(["online", "presencial"] as const).map((m) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => set("modality", m)}
-                className={cn(
-                  "flex h-11 items-center justify-center gap-2 rounded-xl border text-sm font-semibold",
-                  form.modality === m ? "border-primary bg-primary-soft text-primary" : "border-border bg-card",
-                )}
-              >
-                {m === "online" ? <Video className="size-4" /> : <MapPin className="size-4" />}
-                {MODALITY_LABEL[m]}
-              </button>
-            ))}
-          </div>
+          <SegmentedControl
+            label="Modalidad"
+            value={form.modality}
+            onValueChange={(value) =>
+              set("modality", value as FormState["modality"])
+            }
+            options={[
+              { value: "online", label: "En línea" },
+              { value: "presencial", label: "Presencial" },
+            ]}
+          />
           {form.modality === "presencial" && service.location ? (
             <p className="text-xs text-muted-foreground">{service.location}</p>
           ) : null}
@@ -426,36 +569,36 @@ function BookingForm({
       ) : null}
 
       {service.paymentMode === "prepaid" ? (
-        <Field label="Forma de pago" hint={`Se cobra ${formatPrice(service.priceCents, service.currency)} al confirmar.`}>
-          <div className="grid grid-cols-3 gap-2">
-            {(
-              [
-                ["card", "Tarjeta"],
-                ["spei", "SPEI"],
-                ["oxxo", "OXXO"],
-              ] as const
-            ).map(([m, label]) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => set("paymentMethod", m)}
-                className={cn(
-                  "h-11 rounded-xl border text-sm font-semibold",
-                  form.paymentMethod === m ? "border-primary bg-primary-soft text-primary" : "border-border bg-card",
-                )}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+        <Field
+          label="Forma de pago"
+          hint={`Se cobra ${formatPrice(service.priceCents, service.currency)} al confirmar.`}
+        >
+          <SegmentedControl
+            label="Forma de pago"
+            value={form.paymentMethod}
+            onValueChange={(value) =>
+              set("paymentMethod", value as FormState["paymentMethod"])
+            }
+            options={[
+              { value: "card", label: "Tarjeta" },
+              { value: "spei", label: "SPEI" },
+              { value: "oxxo", label: "OXXO" },
+            ]}
+          />
         </Field>
       ) : service.priceCents > 0 ? (
         <Badge variant="secondary" className="w-fit">
-          {PAYMENT_MODE_LABEL[service.paymentMode]} · {formatPrice(service.priceCents, service.currency)}
+          {PAYMENT_MODE_LABEL[service.paymentMode]} ·{" "}
+          {formatPrice(service.priceCents, service.currency)}
         </Badge>
       ) : null}
 
-      <label className={cn("flex items-start gap-3 rounded-xl border p-4 text-sm", errors.consent ? "border-destructive" : "border-border")}>
+      <label
+        className={cn(
+          "flex items-start gap-3 rounded-xl border p-4 text-sm",
+          errors.consent ? "border-destructive" : "border-border",
+        )}
+      >
         <input
           type="checkbox"
           className="mt-0.5 size-4 shrink-0 accent-primary"
@@ -464,44 +607,42 @@ function BookingForm({
         />
         <span>
           Acepto el{" "}
-          <Link href="/privacidad" target="_blank" className="font-semibold text-primary underline">
+          <Link
+            href="/privacidad"
+            target="_blank"
+            className="font-semibold text-primary underline"
+          >
             aviso de privacidad
           </Link>{" "}
-          y que mis datos de salud se traten para agendar y dar seguimiento a mi consulta.
+          y que mis datos de salud se traten para agendar y dar seguimiento a mi
+          consulta.
         </span>
       </label>
-      {errors.consent ? <p className="-mt-3 text-xs text-destructive">{errors.consent}</p> : null}
+      {errors.consent ? (
+        <p className="-mt-3 text-xs text-destructive">{errors.consent}</p>
+      ) : null}
 
-      <Button type="submit" size="lg" loading={pending} className="w-full">
-        {service.paymentMode === "prepaid" ? "Continuar al pago" : "Confirmar cita"}
-      </Button>
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+        <div className="mx-auto flex max-w-lg gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onBack}
+            disabled={pending}
+          >
+            Atrás
+          </Button>
+          <Button type="submit" size="lg" loading={pending} className="flex-1">
+            {service.paymentMode === "prepaid"
+              ? "Continuar al pago"
+              : "Confirmar cita"}
+          </Button>
+        </div>
+      </div>
       <p className="inline-flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
-        <ShieldCheck className="size-3.5" /> Tus datos solo los ve tu nutrióloga.
+        <ShieldCheck className="size-3.5" /> Tus datos solo los ve tu
+        nutrióloga.
       </p>
     </form>
-  );
-}
-
-function Field({
-  label,
-  error,
-  hint,
-  children,
-}: {
-  label: string;
-  error?: string;
-  hint?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <Label>{label}</Label>
-      {children}
-      {error ? (
-        <p className="text-xs text-destructive">{error}</p>
-      ) : hint ? (
-        <p className="text-xs text-muted-foreground">{hint}</p>
-      ) : null}
-    </div>
   );
 }
