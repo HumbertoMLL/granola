@@ -10,7 +10,11 @@ import {
   patients,
   payments,
   services,
+  documents,
+  reports,
 } from "@/lib/db";
+
+import { documentsReady } from "@granola/db/documents-ready";
 
 export const ACCOUNT_EXPORT_VERSION = 1;
 
@@ -101,7 +105,13 @@ export async function collectAccountExport(nutritionistId: string, email: string
         .where(eq(appointments.nutritionistId, nutritionistId)),
     ]);
 
+  const [ownedDocuments, ownedReports] = await documentsReady() ? await Promise.all([
+    db.select().from(documents).where(eq(documents.nutritionistId, nutritionistId)),
+    db.select().from(reports).where(eq(reports.nutritionistId, nutritionistId)),
+  ]) : [[], []];
   return {
+    documents: ownedDocuments,
+    reports: ownedReports,
     version: ACCOUNT_EXPORT_VERSION,
     exportedAt: exportedAt.toISOString(),
     nutritionist: profile[0] ? { ...profile[0], email } : null,

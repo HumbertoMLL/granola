@@ -6,6 +6,8 @@ import { SegmentedControl } from "./segmented-control";
 import { FilterChip, AppliedFilters } from "./filter-chip";
 import { Stepper } from "./stepper";
 import { Timeline } from "./timeline";
+import { FormField } from "./form-field";
+import { Switch } from "./switch";
 import { EmptyState } from "./empty-state";
 import {
   Sheet,
@@ -18,6 +20,17 @@ import {
 afterEach(cleanup);
 
 describe("Patrones de interfaz", () => {
+  it("FormField conecta el label visible al Switch y permite activarlo", async () => {
+    render(
+      <FormField label="Mostrar Peso">
+        <Switch defaultChecked />
+      </FormField>,
+    );
+    const toggle = screen.getByRole("switch", { name: "Mostrar Peso" });
+    expect(toggle.getAttribute("aria-checked")).toBe("true");
+    await userEvent.click(screen.getByText("Mostrar Peso"));
+    expect(toggle.getAttribute("aria-checked")).toBe("false");
+  });
   it("SegmentedControl renderiza un grupo con una selección y responde al teclado", async () => {
     function Example() {
       const [value, setValue] = React.useState("day");

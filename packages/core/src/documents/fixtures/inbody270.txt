@@ -1,0 +1,14 @@
+Estudio ficticio sin datos personales
+InBody 270
+Peso: 72.4 kg
+Masa muscular esquelética: 28.1 kg
+Masa grasa corporal: 18.2 kg
+Porcentaje de grasa corporal: 25.1 %
+Agua corporal total: 38.6 L
+IMC: 25.0 kg/m²
+Tasa metabólica basal: 1540 kcal
+Masa magra brazo derecho: 2.8 kg
+Masa magra brazo izquierdo: 2.7 kg
+Masa magra tronco: 22.1 kg
+Masa magra pierna derecha: 7.9 kg
+Masa magra pierna izquierda: 7.8 kg

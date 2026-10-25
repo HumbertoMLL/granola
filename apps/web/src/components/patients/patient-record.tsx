@@ -1,5 +1,7 @@
 "use client";
 
+import { DocumentsTab } from "./documents-tab";
+import { getInbodyEvolution } from "@/app/(panel)/app/pacientes/document-actions";
 import { apiResult } from "./api-result";
 import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
@@ -130,6 +132,17 @@ function RecordContent({
     timezone,
     appointmentId,
   } = data;
+  const [evolution, setEvolution] = useState<Awaited<
+    ReturnType<typeof getInbodyEvolution>
+  > | null>(null);
+  const refreshEvolution = () => {
+    void apiResult(getInbodyEvolution(patient.id)).then(setEvolution);
+  };
+  useEffect(() => {
+    void apiResult(getInbodyEvolution(patient.id)).then(setEvolution);
+  }, [patient.id]);
+  const inbodyRows =
+    evolution?.ok && evolution.data.length >= 2 ? evolution.data : [];
   const [editor, setEditor] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -229,7 +242,11 @@ function RecordContent({
           <TabsTrigger value="summary">Resumen</TabsTrigger>
           <TabsTrigger value="measurements">Antropometría</TabsTrigger>
           <TabsTrigger value="history">Historial</TabsTrigger>
+          <TabsTrigger value="documents">Documentos</TabsTrigger>
         </TabsList>
+        <TabsContent value="documents">
+          <DocumentsTab patientId={patient.id} onChange={refreshEvolution} />
+        </TabsContent>
         <TabsContent value="summary" className="grid gap-4">
           <section className="grid gap-4 py-4">
             <h2 className="text-lg font-semibold">Datos del paciente</h2>
@@ -308,7 +325,19 @@ function RecordContent({
               <h2 className="text-lg font-semibold">Antropometría</h2>
               <Button onClick={() => setEditor("new")}>Nueva medición</Button>
             </div>
-            <MeasurementChart rows={rows} timezone={timezone} />
+            <MeasurementChart
+              rows={[...rows, ...inbodyRows].sort(
+                (a, b) => a.measuredAt.getTime() - b.measuredAt.getTime(),
+              )}
+              timezone={timezone}
+              includeComposition={inbodyRows.length >= 2}
+            />
+            {inbodyRows.length >= 2 && (
+              <p className="text-xs text-muted-foreground">
+                Incluye reportes InBody revisados; fecha de carga del estudio.
+                Las mediciones manuales se conservan.
+              </p>
+            )}
             <div className="flex flex-wrap gap-4 text-sm">
               <p>
                 IMC (OMS, adultos):{" "}

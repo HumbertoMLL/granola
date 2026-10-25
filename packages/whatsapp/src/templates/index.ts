@@ -7,3 +7,4 @@ export { buildCitaReagendada, type CitaReagendadaData } from "./cita_reagendada"
 export { buildPagoPendienteOxxo, type PagoPendienteOxxoData } from "./pago_pendiente_oxxo";
 export { buildPideResena, type PideResenaData } from "./pide_resena";
 export { buildNuevaCitaNutri, type NuevaCitaNutriData } from "./nueva_cita_nutri";
+export { buildReporteListo, type ReporteListoData } from "./reporte_listo";

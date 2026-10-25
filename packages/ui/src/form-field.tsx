@@ -4,6 +4,7 @@ import * as React from "react";
 import { Input } from "./input";
 import { Textarea } from "./textarea";
 import { SelectTrigger } from "./select";
+import { Switch } from "./switch";
 import { Label } from "./label";
 
 function associateControls(
@@ -26,6 +27,7 @@ function associateControls(
       node.type === Input ||
       node.type === Textarea ||
       node.type === SelectTrigger ||
+      node.type === Switch ||
       node.type === "input" ||
       node.type === "textarea" ||
       node.type === "select"

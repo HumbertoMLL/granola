@@ -291,7 +291,16 @@ pnpm --filter @granola/web exec next dev -p 3100
     <span class="tag ok">hecho</span>
     <ul class="sub">
       <li>Landing + login/registro</li>
-      <li>Panel: agenda, servicios, disponibilidad</li>
+      <li>Panel: dashboard real, agenda, servicios y disponibilidad</li>
+      <li>Pacientes, expediente, antropometría y notas clínicas</li>
+      <li>Configuración y onboarding</li>
+      <li>Docker completo: web + Postgres + proxy Neon + Inngest</li>
+      <li>Borrado lógico de cuenta con 30 días de gracia</li>
+      <li>UX nueva mobile-first en el panel</li>
+      <li>Google Calendar + Meet</li>
+      <li>Correos transaccionales con Resend</li>
+      <li>Rate limit distribuido con Redis</li>
+      <li>Migraciones en deploy tras CI verde (requiere secrets y check en Vercel)</li>
       <li>Editor link-tree con 5 temas + preview</li>
       <li>Booking público + cancelar/reagendar</li>
       <li>8 plantillas WA + jobs de recordatorio</li>
@@ -302,11 +311,9 @@ pnpm --filter @granola/web exec next dev -p 3100
   <div class="card">
     <span class="tag wip">siguiente</span>
     <ul class="sub">
-      <li>Correr migraciones y seed contra Neon y probar el flujo completo</li>
-      <li>Google Calendar sync (Meet) — pendiente de F1</li>
-      <li>F1.5: todo el proyecto en Docker (web + DB + Inngest)</li>
-      <li>F2: pacientes + expediente + antropometría</li>
-      <li>Deploy a Vercel</li>
+      <li>Logs estructurados sin PII y observabilidad</li>
+      <li>InBody: carga y lectura de reportes</li>
+      <li>Importador de pacientes y datos existentes</li>
     </ul>
   </div>
   <div class="card">

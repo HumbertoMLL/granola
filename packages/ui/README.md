@@ -34,7 +34,7 @@ Design system de Granola. Usar los tokens semánticos de `src/styles.css`; no de
 
 ## Sistema visual
 
-Fuente única: `src/styles.css` ([ADR 0016](../../docs/adr/0016-sistema-visual.md)). Plus Jakarta Sans usa pesos 400, 500 y 600. Instrument Serif se reserva al display de marketing y al nombre del perfil público; no se usa en títulos del panel. Los números heredan `tabular-nums`.
+Fuente única: `src/styles.css` ([ADR 0017](../../docs/adr/0017-sistema-visual.md)). Plus Jakarta Sans usa pesos 400, 500 y 600. Instrument Serif se reserva al display de marketing y al nombre del perfil público; no se usa en títulos del panel. Los números heredan `tabular-nums`.
 
 ### Tokens
 

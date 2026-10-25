@@ -1,0 +1,19 @@
+Synthetic anonymous fixture
+InBody770
+Weight (kg): 68,2
+Skeletal Muscle Mass: 29,4 kg
+Body Fat Mass: 14,8 kg
+Percent Body Fat: 21,7 %
+Total Body Water: 39,2 L
+BMI: 23,6 kg/m²
+Basal Metabolic Rate: 1589 kcal
+Lean right arm: 2.95 kg
+Lean left arm: 2.88 kg
+Lean trunk: 23.1 kg
+Lean right leg: 8.10 kg
+Lean left leg: 8.05 kg
+Fat right arm: 0.8 kg
+Fat left arm: 0.7 kg
+Fat trunk: 7.8 kg
+Fat right leg: 2.0 kg
+Fat left leg: 1.9 kg

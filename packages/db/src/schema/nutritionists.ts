@@ -1,3 +1,4 @@
+import { documents, reports } from "./documents";
 import { relations, sql } from "drizzle-orm";
 import { boolean, index, integer, jsonb, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { users } from "./auth";
@@ -71,6 +72,7 @@ export const nutritionists = pgTable(
     avatarUrl: text("avatar_url"),
     cedula: text("cedula"),
     phoneWa: text("phone_wa"),
+    notifyNewBooking: boolean("notify_new_booking").notNull().default(true),
     timezone: text("timezone").notNull().default("America/Mexico_City"),
     theme: jsonb("theme").$type<NutritionistTheme>().notNull().default({}),
     links: jsonb("links").$type<NutritionistLink[]>().notNull().default([]),
@@ -120,4 +122,6 @@ export const nutritionistsRelations = relations(nutritionists, ({ one, many }) =
   reviews: many(reviews),
   clinicalNotes: many(clinicalNotes),
   measurements: many(measurements),
+  documents: many(documents),
+  reports: many(reports),
 }));

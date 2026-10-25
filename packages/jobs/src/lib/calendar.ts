@@ -44,7 +44,7 @@ export async function syncAppointmentCalendar(
     clearCalendarBusyCache(nutritionistId);
     return { synced: true, ...(pendingMeet ? { pendingMeet: true as const } : {}) };
   } catch (error) {
-    // El fallo queda aislado y sin PII: WhatsApp ya se envió y los recordatorios siguen.
+    // El fallo queda aislado y sin PII: La confirmación puede continuar y los recordatorios siguen.
     console.warn("[google-calendar] sincronización no disponible", { operation, status: error instanceof GoogleCalendarError ? error.status : "unavailable" });
     return { failed: true };
   }

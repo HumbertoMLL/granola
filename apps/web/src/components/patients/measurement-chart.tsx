@@ -5,13 +5,17 @@ type Point = {
   measuredAt: Date;
   weightKg: string | null;
   waistCm: string | null;
+  bodyFatPct?: string | null;
+  muscleKg?: string | null;
 };
 export function MeasurementChart({
   rows,
   timezone,
+  includeComposition = false,
 }: {
   rows: Point[];
   timezone: string;
+  includeComposition?: boolean;
 }) {
   const series = [
     {
@@ -26,11 +30,27 @@ export function MeasurementChart({
       unit: "cm",
       color: "var(--status-pending-foreground)",
     },
+    ...(includeComposition
+      ? ([
+          {
+            key: "bodyFatPct",
+            label: "Grasa corporal",
+            unit: "%",
+            color: "var(--status-cancelled-foreground)",
+          },
+          {
+            key: "muscleKg",
+            label: "Masa muscular",
+            unit: "kg",
+            color: "var(--status-done-foreground)",
+          },
+        ] as const)
+      : []),
   ] as const;
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       {series.map((s) => {
-        const points = rows.filter((r) => r[s.key] !== null);
+        const points = rows.filter((r) => r[s.key] != null);
         if (!points.length)
           return (
             <p key={s.key} className="text-sm text-muted-foreground">

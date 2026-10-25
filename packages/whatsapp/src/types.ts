@@ -9,6 +9,7 @@ export const TEMPLATE_NAMES = [
   "pago_pendiente_oxxo",
   "pide_resena",
   "nueva_cita_nutri",
+  "reporte_listo",
 ] as const;
 
 export type TemplateName = (typeof TEMPLATE_NAMES)[number];

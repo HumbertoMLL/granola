@@ -6,6 +6,7 @@ import { requireNutritionist } from "@/lib/session";
 import { PageHeader } from "@/components/panel/page-header";
 import { SettingsForms } from "@/components/configuracion/settings-forms";
 import { AccountDeletionSection } from "@/components/configuracion/account-deletion-section";
+import { NotificationSettings } from "@/components/configuracion/notification-settings";
 import { GoogleCalendarCard } from "./google-calendar-card";
 
 export const metadata: Metadata = { title: "Configuración" };
@@ -26,6 +27,7 @@ async function Content() {
         email={user.email}
         timezone={nutritionist.timezone}
       />
+      <NotificationSettings notifyNewBooking={nutritionist.notifyNewBooking} />
       <GoogleCalendarCard
         connected={Boolean(nutritionist.googleRefreshTokenEnc)}
         configured={Boolean(

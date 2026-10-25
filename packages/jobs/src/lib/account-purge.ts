@@ -1,3 +1,5 @@
+import { documentsReady } from "@granola/db/documents-ready";
+import { deleteClinicalFiles } from "./r2";
 import {
   accounts,
   and,
@@ -14,6 +16,8 @@ import {
   users,
   verifications,
   waMessages,
+  documents,
+  reports,
 } from "@granola/db";
 
 /**
@@ -74,6 +78,11 @@ export async function purgeAccount(nutritionistId: string, now: Date = new Date(
     .from(patients)
     .where(eq(patients.nutritionistId, n.id));
 
+  const ready = await documentsReady();
+  const reportRows = ready ? await db.query.reports.findMany({ where: eq(reports.nutritionistId, n.id) }) : [];
+  // Un error al borrar archivos deja la cuenta pendiente para reintentar el purge.
+  const hasDocuments = ready && await db.query.documents.findFirst({ columns: { id: true }, where: eq(documents.nutritionistId, n.id) });
+  await deleteClinicalFiles(n.id, !!hasDocuments);
   // Sin carrera con "Cancelar eliminación": cancelAccountDeletion se niega una vez
   // vencida deletion_scheduled_for, y aquí solo llegamos con la gracia vencida.
   await db.batch([
@@ -95,6 +104,13 @@ export async function purgeAccount(nutritionistId: string, now: Date = new Date(
         updatedAt: now,
       })
       .where(and(eq(nutritionists.id, n.id), isNotNull(nutritionists.deletedAt), isNull(nutritionists.purgedAt))),
+    ...(ready ? [
+      db.update(documents).set({ storageKey: "purged", parsedJson: null, parseError: null }).where(eq(documents.nutritionistId, n.id)),
+      ...reportRows.map((r) => db.update(reports).set({
+        content: r.content.map((i) => ({ ...i, etiqueta: i.clave, comentario: "" })),
+        interpretation: "", brand: { logo_url: null, color: "#4A7A2B", firma: "" }, pdfStorageKey: null,
+      }).where(and(eq(reports.id, r.id), eq(reports.nutritionistId, n.id)))),
+    ] : []),
     db
       .update(patients)
       .set({ name: ANONYMOUS_PATIENT_NAME, phoneWa: null, email: null, updatedAt: now })

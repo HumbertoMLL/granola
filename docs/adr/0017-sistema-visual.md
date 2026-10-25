@@ -1,4 +1,4 @@
-# ADR 0016 — Sistema visual con jerarquía y densidad
+# ADR 0017 — Sistema visual con jerarquía y densidad
 
 Fecha: 2026-10-25 · Estado: aceptado para implementación según el encargo de rediseño visual.
 

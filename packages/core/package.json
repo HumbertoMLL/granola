@@ -7,9 +7,19 @@
     ".": "./src/index.ts",
     "./scheduling": "./src/scheduling/index.ts",
     "./nutrition": "./src/nutrition/index.ts",
-    "./smae": "./src/smae/index.ts"
+    "./smae": "./src/smae/index.ts",
+    "./documents": "./src/documents/index.ts"
   },
-  "scripts": { "test": "vitest run", "typecheck": "tsc --noEmit" },
-  "dependencies": { "zod": "^4.1.0" },
-  "devDependencies": { "@granola/config": "workspace:*", "typescript": "^5.9.0", "vitest": "^3.2.0" }
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "@granola/config": "workspace:*",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.0"
+  }
 }
