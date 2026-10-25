@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Directorio — Propuesta A</title>
+<style>
+*{box-sizing:border-box}
+body{max-width:390px;margin:0 auto;font-family:system-ui;color:#111;background:#fff;padding:12px;font-size:14px}
+.tag{font-size:12px;font-weight:700;background:#111;color:#fff;padding:6px 10px;border-radius:4px;margin:0 0 12px}
+h1{font-size:20px;margin:4px 0 10px}
+.search{border:2px solid #111;border-radius:8px;padding:12px;color:#777;margin-bottom:10px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;white-space:nowrap}
+.chip{border:1px solid #999;border-radius:16px;padding:6px 12px;font-size:13px;flex:none}
+.chip.on{background:#111;color:#fff;border-color:#111}
+.bar{display:flex;justify-content:space-between;align-items:center;margin:12px 0 6px;font-size:13px}
+.bar b{font-size:15px}
+.card{display:flex;gap:10px;border:1px solid #ccc;border-radius:8px;padding:10px;margin-bottom:8px}
+.ph{width:56px;height:56px;flex:none;border:1px solid #999;background:#ddd;border-radius:6px;position:relative;overflow:hidden}
+.ph:before,.ph:after{content:"";position:absolute;left:-10px;right:-10px;top:50%;height:1px;background:#999;transform:rotate(45deg)}
+.ph:after{transform:rotate(-45deg)}
+.info{flex:1;min-width:0}
+.row{display:flex;justify-content:space-between;align-items:baseline}
+.name{font-weight:700;font-size:15px}
+.rt{font-size:12px;white-space:nowrap}
+.sp{color:#444;font-size:13px}
+.meta{color:#666;font-size:12px;margin:2px 0}
+.next{font-size:12px;background:#eee;display:inline-block;padding:2px 6px;border-radius:4px;margin-top:2px}
+.foot{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.price{font-weight:700}
+.btn{border:1.5px solid #111;border-radius:6px;padding:6px 10px;font-size:13px;font-weight:600;background:#fff}
+.pag{display:flex;justify-content:center;gap:6px;margin:14px 0}
+.pag span{border:1px solid #999;border-radius:4px;padding:6px 10px;font-size:13px}
+.pag .on{background:#111;color:#fff;border-color:#111}
+.notes{border-top:2px dashed #999;margin-top:18px;padding-top:10px;font-size:13px;color:#333}
+.notes h2{font-size:14px;margin:0 0 6px}
+.notes li{margin-bottom:6px}
+</style>
+</head>
+<body>
+<p class="tag">Propuesta A — Lista densa con filtros arriba</p>
+<h1>Encuentra a tu nutrióloga</h1>
+<div class="search">⌕ Busca por nombre, especialidad o ciudad</div>
+<div class="chips">
+  <span class="chip on">Online</span>
+  <span class="chip">Presencial</span>
+  <span class="chip">CDMX</span>
+  <span class="chip">Deportiva</span>
+  <span class="chip">Bariatría</span>
+  <span class="chip">Pediátrica</span>
+  <span class="chip">Precio ▾</span>
+</div>
+<div class="bar"><b>12 nutriólogas</b><span>Ordenar: Mejor calificadas ▾</span></div>
+
+<div class="card"><div class="ph"></div><div class="info">
+  <div class="row"><span class="name">Karla Demo</span><span class="rt">★ 4.9 (23)</span></div>
+  <div class="sp">Nutrición metabólica</div>
+  <div class="meta">CDMX · Online y presencial</div>
+  <span class="next">Próximo horario: mañana 10:00</span>
+  <div class="foot"><span class="price">desde $500 MXN</span><span class="btn">Ver perfil</span></div>
+</div></div>
+
+<div class="card"><div class="ph"></div><div class="info">
+  <div class="row"><span class="name">Sofía Ramírez</span><span class="rt">★ 4.8 (41)</span></div>
+  <div class="sp">Nutrición deportiva</div>
+  <div class="meta">Guadalajara · Online</div>
+  <span class="next">Próximo horario: mañana 10:00</span>
+  <div class="foot"><span class="price">desde $600 MXN</span><span class="btn">Ver perfil</span></div>
+</div></div>
+
+<div class="card"><div class="ph"></div><div class="info">
+  <div class="row"><span class="name">Mariana Torres</span><span class="rt">★ 4.7 (15)</span></div>
+  <div class="sp">Bariatría</div>
+  <div class="meta">CDMX · Presencial</div>
+  <div class="foot"><span class="price">desde $700 MXN</span><span class="btn">Ver perfil</span></div>
+</div></div>
+
+<div class="card"><div class="ph"></div><div class="info">
+  <div class="row"><span class="name">Daniela Ortiz</span><span class="rt">★ 5.0 (9)</span></div>
+  <div class="sp">Nutrición pediátrica</div>
+  <div class="meta">Monterrey · Online</div>
+  <div class="foot"><span class="price">desde $450 MXN</span><span class="btn">Ver perfil</span></div>
+</div></div>
+
+<div class="pag"><span>‹</span><span class="on">1</span><span>2</span><span>3</span><span>›</span></div>
+
+<div class="notes">
+  <h2>Notas UX</h2>
+  <ul>
+    <li><b>Sin scroll:</b> compara 3–4 nutriólogas a la vez; tarjeta horizontal de ~110 px con precio y ★ alineados a la derecha para escanear en columna.</li>
+    <li><b>Decidir entre dos:</b> mismos datos en la misma posición en cada tarjeta (especialidad, ciudad+modalidad, precio, ★ y reseñas), así se compara de un vistazo; el desempate es "Próximo horario" y "Ver perfil".</li>
+    <li><b>0 resultados:</b> "Ninguna nutrióloga cumple todos tus filtros" + chips activos con ✕ para quitarlos uno a uno y la sugerencia "Quitar 'Pediátrica' muestra 3 resultados".</li>
+  </ul>
+</div>
+</body>
+</html>

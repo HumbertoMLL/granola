@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Directorio — Propuesta B</title>
+<style>
+*{box-sizing:border-box}
+body{max-width:390px;margin:0 auto;font-family:system-ui;color:#111;background:#fff;padding:12px;font-size:14px;overflow-x:hidden}
+.tag{font-size:12px;font-weight:700;background:#111;color:#fff;padding:6px 10px;border-radius:4px;margin:0 0 12px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.sel{border:2px solid #111;border-radius:8px;padding:10px 14px;font-weight:600}
+.count{font-size:13px;color:#555;font-weight:600}
+.stage{position:relative;height:500px}
+.peek{position:absolute;top:14px;left:24px;right:-30px;bottom:0;border:1px solid #bbb;border-radius:16px;background:#f2f2f2}
+.card{position:absolute;inset:0 18px 14px 0;border:2px solid #111;border-radius:16px;background:#fff;padding:14px;display:flex;flex-direction:column}
+.ph{height:190px;border:1px solid #999;background:#ddd;border-radius:10px;position:relative;overflow:hidden}
+.ph:before,.ph:after{content:"";position:absolute;left:-20%;right:-20%;top:50%;height:1px;background:#999;transform:rotate(38deg)}
+.ph:after{transform:rotate(-38deg)}
+.row{display:flex;justify-content:space-between;align-items:baseline;margin-top:12px}
+.name{font-size:22px;font-weight:800}
+.rt{font-size:14px;font-weight:600}
+.sp{color:#444;font-size:15px;margin-top:2px}
+.bio{color:#666;font-size:13px;margin:8px 0;font-style:italic}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid #999;border-radius:14px;padding:4px 10px;font-size:12px}
+.chip.dark{background:#111;color:#fff;border-color:#111}
+.next{margin-top:auto;background:#eee;border-radius:8px;padding:10px;font-size:14px;text-align:center}
+.next b{display:block;font-size:16px}
+.act{display:flex;gap:8px;margin-top:14px}
+.btn{flex:1;text-align:center;border-radius:12px;padding:16px 8px;font-size:16px;font-weight:700}
+.ghost{border:2px solid #111;flex:0 0 36%}
+.solid{background:#111;color:#fff}
+.dots{display:flex;justify-content:center;gap:5px;margin:12px 0}
+.dots i{width:7px;height:7px;border-radius:50%;background:#ccc}
+.dots i.on{background:#111;width:18px;border-radius:4px}
+.link{text-align:center;font-size:13px;text-decoration:underline;color:#444}
+.notes{border-top:2px dashed #999;margin-top:18px;padding-top:10px;font-size:13px;color:#333}
+.notes h2{font-size:14px;margin:0 0 6px}
+.notes li{margin-bottom:6px}
+</style>
+</head>
+<body>
+<p class="tag">Propuesta B — Una nutrióloga a la vez</p>
+<div class="top">
+  <span class="sel">Especialidad: Todas ▾</span>
+  <span class="count">1 / 12</span>
+</div>
+
+<div class="stage">
+  <div class="peek"></div>
+  <div class="card">
+    <div class="ph"></div>
+    <div class="row"><span class="name">Karla Demo</span><span class="rt">★ 4.9 (23)</span></div>
+    <div class="sp">Nutrición metabólica</div>
+    <p class="bio">"Te ayudo a controlar glucosa y peso sin dietas de hambre."</p>
+    <div class="chips">
+      <span class="chip">Online y presencial</span>
+      <span class="chip">CDMX</span>
+      <span class="chip dark">desde $500 MXN</span>
+    </div>
+    <div class="next">Próximo horario<b>mañana 10:00</b></div>
+  </div>
+</div>
+
+<div class="act">
+  <span class="btn ghost">Siguiente →</span>
+  <span class="btn solid">Agendar con Karla</span>
+</div>
+<div class="dots"><i class="on"></i><i></i><i></i><i></i><i></i><i></i></div>
+<p class="link">Ver perfil completo de Karla</p>
+
+<div class="notes">
+  <h2>Notas UX</h2>
+  <ul>
+    <li><b>Sin scroll:</b> compara 1 nutrióloga (más el borde de la siguiente asomando como pista de que hay más); el foco total reduce la parálisis por elegir.</li>
+    <li><b>Decidir entre dos:</b> no hay comparación lado a lado; el paciente decide "sí / siguiente". Se agrega "← Anterior" al deslizar y un corazón para guardar y ver al final "Tus 2 favoritas" en tabla comparativa.</li>
+    <li><b>0 resultados:</b> la tarjeta se reemplaza por "Aún no hay nutriólogas de Pediátrica en tu zona" + botones "Ver todas las especialidades" y "Ver opciones online".</li>
+  </ul>
+</div>
+</body>
+</html>
