@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { Button, Card, Label, Textarea } from "@granola/ui";
+import { Button, Label, Textarea } from "@granola/ui";
 
 import { submitReview } from "@/app/resena/[cancelToken]/actions";
 
@@ -17,7 +17,12 @@ type Props = {
   nutritionistSlug: string;
 };
 
-export function ReviewForm({ token, patientFirstName, nutritionistName, nutritionistSlug }: Props) {
+export function ReviewForm({
+  token,
+  patientFirstName,
+  nutritionistName,
+  nutritionistSlug,
+}: Props) {
   const [rating, setRating] = React.useState(0);
   const [text, setText] = React.useState("");
   const [isPublic, setIsPublic] = React.useState(true);
@@ -53,13 +58,12 @@ export function ReviewForm({ token, patientFirstName, nutritionistName, nutritio
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-6" noValidate>
       <div>
-        <h1 className="text-2xl font-extrabold tracking-tight">¿Cómo te fue, {patientFirstName}?</h1>
-        <p className="text-muted-foreground">
-          Tu opinión ayuda a {nutritionistName} y a otras personas que buscan nutrióloga.
-        </p>
+        <h1 className="text-xl font-semibold tracking-tight">
+          ¿Cómo te fue, {patientFirstName}?
+        </h1>
       </div>
 
-      <Card className="gap-6">
+      <div className="flex flex-col gap-6">
         <StarRatingInput
           value={rating}
           onChange={(v) => {
@@ -72,7 +76,10 @@ export function ReviewForm({ token, patientFirstName, nutritionistName, nutritio
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="review-text">
-            Cuéntanos más <span className="font-normal text-muted-foreground">(opcional)</span>
+            Cuéntanos más{" "}
+            <span className="font-normal text-muted-foreground">
+              (opcional)
+            </span>
           </Label>
           <Textarea
             id="review-text"
@@ -84,28 +91,35 @@ export function ReviewForm({ token, patientFirstName, nutritionistName, nutritio
             disabled={pending}
             aria-describedby="review-text-count"
           />
-          <p id="review-text-count" className="self-end text-xs tabular-nums text-muted-foreground">
+          <p
+            id="review-text-count"
+            className="self-end text-xs tabular-nums text-muted-foreground"
+          >
             {text.length}/{REVIEW_TEXT_MAX}
           </p>
         </div>
 
-        <label className="flex cursor-pointer items-start gap-3 rounded-xl bg-secondary/60 p-3 text-sm">
+        <label className="flex cursor-pointer items-start gap-3 border-t border-border pt-4 text-sm">
           <input
             type="checkbox"
             checked={isPublic}
             onChange={(e) => setIsPublic(e.target.checked)}
             disabled={pending}
-            className="mt-0.5 size-5 shrink-0 cursor-pointer accent-primary"
+            className="mt-1 size-4 shrink-0 cursor-pointer accent-primary"
           />
           <span>
-            <span className="font-medium">Mostrar mi reseña en la página pública de {nutritionistName}</span>
-            <span className="block text-muted-foreground">Solo se verá tu primer nombre.</span>
+            <span className="font-medium">
+              Mostrar mi reseña en la página pública de {nutritionistName}
+            </span>
+            <span className="block text-muted-foreground">
+              Solo se verá tu primer nombre.
+            </span>
           </span>
         </label>
-      </Card>
+      </div>
 
       {error ? (
-        <p role="alert" className="text-sm font-medium text-destructive">
+        <p role="alert" className="text-sm font-medium text-destructive-ink">
           {error}
         </p>
       ) : null}

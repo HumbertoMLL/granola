@@ -3,17 +3,20 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
-import { CalendarClock } from "lucide-react";
 
 import { Button, Card, Skeleton } from "@granola/ui";
 
+import { Logo } from "@/components/logo";
 import { PublicShell } from "@/components/booking/public-shell";
 import { ReviewForm } from "@/components/reviews/review-form";
 import { reviewTokenSchema } from "@/components/reviews/review-schema";
 import { ReviewThanks } from "@/components/reviews/review-thanks";
 import { appointments, db, eq } from "@/lib/db";
 
-export const metadata: Metadata = { title: "Deja tu reseña", robots: { index: false, follow: false } };
+export const metadata: Metadata = {
+  title: "Deja tu reseña",
+  robots: { index: false, follow: false },
+};
 
 type Props = { params: Promise<{ cancelToken: string }> };
 
@@ -36,18 +39,27 @@ async function ResenaContent({ params }: Props) {
     columns: { status: true },
     with: {
       patient: { columns: { name: true } },
-      nutritionist: { columns: { slug: true, displayName: true, avatarUrl: true } },
+      nutritionist: {
+        columns: { slug: true, displayName: true, avatarUrl: true },
+      },
       reviews: { columns: { id: true }, limit: 1 },
     },
   });
   if (!appt) notFound();
 
   const nutri = appt.nutritionist;
-  const patientFirstName = appt.patient.name.trim().split(/\s+/)[0] ?? appt.patient.name;
+  const patientFirstName =
+    appt.patient.name.trim().split(/\s+/)[0] ?? appt.patient.name;
 
   let content: React.ReactNode;
   if (appt.reviews.length > 0) {
-    content = <ReviewThanks nutritionistName={nutri.displayName} nutritionistSlug={nutri.slug} variant="already" />;
+    content = (
+      <ReviewThanks
+        nutritionistName={nutri.displayName}
+        nutritionistSlug={nutri.slug}
+        variant="already"
+      />
+    );
   } else if (appt.status === "completed") {
     content = (
       <ReviewForm
@@ -58,17 +70,17 @@ async function ResenaContent({ params }: Props) {
       />
     );
   } else {
-    const upcoming = appt.status === "confirmed" || appt.status === "pending_payment";
+    const upcoming =
+      appt.status === "confirmed" || appt.status === "pending_payment";
     content = (
-      <Card className="items-center gap-4 py-10 text-center">
-        <span className="flex size-14 items-center justify-center rounded-full bg-secondary text-muted-foreground">
-          <CalendarClock className="size-7" aria-hidden />
-        </span>
+      <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-extrabold tracking-tight">
-            {upcoming ? "Tu cita aún no termina" : "Esta cita no se puede reseñar"}
+          <h1 className="text-xl font-semibold tracking-tight">
+            {upcoming
+              ? "Tu cita aún no termina"
+              : "Esta cita no se puede reseñar"}
           </h1>
-          <p className="text-muted-foreground">
+          <p className="mt-2 text-sm text-muted-foreground">
             {upcoming
               ? `Podrás dejar tu reseña para ${nutri.displayName} cuando termine tu consulta.`
               : "Solo se pueden reseñar consultas que sí se realizaron."}
@@ -78,23 +90,32 @@ async function ResenaContent({ params }: Props) {
           {upcoming ? (
             <Link href={`/cita/${cancelToken}`}>Ver mi cita</Link>
           ) : (
-            <Link href={`/${nutri.slug}`}>Ver la página de {nutri.displayName}</Link>
+            <Link href={`/${nutri.slug}`}>
+              Ver la página de {nutri.displayName}
+            </Link>
           )}
         </Button>
-      </Card>
+      </div>
     );
   }
 
-  return <PublicShell nutritionist={nutri}>{content}</PublicShell>;
+  return (
+    <PublicShell nutritionist={nutri} compact>
+      <Card className="gap-6 p-6 md:p-8">
+        <Logo size={24} />
+        {content}
+      </Card>
+    </PublicShell>
+  );
 }
 
 function ResenaSkeleton() {
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-col gap-4 px-4 py-10">
+    <div className="mx-auto flex w-full max-w-[400px] flex-col gap-4 px-4 py-8">
       <Skeleton className="h-8 w-56" />
       <Skeleton className="h-4 w-72" />
-      <Skeleton className="h-64 w-full rounded-2xl" />
-      <Skeleton className="h-13 w-full rounded-full" />
+      <Skeleton className="h-4 w-48" />
+      <Skeleton className="h-12 w-full rounded-md" />
     </div>
   );
 }
