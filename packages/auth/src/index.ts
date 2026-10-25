@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { magicLink } from "better-auth/plugins/magic-link";
+import { bearer } from "better-auth/plugins";
 import { db, schema } from "@granola/db";
 
 function createAuth() {
@@ -24,6 +25,10 @@ function createAuth() {
         ? { google: { clientId: googleClientId, clientSecret: googleClientSecret } }
         : {},
     plugins: [
+      // Expo / clientes sin cookies: `Authorization: Bearer <token>` se convierte en
+      // cookie de sesión antes de validar, y al iniciar sesión la respuesta trae el
+      // token en el header `set-auth-token`. Ver packages/auth/README.md.
+      bearer(),
       magicLink({
         expiresIn: 60 * 15,
         storeToken: "hashed",
