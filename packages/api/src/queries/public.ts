@@ -1,3 +1,4 @@
+import { getCalendarBusy } from "@granola/google-calendar";
 import type { AvailabilityOverride, AvailabilityRule, Interval } from "@granola/core/scheduling";
 import {
   and,
@@ -8,6 +9,7 @@ import {
   eq,
   gt,
   inArray,
+  isNull,
   lt,
   nutritionists,
   services,
@@ -73,7 +75,8 @@ const PUBLIC_SERVICE_COLUMNS = {
 
 export async function getPublicNutritionistBySlug(slug: string): Promise<PublicNutritionist | null> {
   const row = await db.query.nutritionists.findFirst({
-    where: eq(nutritionists.slug, slug),
+    // Cuenta en gracia de borrado (ADR 0015) → como si no existiera.
+    where: and(eq(nutritionists.slug, slug), isNull(nutritionists.deletedAt)),
     columns: PUBLIC_NUTRITIONIST_COLUMNS,
   });
   return row ?? null;
@@ -137,5 +140,11 @@ export async function loadSchedulingContext(nutritionistId: string, from: Date, 
         ),
       ),
   ]);
-  return { rules, overrides, busy };
+  const profile = await db.query.nutritionists.findFirst({
+    where: eq(nutritionists.id, nutritionistId), columns: { googleRefreshTokenEnc: true },
+  });
+  const calendarBusy = await getCalendarBusy({
+    nutritionistId, encryptedRefreshToken: profile?.googleRefreshTokenEnc ?? null, from, to,
+  });
+  return { rules, overrides, busy: [...busy, ...calendarBusy] };
 }

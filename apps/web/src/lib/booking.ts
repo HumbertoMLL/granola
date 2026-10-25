@@ -1,4 +1,5 @@
 import "server-only";
+import { getCalendarBusy } from "@granola/google-calendar";
 
 import { randomBytes } from "node:crypto";
 
@@ -20,6 +21,7 @@ import {
   eq,
   gt,
   inArray,
+  isNull,
   lt,
   ne,
   nutritionists,
@@ -80,7 +82,8 @@ export async function getPublicNutritionistBySlug(
   slug: string,
 ): Promise<PublicNutritionist | null> {
   const row = await db.query.nutritionists.findFirst({
-    where: eq(nutritionists.slug, slug),
+    // Cuenta en gracia de borrado (ADR 0015) → como si no existiera.
+    where: and(eq(nutritionists.slug, slug), isNull(nutritionists.deletedAt)),
     columns: PUBLIC_NUTRITIONIST_COLUMNS,
   });
   return row ?? null;
@@ -90,7 +93,7 @@ export async function getPublicNutritionistById(
   id: string,
 ): Promise<PublicNutritionist | null> {
   const row = await db.query.nutritionists.findFirst({
-    where: eq(nutritionists.id, id),
+    where: and(eq(nutritionists.id, id), isNull(nutritionists.deletedAt)),
     columns: PUBLIC_NUTRITIONIST_COLUMNS,
   });
   return row ?? null;
@@ -194,7 +197,17 @@ export async function loadSchedulingContext(
       .where(and(...busyWhere)),
   ]);
 
-  return { rules, overrides, busy };
+  const profile = await db.query.nutritionists.findFirst({
+    where: eq(nutritionists.id, nutritionistId), columns: { googleRefreshTokenEnc: true },
+  });
+  const excluded = excludeAppointmentId ? await db.query.appointments.findFirst({
+    where: and(eq(appointments.id, excludeAppointmentId), eq(appointments.nutritionistId, nutritionistId)),
+    columns: { googleEventId: true },
+  }) : undefined;
+  const calendarBusy = await getCalendarBusy({
+    nutritionistId, encryptedRefreshToken: profile?.googleRefreshTokenEnc ?? null, from, to, excludeEventId: excluded?.googleEventId ?? undefined,
+  });
+  return { rules, overrides, busy: [...busy, ...calendarBusy] };
 }
 
 export type AvailableSlotsInput = {

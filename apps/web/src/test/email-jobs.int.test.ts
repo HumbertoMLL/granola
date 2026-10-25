@@ -96,7 +96,7 @@ describe("Cuando se cancela una cita", () => {
     await handler("appointment-cancelled")({ event: { id: "evt-cancelled", data: { ...f.data, by: "patient" } }, step });
     expect(sendEmail).toHaveBeenCalledOnce();
     expect(sendEmail).toHaveBeenCalledWith(expect.objectContaining({ to: f.patient.email, subject: "Tu cita fue cancelada", text: expect.stringContaining(`/${f.nutritionist.slug}/agendar`) }));
-    expect(step.run.mock.calls.map(([id]) => id)).toEqual(["cargar-cita", "wa-cita-cancelada", "email-cita-cancelada-paciente"]);
+    expect(step.run.mock.calls.map(([id]) => id)).toEqual(["cargar-cita", "wa-cita-cancelada", "calendar-cancelled", "email-cita-cancelada-paciente"]);
   });
   it("sin email conserva el WhatsApp y omite el correo", async () => {
     const f = await fixture(null, "cancelled");

@@ -26,6 +26,11 @@ export const events = {
   "appointment/pending_payment": appointmentEventData.extend({ expiresAt: z.string().datetime() }),
   /** Cita terminada (2h después de ends_at). Pide reseña. */
   "appointment/completed": appointmentEventData,
+  /**
+   * Corre el purge de cuentas vencidas (ADR 0015) fuera del cron diario, p. ej.
+   * desde el dashboard de Inngest. Sin datos: el job busca él mismo qué purgar.
+   */
+  "account/purge": z.object({}),
 } as const;
 
 export type GranolaEvents = {

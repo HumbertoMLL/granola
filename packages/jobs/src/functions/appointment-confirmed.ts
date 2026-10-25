@@ -1,3 +1,4 @@
+import { syncAppointmentCalendar } from "../lib/calendar";
 import { citaConfirmadaPaciente, nuevaCitaNutri } from "@granola/email";
 import { appointmentEmailFields, sendJobEmail } from "../lib/email";
 import { and, appointments, db, eq } from "@granola/db";
@@ -97,6 +98,14 @@ export const onAppointmentConfirmed = inngest.createFunction(
         tags: [{ name: "template", value: "nueva_cita_nutri" }],
         idempotencyKey: `confirmed-${event.id ?? appointmentId}-nutritionist`,
       }));
+    }
+
+    let calendar = await step.run("calendar-confirmed", () => syncAppointmentCalendar(appointmentId, event.data.nutritionistId, "confirmed"));
+    // Meet es asíncrono: resolverlo en pasos durables, sin repetir WhatsApp ni
+    // crear otro evento. Un fallo posterior deja continuar los recordatorios.
+    for (let attempt = 1; calendar.pendingMeet && attempt <= 3; attempt++) {
+      await step.sleep(`esperar-meet-${attempt}`, "10s");
+      calendar = await step.run(`calendar-meet-${attempt}`, () => syncAppointmentCalendar(appointmentId, event.data.nutritionistId, "confirmed"));
     }
 
     const plan = await step.run("plan", () => planFor(ctx));

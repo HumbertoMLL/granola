@@ -25,6 +25,11 @@ export const requireNutritionist = createMiddleware<{ Variables: TenantVariables
     return apiError(c, 403, "forbidden", "Tu cuenta no tiene perfil de nutrióloga. Termina tu registro en la web.");
   }
 
+  // Borrado pendiente (ADR 0015): la cuenta solo puede cancelar el borrado, y eso vive en la web.
+  if (nutritionist.deletedAt) {
+    return apiError(c, 403, "forbidden", "Tu cuenta está en proceso de eliminación. Entra a la web para cancelarlo.");
+  }
+
   c.set("nutritionist", nutritionist);
   await next();
 });
