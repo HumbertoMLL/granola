@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./schema": "./src/schema/index.ts"
+    "./schema": "./src/schema/index.ts",
+    "./testing": "./src/testing.ts"
   },
   "scripts": {
     "generate": "drizzle-kit generate",
@@ -19,9 +20,11 @@
   },
   "devDependencies": {
     "@granola/config": "workspace:*",
-    "drizzle-kit": "^0.31.0",
+    "@types/node": "^20",
+    "@types/pg": "^8.15.6",
     "dotenv": "^17.0.0",
-    "typescript": "^5.9.0",
-    "@types/node": "^20"
+    "drizzle-kit": "^0.31.0",
+    "pg": "^8.23.1",
+    "typescript": "^5.9.0"
   }
 }

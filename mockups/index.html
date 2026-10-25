@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Granola · wireframes UX</title>
+<style>
+  body{margin:0;background:#f2f2f2;font:14px/1.4 system-ui,sans-serif;color:#111}
+  header{position:sticky;top:0;z-index:2;background:#fff;border-bottom:1px solid #ccc;padding:12px 20px}
+  header h1{margin:0 0 8px;font-size:16px}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap}
+  .tabs button{font:inherit;padding:7px 14px;border:1px solid #111;background:#fff;color:#111;cursor:pointer}
+  .tabs button[aria-selected="true"]{background:#111;color:#fff}
+  .tabs a{margin-left:auto;align-self:center;color:#666;font-size:12px}
+  main{padding:20px}
+  .row{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;align-items:flex-start}
+  .phone{width:390px}
+  .phone h3{margin:0 0 6px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#666}
+  iframe{width:390px;height:820px;border:2px solid #111;border-radius:28px;background:#fff;display:block}
+</style>
+</head>
+<body>
+<header>
+  <h1>Granola · wireframes UX · 3 propuestas por pantalla</h1>
+  <div class="tabs" role="tablist" id="tabs"></div>
+</header>
+<main><div class="row" id="row"></div></main>
+<script>
+  const screens=[
+    ["linktree","Link tree"],["agendar","Agendar"],["directorio","Directorio"],["agenda-nutri","Agenda nutri"]
+  ];
+  const tabs=document.getElementById("tabs"), row=document.getElementById("row");
+  function show(key){
+    [...tabs.querySelectorAll("button")].forEach(b=>b.setAttribute("aria-selected",b.dataset.key===key));
+    row.innerHTML=["a","b","c"].map(l=>`<div class="phone"><h3>Propuesta ${l.toUpperCase()}</h3><iframe src="${key}/${l}.html" loading="lazy" title="${key} ${l}"></iframe></div>`).join("");
+    history.replaceState(null,"","#"+key);
+  }
+  screens.forEach(([k,t])=>{const b=document.createElement("button");b.role="tab";b.dataset.key=k;b.textContent=t;b.onclick=()=>show(k);tabs.appendChild(b);});
+  const a=document.createElement("a");a.href="index-estilos.html";a.textContent="ver comparación de estilos visuales →";tabs.appendChild(a);
+  const fromHash=()=>show(screens.some(([k])=>k===location.hash.slice(1))?location.hash.slice(1):"linktree");
+  addEventListener("hashchange",fromHash);
+  fromHash();
+</script>
+</body>
+</html>
