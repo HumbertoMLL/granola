@@ -11,6 +11,7 @@ apps/web        Next.js 16 App Router (panel nutri + páginas públicas + API)
 apps/mobile     Expo (futuro, no tocar aún)
 packages/db     Drizzle + Neon Postgres. Schema en src/schema/*.ts, migraciones en migrations/
 packages/auth   Better Auth (server + client)
+packages/api    API v1 con Hono (/api/v1/*), montada en apps/web. Sin dependencia de Next (ADR 0007)
 packages/core   Lógica pura sin IO: scheduling, smae, nutrition. 100% testeable con vitest
 packages/whatsapp  Meta Cloud API client + plantillas + parser de webhooks
 packages/payments  Stripe Connect + Mercado Pago
