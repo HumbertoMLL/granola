@@ -45,9 +45,12 @@ export default defineConfig({
           globalSetup: ["./src/test/integration-global-setup.ts"],
           setupFiles: ["./src/test/integration-setup.ts"],
           // Una sola base compartida: los archivos corren en serie y cada test parte de cero.
-          fileParallelism: false,
-          testTimeout: 20_000,
-          hookTimeout: 30_000,
+          // (`fileParallelism` no existe a nivel de proyecto: forzamos un único fork.)
+          pool: "forks",
+          poolOptions: { forks: { singleFork: true } },
+          // El proxy neon-http local hace SCRAM en cada query (~50–500 ms según la carga de la máquina).
+          testTimeout: 60_000,
+          hookTimeout: 60_000,
         },
       },
     ],
